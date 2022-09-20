@@ -1,0 +1,1 @@
+Run the server using command: node server.js
