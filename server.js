@@ -23,8 +23,6 @@ app.get('/', async (req, res) => {
 	//accountDB()
 })
 
-
-
 // TODO: setup AWS connection to use non-local database
 var environment = getEnvironment()
 console.log("environment: " + environment)
