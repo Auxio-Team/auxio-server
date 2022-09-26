@@ -1,15 +1,21 @@
+const { Client, Pool } = require('pg')
 
-const q1 = async () => {
-	const { Client } = require('pg')
-	const client = new Client()
+const dbCreateAccount = async () => {
+	const PGUSER='maxfinder'
+	const PGHOST='localhost'
+	const PGDATABASE='musixdb'
+	const PGPASSWORD=null
+	const PGPORT=5432
 
-	await client.connect()
-
-	const res = await client.query('SELECT $1::text as message', ['Hello world!'])
-	console.log(res.rows[0].message) // Hello world!
-	await client.end()
+	const client = new Client({
+		user: PGUSER,
+		host: PGHOST,
+		database: PGDATABASE,
+		password: PGPASSWORD,
+		port: 5432,
+	})
+	client.connect()
+	.then(() => console.log("Connected successfuly"))
+	.catch( e => console.log(e))
+	.finally(() => client.end())
 }
-
-module.exports = {
-	q1
-};
