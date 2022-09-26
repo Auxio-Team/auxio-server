@@ -1,0 +1,7 @@
+CREATE TABLE person (
+	id BIGSERIAL NOT NULL PRIMARY KEY,
+	email VARCHAR(320) NOT NULL,
+	username VARCHAR(50) NOT NULL,
+	first_name VARCHAR(50) NOT NULL,
+	last_name VARCHAR(50) NOT NULL,
+);
