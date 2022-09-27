@@ -1,6 +1,6 @@
 // http://localhost:3000
-const { accountDB } = require('./database/accountDB')
-const { createMusixDatabase } = require('./database/createDB')
+const { accountDB } = require('./src/database/accountDatabase')
+const { createMusixDatabase } = require('./src/database/createDatabase')
 
 const process = require('process')
 
@@ -14,16 +14,15 @@ const bodyParser = require('body-parser')
 app.use(bodyParser.json())
 
 /* import routes */
-require('./routes/accountRoutes')(app)
+require('./src/routes/accountRoutes')(app)
 
-
-// FIXME: test the database connection
+// FIXME: test creating a new postgres database and connecting to it.
 app.get('/', async (req, res) => {
 	createMusixDatabase()
 	//accountDB()
 })
 
-// TODO: setup AWS connection to use non-local database
+// TODO: setup AWS connection to use non-local database.
 var environment = getEnvironment()
 console.log("environment: " + environment)
 

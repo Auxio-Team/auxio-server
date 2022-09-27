@@ -1,0 +1,63 @@
+const {
+	validateCreateAccount,
+	encryptPassword,
+	verifyUsernamePassword,
+	users
+} = require('../services/accountService')
+
+const {
+	account
+} = require('../models/account')
+
+/*
+ * Create a new account and save it in the database.
+ */
+const createAccountController = async ( dbCreateAccountFunc , username, password, phoneNumber) => {
+	// validate username and password
+	if (!await validateCreateAccount(username, password)) {
+		return null
+	}
+	// encrypt the password
+	const hashedPassword = await encryptPassword(password)
+	console.log("Hashed Password: " + hashedPassword)
+
+	// save the account to database
+	const newAccount = account(username, hashedPassword, phoneNumber)
+	if (await dbCreateAccountFunc(newAccount)) {
+		return newAccount
+	}
+	else {
+		return null
+	}
+}
+
+/*
+ * Authenticate a user logging into an account.
+ */
+const accountLoginController = async (dbGetPasswordByUsernameFunc, username, password) => {
+	if (!await verifyUsernamePassword(dbGetPasswordByUsernameFunc, username, password)) {
+		return null
+	}
+	else {
+		return true	
+	}
+}
+
+/*
+ * Get all accounts in the database.
+ */
+const getAccountsController = async (dbGetAccountsFunc) => {
+	const accounts = await dbGetAccountsFunc()
+	if (accounts == null) {
+		return []
+	}
+	else {
+		return accounts
+	}
+}
+
+module.exports = {
+	createAccountController,
+	accountLoginController,
+	getAccountsController
+}
