@@ -35,16 +35,36 @@ const encryptPassword = async (password) => {
 }
 
 /* 
- * Validate that the username is unique, and that the password is strong.
+ * Validate that the username and phone number are both unique.
  * @param username -> the username for the account we are trying to create.
- * @param password -> the password for the account we are tyring to crate.
+ * @param phoneNumber -> the phone number for the account we are tyring to crate.
  * @return -> true if both username/password are valid, otherwise false.
  */
-const validateCreateAccount = async (username, password) => {
-	if (password.length < 7) {
+const validateCreateAccount = async (username, phoneNumber) => {
+	if (await uniqueUsername(username) && await uniquePhoneNumber) {
+		return true
+	}
+	else {
 		return false
 	}
-	return true
+}
+
+/*
+ * Check if username is unique
+ * @param username -> the username that we are checking.
+ * @return -> true if it is unique, otherwise false.
+ */
+const uniqueUsername = async (username) => {
+	return true;
+}
+
+/*
+ * Check if phone number is unique
+ * @param phoneNumber -> the phone number that we are checking.
+ * @return -> true if it is unique, otherwise false.
+ */
+const uniquePhoneNumber = async (phoneNumber) => {
+	return true;
 }
 
 module.exports = {

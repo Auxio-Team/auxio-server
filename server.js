@@ -1,4 +1,6 @@
 // http://localhost:3000
+const { accountDB } = require('./database/accountDB')
+const { createMusixDatabase } = require('./database/createDB')
 
 const process = require('process')
 
@@ -13,6 +15,13 @@ app.use(bodyParser.json())
 
 /* import routes */
 require('./routes/accountRoutes')(app)
+
+
+// FIXME: test the database connection
+app.get('/', async (req, res) => {
+	createMusixDatabase()
+	//accountDB()
+})
 
 // TODO: setup AWS connection to use non-local database
 var environment = getEnvironment()
