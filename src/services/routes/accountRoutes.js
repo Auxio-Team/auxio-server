@@ -5,25 +5,24 @@ const {
 	users
 } = require('../service/accountService')
 
+const { createAccountInterface } = require('../interface/accountInterface')
+
 module.exports = function (app) {
 	/*
-	 * Create a user with username password.
+	 * Create user.
 	 */
 	app.post('/account', async (req, res) => {
-		// validate username and password
-		const username = req.body.username
-		const password = req.body.password
-		if (await validateCreateAccount(username, password) == false) {
-			res.status(400).send()
+		try {
+			if (await createAccountInterface(req.body.username, req.body.password)) {
+				res.status(201).send() 
+			}
+			else {
+				res.status(400).send()
+			}
 		}
-		// encrypt the password
-		const hashedPassword = await encryptPassword(password)
-		console.log("Hashed Password: " + hashedPassword)
-		// TODO: save the account to DB (save to "users" for now)
-		const account = { username: username, password: hashedPassword }
-		users.push(account)
-
-		res.status(201).send() // 201 -> create request succeeded.
+		catch (e) {
+			res.status(500).send()
+		}
 	})
 
 	/*

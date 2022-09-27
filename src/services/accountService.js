@@ -8,9 +8,9 @@ const users = [] // temporary variable for proof of concept (will use database i
  * @param password -> the password that was entered.
  * @return -> true if the username/password matches a valid account, otherwise false.
  */
-const verifyUsernamePassword = async (username, password) => {
-	const user = users.find(user => user.username = username)
-	if (user == null || !await bcrypt.compare(password, user.password)) {
+const verifyUsernamePassword = async (dbGetPasswordByUsernameFunc, username, password) => {
+	const userPassword = await dbGetPasswordByUsernameFunc(username)
+	if (userPassword == null || !await bcrypt.compare(password, userPassword)) {
 		return false
 	}
 	else {
@@ -24,14 +24,10 @@ const verifyUsernamePassword = async (username, password) => {
  * @return -> the encrypted password if encryption is successful, otherwise false
  */
 const encryptPassword = async (password) => {
-	try {
-		const saltRounds = 10
-		const salt = await bcrypt.genSalt(saltRounds)
-		const hashedPassword = await bcrypt.hash(password, salt)
-		return hashedPassword
-	} catch {
-		return false
-	}
+	const saltRounds = 10
+	const salt = await bcrypt.genSalt(saltRounds)
+	const hashedPassword = await bcrypt.hash(password, salt)
+	return hashedPassword
 }
 
 /* 
