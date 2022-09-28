@@ -13,10 +13,10 @@ const fs = require("fs");
 
 const createMusixDatabase = async () => {
 	// connect to "postgres" database.
-	var PGUSER = 'postgres'
+	var PGUSER = process.env.USER
 	const PGHOST = 'localhost'
 	var PGDATABASE = 'postgres'
-	const PGPASSWORD = null
+	const PGPASSWORD = process.env.PGPASSWORD
 	const PGPORT = 5432
 
 	const clientPostgres = new Client({
@@ -24,34 +24,32 @@ const createMusixDatabase = async () => {
 		host: PGHOST,
 		database: PGDATABASE,
 		password: PGPASSWORD,
-		port: 5432,
+		port: PGPORT,
 	})
 	await clientPostgres.connect()
-	.then(() => console.log("Connected successfuly to postgres"))
+	.then(() => console.log("Connected successfully to postgres"))
 	.catch( e => console.log(e))
 
 	// attempt to delete "musixdb" database.
 	try {
 		await clientPostgres.query('DROP DATABASE musixdb')
 	}
-	catch {
-		console.log("Database \"musixdb\" doesn't exist")
+	catch (e) {
+		// musixdb database doesn't exist
 	}
 
 	// create "musixdb" database.
-	const user = process.env.USER
 	try {
-		await clientPostgres.query('CREATE DATABASE musixdb WITH OWNER=' + user)
+		await clientPostgres.query('CREATE DATABASE musixdb WITH OWNER=' + PGUSER)
 		console.log("Succesfully created database \"musixdb\"")
 	}
-	catch {
+	catch (e) {
 		console.log("Error: could not create database \"musixdb\"")
+		console.log(e)
 	}
-
 	await clientPostgres.end()
 
 	// disconnect from "postgres" database connect to "musixdb" database.
-	PGUSER = user
 	PGDATABASE='musixdb'	
 
 	const pool = new Pool({
@@ -82,7 +80,7 @@ const createMusixDatabase = async () => {
  * @return ->
  */
 const createMusixSchema = async (pool) => {
-	const sqlText = fs.readFileSync("database/schema.sql").toString()
+	const sqlText = fs.readFileSync("src/database/schema.sql").toString()
 	console.log(sqlText)
 }
 
