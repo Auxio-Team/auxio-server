@@ -28,13 +28,13 @@ const createMusixDatabase = async () => {
 	})
 	await clientPostgres.connect()
 	.then(() => console.log("Connected successfully to postgres"))
-	.catch( e => console.log(e))
+	.catch( err => console.log(err))
 
 	// attempt to delete "musixdb" database.
 	try {
 		await clientPostgres.query('DROP DATABASE musixdb')
 	}
-	catch (e) {
+	catch (err) {
 		// musixdb database doesn't exist
 	}
 
@@ -43,9 +43,9 @@ const createMusixDatabase = async () => {
 		await clientPostgres.query('CREATE DATABASE musixdb WITH OWNER=' + PGUSER)
 		console.log("Succesfully created database \"musixdb\"")
 	}
-	catch (e) {
+	catch (err) {
 		console.log("Error: could not create database \"musixdb\"")
-		console.log(e)
+		console.log(err)
 	}
 	await clientPostgres.end()
 
@@ -61,13 +61,13 @@ const createMusixDatabase = async () => {
 	})
 	await pool.connect()
 	.then(() => console.log("Connected successfuly to musixdb"))
-	.catch( e => console.log(e))
+	.catch( err => console.log(err))
 
   // create schema in "musixdb" database.
 	try {
 		await createMusixSchema(pool)
 	}
-	catch {
+	catch (err) {
 		console.log("Couldn't create musixdb schema")
 	}
 
