@@ -2,6 +2,17 @@
 Run the server using command: `node server.js`
 
 
+# Install PostgreSQL on Mac
+
+Download Postgres app here: https://postgresapp.com/downloads.html. Download "Postgres.app with all currently supported versions (Universal/Intel)" which is under the "Additional Releases" section.
+
+Add the path of the postgres bin directory to your PATH variable.
+
+Open the Postgres application and start the server using newest version of Postgres (14.5).
+
+Interact with databases by running "psql" from the command line.
+
+
 # Install PostgreSQL on Windows (WSL)
 
 These instructions are helpful if you want to try to install PostgreSQL on Windows without WSL: https://phoenixnap.com/kb/install-postgresql-windows
