@@ -19,6 +19,10 @@ const {
 	dbGetAccounts
 } = require('../database/accountDatabase')
 
+const process = require('process')
+const jwt = require('jsonwebtoken')
+
+
 
 module.exports = function (app) {
 	/*
@@ -62,13 +66,23 @@ module.exports = function (app) {
 				res.status(400).send("Authentication failed")
 			}
 			else {
-				res.status(200).send("Successful login")
+				// once we know the user has entered a correct username and password,
+				// we want to authenticate and serialize the user with JWT.
+				const username = req.body.username
+				const user = { name: username } 
+				console.log(user)
+				console.log(process.env.ACCESS_TOKEN_SECRET)
+				const accessToken = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET)
+				res.json({ accessToken: accessToken })
+
+				res.status(200).send()
 			}
 		}
 		catch (err) {
 			console.log(err)
 			res.status(500).send("Internal Server Error")
 		}
+
 	})
 
 	/*

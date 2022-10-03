@@ -8,6 +8,10 @@ const accounts = [] // temporary variable for proof of concept (will use databas
  * @return -> true if the account is created successfully
  */
 const dbCreateAccount = async (account) => {
+	
+
+
+
 	accounts.push(account)
 	return true
 }

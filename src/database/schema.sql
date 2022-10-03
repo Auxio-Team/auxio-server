@@ -2,5 +2,7 @@ CREATE TABLE account (
 	id BIGSERIAL NOT NULL PRIMARY KEY,
 	username VARCHAR(50) NOT NULL,
 	pass VARCHAR(320) NOT NULL,
-	phone_number VARCHAR(10) NOT NULL,
-);
+	phone_number VARCHAR(10) NOT NULL);
+
+CREATE TABLE refresh_token (
+	token VARCHAR(64) NOT NULL);

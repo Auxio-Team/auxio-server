@@ -63,9 +63,37 @@ const uniquePhoneNumber = async (phoneNumber) => {
 	return true;
 }
 
+/*
+ * Get the token they send us, verify that this is the correct user,
+ * and return that user.
+ */
+const authenticateToken = (req, res, next) => {
+	const authHeader = req.headers['authorization']
+	const token = authHeader && authHeader.split(' ')[1] // get the token portion of 'Bearer TOKEN'
+
+	if (token == null) {
+		return null // 401 error
+	}
+
+	jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, user) => {
+		if (err) {
+			return null // 403 error
+		}	
+
+		next()
+
+	})
+	
+}
+
+
+
 module.exports = {
 	encryptPassword,
 	validateCreateAccount,
 	verifyUsernamePassword,
 	users
 }
+
+
+
