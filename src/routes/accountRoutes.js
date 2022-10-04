@@ -16,12 +16,13 @@ const {
 const {
 	dbCreateAccount,
 	dbGetPasswordByUsername,
-	dbGetAccounts
+	dbGetAccounts,
+	dbUsernameExists,
+	dbPhoneNumberExists
 } = require('../database/accountDatabase')
 
 const process = require('process')
 const jwt = require('jsonwebtoken')
-
 
 
 module.exports = function (app) {
@@ -31,6 +32,8 @@ module.exports = function (app) {
 	app.post('/account', async (req, res) => {
 		try {
 			const newAccount = await createAccountController(
+				dbUsernameExists,
+				dbPhoneNumberExists,
 				dbCreateAccount,
 				req.body.username,
 				req.body.password,
@@ -47,42 +50,6 @@ module.exports = function (app) {
 			console.log(err)
 			res.status(500).send("Internal Server Error")
 		}
-	})
-
-	/*
-	 * Use login.
-	 * 200 -> Valid login.
-	 * 400 -> Authentication failed.
-	 * 500 -> Internal server error.
-	 */
-	app.post('/account/login', async (req, res) => {
-		try {
-			const login = await accountLoginController(
-				dbGetPasswordByUsername,
-				req.body.username,
-				req.body.password)
-
-			if (login == null) {
-				res.status(400).send("Authentication failed")
-			}
-			else {
-				// once we know the user has entered a correct username and password,
-				// we want to authenticate and serialize the user with JWT.
-				const username = req.body.username
-				const user = { name: username } 
-				console.log(user)
-				console.log(process.env.ACCESS_TOKEN_SECRET)
-				const accessToken = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET)
-				res.json({ accessToken: accessToken })
-
-				res.status(200).send()
-			}
-		}
-		catch (err) {
-			console.log(err)
-			res.status(500).send("Internal Server Error")
-		}
-
 	})
 
 	/*
