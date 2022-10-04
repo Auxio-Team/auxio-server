@@ -7,4 +7,6 @@ CREATE TABLE account (
 	dark_mode_enabled BOOLEAN NOT NULL);
 
 CREATE TABLE refresh_token (
-	token VARCHAR(64) NOT NULL);
+	id BIGSERIAL NOT NULL PRIMARY KEY,
+	username VARCHAR(50) NOT NULL,
+	token VARCHAR(320) NOT NULL);

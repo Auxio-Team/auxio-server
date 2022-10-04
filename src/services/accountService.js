@@ -8,8 +8,8 @@ const bcrypt = require('bcrypt')
 const encryptPassword = async (password) => {
 	const saltRounds = 10
 	const salt = await bcrypt.genSalt(saltRounds)
-	const hashedPassword = await bcrypt.hash(password, salt)
-	return hashedPassword
+	const encryptedPassword = await bcrypt.hash(password, salt)
+	return encryptedPassword
 }
 
 /* 
@@ -25,26 +25,6 @@ const validateCreateAccount = async (dbUsernameExists, dbPhoneNumberExists, user
 	else {
 		return true
 	}
-}
-
-/*
- * Get the token they send us, verify that this is the correct user,
- * and return that user.
- */
-const authenticateToken = (req, res, next) => {
-	const authHeader = req.headers['authorization']
-	const token = authHeader && authHeader.split(' ')[1] // get the token portion of 'Bearer TOKEN'
-
-	if (token == null) {
-		return null // 401 error
-	}
-
-	jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, user) => {
-		if (err) {
-			return null // 403 error
-		}	
-		next()
-	})
 }
 
 module.exports = {

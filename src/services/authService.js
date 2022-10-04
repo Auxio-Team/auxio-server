@@ -3,13 +3,13 @@ const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
 
 /*
- * Verify that the username exists and that the password matches (use Bcrypt to compare passwords)
+ * Verify that the username exists and that the password matches (compare with Bcrypt)
  * @param username -> the username that was entered.
  * @param password -> the password that was entered.
  * @return -> true if the username/password matches a valid account, otherwise false.
  */
-const verifyUsernamePassword = async (dbGetPasswordByUsername, username, password) => {
-	const accountPassword = await dbGetPasswordByUsername(username)
+const verifyUsernamePassword = async (dbGetPassword, username, password) => {
+	const accountPassword = await dbGetPassword(username)
 	if (accountPassword == null || !await bcrypt.compare(password, accountPassword)) {
 		return false
 	}
@@ -37,8 +37,60 @@ const generateRefreshToken = async (account) => {
 		process.env.REFRESH_TOKEN_SECRET)
 }
 
+/*
+ * Encrypt the refresh token using Bcrypt.
+ * @param refreshToken -> the refresh token we are encrypting.
+ * @return -> the encrypted token if encryption is successful, otherwise false
+ */
+const encryptRefreshToken = async (refreshToken) => {
+	const saltRounds = 10 
+	const salt = await bcrypt.genSalt(saltRounds)
+	const encryptedToken = await bcrypt.hash(
+		refreshToken.substring(refreshToken.length - 72, refreshToken.length - 1), salt)
+	return encryptedToken
+}
+
+/*
+ * Store new refresh token in the database.
+ */
+const storeRefreshToken = async (dbCreateRefreshToken, dbDeleteRefreshToken, username, refreshToken) => {
+	// encrypt the refresh token
+	const encryptedToken = await encryptRefreshToken(refreshToken)
+	console.log("Encrypted Refresh Token", encryptedToken)
+
+	// remove any old refresh token
+	await dbDeleteRefreshToken(username)
+
+	// create the new refresh token 
+	if (!await dbCreateRefreshToken(username, encryptedToken)) {
+		return null
+	}
+	return true
+}
+
+/*
+ * Verify that the refresh token exists for this user (compare with Bcrypt)
+ * @param username -> the username belonging to the refresh token.
+ * @param refreshToken -> the token that was sent.
+ * @return -> true if the token exists, otherwise false.
+ */
+const verifyRefreshToken = async (dbGetRefreshToken, username, refreshToken) => {
+	const databaseToken = await dbGetRefreshToken(username)
+	if (databaseToken == null
+		|| !await bcrypt.compare(refreshToken.substring(
+					refreshToken.length - 72, refreshToken.length - 1), databaseToken)){
+		return null
+	}
+	else {
+		return true
+	}
+}
+
 module.exports = {
 	verifyUsernamePassword,
 	generateAccessToken,
-	generateRefreshToken
+	generateRefreshToken,
+	encryptRefreshToken,
+	storeRefreshToken,
+	verifyRefreshToken
 }

@@ -16,11 +16,11 @@ const createAccountController = async (dbUsernameExists, dbPhoneNumberExists, db
 		return null
 	}
 	// encrypt the password
-	const hashedPassword = await encryptPassword(password)
-	console.log("Hashed Password: " + hashedPassword)
+	const encryptedPassword = await encryptPassword(password)
+	console.log("Encrypted Password: " + encryptedPassword)
 
 	// save the account to database
-	const newAccount = account(username, hashedPassword, phoneNumber)
+	const newAccount = account(username, encryptedPassword, phoneNumber)
 	console.log("Saving new account to database with username=" + newAccount.username)
 	if (await dbCreateAccount(newAccount)) {
 		return newAccount

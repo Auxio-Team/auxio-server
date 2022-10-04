@@ -7,7 +7,10 @@ const {
 
 /* import database functions */
 const {
-	dbGetPasswordByUsername
+	dbGetPassword,
+	dbCreateRefreshToken,
+	dbGetRefreshToken,
+	dbDeleteRefreshToken
 } = require("../database/authDatabase")
 
 
@@ -19,18 +22,26 @@ module.exports = function (app) {
 	 */
 	app.post('/login', async (req, res) => {
 		// authenticate user by checking username and password
-		const loggedIn = await loginController(
-			dbGetPasswordByUsername,
-			req.body.username,
-			req.body.password)
+		try {
+			const loggedIn = await loginController(
+				dbGetPassword,
+				dbCreateRefreshToken,
+				dbDeleteRefreshToken,
+				req.body.username,
+				req.body.password)
+			// if logged in, return the object which contains access token and refresh token
+			if (loggedIn) {
+				res.status(200).send(loggedIn)
+			}
+			else {
+				res.status(403).send("Authentication failed")
+			}
+		}
+		catch (err) {
+			console.log(err)
+			res.status(500).send("Internal Server Error")
+		}
 
-		// if logged in, return the object which contains access token and refresh token
-		if (loggedIn) {
-			res.status(200).send(loggedIn)
-		}
-		else {
-			res.status(403).send("Authentication failed")
-		}
 	})
 
 	/*
@@ -39,12 +50,23 @@ module.exports = function (app) {
 	 * 403 -> could not generate new access token.
 	 */
 	app.post('/token', async (req, res) => {
-		const token = tokenController(req.body.token)
-		if (token) {
-			res.status(200).send(token)
+		const authHeader = req.headers['authorization']
+		const refreshToken = authHeader && authHeader.split(' ')[1] // get the token portion of 'Bearer TOKEN'
+		try {
+			const accessToken = await tokenController(
+				dbGetRefreshToken,
+				refreshToken)
+
+			if (accessToken) {
+				res.status(200).send({ accessToken: accessToken })
+			}
+			else {
+				res.status(403).send("Could not generate access token. Permission denied.")
+			}
 		}
-		else {
-			res.status(403).send("Could not generate access token. Permission denied.")
+		catch (err) {
+			console.log(err)
+			res.status(500).send("Internal Server Error")
 		}
 	})
 }

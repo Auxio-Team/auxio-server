@@ -15,6 +15,11 @@ const port = 3000
 /* middleware handlers */
 app.use(express.json())
 
+// test creating a new postgres database and connecting to it.
+app.get('/', async (req, res) => {
+	createMusixDatabase()
+})
+
 /* import routes */
 require('./src/routes/accountRoutes')(app)
 
@@ -44,12 +49,6 @@ app.use((req, res, next) => {
 		req.account = account
 		next()
 	})
-})
-
-// FIXME: test creating a new postgres database and connecting to it.
-app.get('/', async (req, res) => {
-	createMusixDatabase()
-	//accountDB()
 })
 
 /* listen on server */

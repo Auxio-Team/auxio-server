@@ -18,7 +18,6 @@ const dbCreateAccount = async (account) => {
 	const pool = createPool("musixdb")
 	pool.connect()
 	.then(client => {
-		console.log("client: " + client)
     return client
       .query(query)
       .then(res => {
