@@ -120,22 +120,6 @@ const dbPhoneNumberExists = async (phoneNumber) => {
 }
 
 /*
- * Get the password of an account given a username.
- * @param username -> the username of the account we want the password from.
- * @return -> the password of the account with username=username, 
- * 						and if the username doesn't exist return null.
- */
-const dbGetPasswordByUsername = async (username) => {
-	const account = accounts.find(account => account.username = username)
-	if (account == null) {
-		return null
-	}
-	else {
-		return account.password
-	}
-}
-
-/*
  * Query for all the accounts from the datase.
  * @return -> all the accounts in the database
  */
@@ -170,7 +154,6 @@ const dbGetAccounts = async () => {
 
 module.exports = {
 	dbCreateAccount,
-	dbGetPasswordByUsername,
 	dbGetAccounts,
 	dbUsernameExists,
 	dbPhoneNumberExists

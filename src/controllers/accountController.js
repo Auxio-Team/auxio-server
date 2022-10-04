@@ -1,8 +1,6 @@
 const {
 	validateCreateAccount,
 	encryptPassword,
-	verifyUsernamePassword,
-	users
 } = require('../services/accountService')
 
 const {

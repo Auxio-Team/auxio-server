@@ -1,3 +1,6 @@
+const process = require('process')
+const bcrypt = require('bcrypt')
+const jwt = require('jsonwebtoken')
 
 /*
  * Verify that the username exists and that the password matches (use Bcrypt to compare passwords)
@@ -7,10 +10,35 @@
  */
 const verifyUsernamePassword = async (dbGetPasswordByUsername, username, password) => {
 	const accountPassword = await dbGetPasswordByUsername(username)
-	if (acountPassword == null || !await bcrypt.compare(password, accountPassword)) {
+	if (accountPassword == null || !await bcrypt.compare(password, accountPassword)) {
 		return false
 	}
 	else {
 		return true
 	}
+}
+
+/*
+ * Generate access token.
+ */
+const generateAccessToken = async (account) => {
+	return jwt.sign(
+		account,
+		process.env.ACCESS_TOKEN_SECRET,
+		{ expiresIn: '20s'})
+}
+
+/*
+ * Generate refresh token.
+ */
+const generateRefreshToken = async (account) => {
+	return jwt.sign(
+		account,
+		process.env.REFRESH_TOKEN_SECRET)
+}
+
+module.exports = {
+	verifyUsernamePassword,
+	generateAccessToken,
+	generateRefreshToken
 }

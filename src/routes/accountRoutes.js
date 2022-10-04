@@ -1,8 +1,6 @@
 const {
 	encryptPassword,
 	validateCreateAccount,
-	verifyUsernamePassword,
-	users
 } = require('../services/accountService')
 
 // import controllers
@@ -20,9 +18,6 @@ const {
 	dbUsernameExists,
 	dbPhoneNumberExists
 } = require('../database/accountDatabase')
-
-const process = require('process')
-const jwt = require('jsonwebtoken')
 
 
 module.exports = function (app) {
@@ -56,6 +51,7 @@ module.exports = function (app) {
 	 * Get all accounts (used for testing).
 	 */
 	app.get('/accounts', async (req, res) => {
+		//console.log("My account: " + req.account.username)
 		try {
 			const accounts = await getAccountsController(dbGetAccounts)
 			res.status(200).send(accounts)

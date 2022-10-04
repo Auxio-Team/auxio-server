@@ -1,6 +1,7 @@
 // http://localhost:3000
 require('dotenv').config()
 const process = require('process')
+const jwt = require('jsonwebtoken')
 
 const { accountDB } = require('./src/database/accountDatabase')
 const { createMusixDatabase } = require('./src/database/createDatabase')
@@ -17,6 +18,33 @@ app.use(express.json())
 /* import routes */
 require('./src/routes/accountRoutes')(app)
 
+/*
+ * Middleware function that authenticates a request.
+ * 1. get the token they send us (it will come from the header).
+ * 2. verify that this is the correct user.
+ * 3. return that user
+ */
+app.use((req, res, next) => {
+	// 'authorization': 'Bearer TOKEN'
+	const authHeader = req.headers['authorization']
+	const token = authHeader && authHeader.split(' ')[1]
+
+	// check if there is a token
+	if (token == null) {
+		console.log("Unauthorized")
+		return res.status(401).send()
+	}
+
+	// verify the token is valid
+	jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, account) => {
+		if (err) {
+			console.log("Forbidden")
+			return res.status(403).send()
+		}
+		req.account = account
+		next()
+	})
+})
 
 // FIXME: test creating a new postgres database and connecting to it.
 app.get('/', async (req, res) => {
@@ -24,48 +52,8 @@ app.get('/', async (req, res) => {
 	//accountDB()
 })
 
-// TODO: setup AWS connection to use non-local database.
-var environment = getEnvironment()
-console.log("environment: " + environment)
-
 /* listen on server */
 app.listen(port, () => {
   console.log(`Server listening on port ${port}`)
 })
 
-/* determines the environment to run the server on (which database to use) */
-function getEnvironment() {
-	if (process.argv.length > 3) {
-		console.log("Invalid number of arguments. Expected form: \"node server <environment>\"")
-		return -1
-	}
-	else if (process.argv.length == 3 && process.argv[2] == 'dev') {
-		return 'dev'	
-	}
-	else {
-		return 'local'
-	}
-}
-
-/*
- * Middleware function that authenticates a request.
- */
-const authenticateToken = (req, res, next) => {
-	// 'authorization': 'Bearer TOKEN'
-	const authHeader = req.headers['authorization']
-	const token = authHeader && authHeader.split(' ')[1]
-
-	// check if there is a token
-	if (token == null) {
-		return res.status(401).send()
-	}
-
-	// verify the token is valid
-	jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, account) => {
-		if (err) {
-			return res.status(403).send()
-		}
-		req.account = account
-		next()
-	})
-}
