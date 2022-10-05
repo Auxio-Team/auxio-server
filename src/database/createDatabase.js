@@ -1,5 +1,6 @@
 const process = require('process')
-const { Client, Pool } = require('pg')
+//const { Client, Pool } = require('pg')
+const { createClient, createPool } = require('./createClientPool')
 const fs = require("fs");
 
 /*
@@ -12,20 +13,7 @@ const fs = require("fs");
  */
 
 const createMusixDatabase = async () => {
-	// connect to "postgres" database.
-	const PGUSER = process.env.USER
-	const PGHOST = 'localhost'
-	var PGDATABASE = 'postgres'
-	const PGPASSWORD = process.env.PGPASSWORD
-	const PGPORT = 5432
-
-	const client = new Client({
-		user: PGUSER,
-		host: PGHOST,
-		database: PGDATABASE,
-		password: PGPASSWORD,
-		port: PGPORT,
-	})
+	const client = createClient('postgres')
 	await client.connect()
 	.then(() => console.log("Connected successfully to postgres"))
 	.catch( err => console.log(err))
@@ -34,11 +22,13 @@ const createMusixDatabase = async () => {
 	try {
 		await client.query('DROP DATABASE musixdb')
 	}
-	catch (err) {} // musixdb database doesn't exist
+	catch (err) {
+		console.log("Error while dropping: " + err)
+	} // musixdb database doesn't exist
 
 	// create "musixdb" database.
 	try {
-		await client.query('CREATE DATABASE musixdb WITH OWNER=' + PGUSER)
+		await client.query('CREATE DATABASE musixdb WITH OWNER=' + process.env.USER)
 		console.log("Succesfully created database \"musixdb\"")
 	}
 	catch (err) {
@@ -46,40 +36,47 @@ const createMusixDatabase = async () => {
 		console.log(err)
 	}
 
-	// disconnect from "postgres" database connect to "musixdb" database.
+	// disconnect from "postgres" database.
 	await client.end()
-	PGDATABASE='musixdb'	
-	const pool = new Pool({
-		user: PGUSER,
-		host: PGHOST,
-		database: PGDATABASE,
-		password: PGPASSWORD,
-		port: 5432,
-	})
-	await pool.connect()
-	.then(() => console.log("Connected successfuly to musixdb"))
-	.catch(err => console.log(err))
 
   // create schema in "musixdb" database.
 	try {
-		await createMusixSchema(pool)
+		await createMusixSchema()
+		console.log("CREATED SCHEMA")
 	}
 	catch (err) {
 		console.log("Couldn't create musixdb schema")
 	}
-
-	// close connection to "musixdb" database
-	await pool.end()
 }
 
 /*
  * Create schema in "musixdb" database.
- * @param pool ->
- * @return ->
+ * @param pool -> 
  */
-const createMusixSchema = async (pool) => {
+const createMusixSchema = async () => {
 	const sqlText = fs.readFileSync("src/database/schema.sql").toString()
 	console.log(sqlText)
+
+	const pool = createPool('musixdb')
+	pool.connect()
+	.then(client => {
+		console.log("Connected successfuly to musixdb")
+    return client
+      .query(sqlText)
+      .then(res => {
+        client.release()
+      })
+      .catch(err => {
+        client.release()
+        console.log(err.stack)
+      })
+  })
+	.catch(err => {
+		console.log("Error creating schema: " + err)
+	})
+
+	// close connection to "musixdb" database
+	await pool.end()
 }
 
 module.exports = { createMusixDatabase }
