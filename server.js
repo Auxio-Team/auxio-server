@@ -1,5 +1,6 @@
 // http://localhost:3000
 const fs = require('fs')
+const crypto = require('crypto')
 if (!fs.existsSync('./.env')) {
 	const accessTokenSecret = crypto.randomBytes(64).toString('hex')
 	const refreshTokenSecret = crypto.randomBytes(64).toString('hex')
@@ -12,10 +13,6 @@ if (!fs.existsSync('./.env')) {
 require('dotenv').config()
 const process = require('process')
 const jwt = require('jsonwebtoken')
-const crypto = require('crypto')
-
-
-const { accountDB } = require('./src/database/accountDatabase')
 const { createMusixDatabase } = require('./src/database/createDatabase')
 
 /* run app on port 3000 */
