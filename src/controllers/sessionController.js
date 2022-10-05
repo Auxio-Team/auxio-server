@@ -49,7 +49,6 @@ const joinSessionController = async ( redisVerifySessionIdExistsCb, redisJoinSes
     }
     return await redisJoinSessionCb(sessionId, username)
         .then((res) => {
-            console.log(res)
             if (res) {
                 return joinSuccess();
             }
@@ -57,7 +56,6 @@ const joinSessionController = async ( redisVerifySessionIdExistsCb, redisJoinSes
         });
     
 }
-
 
 module.exports = { 
     createSessionController,

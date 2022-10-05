@@ -30,12 +30,12 @@ module.exports = function (app) {
                 redisVerifySessionIdExists,
                 req.account.username
             )
-            console.log(newSession)
 			if (newSession == null) {
 				res.status(400).send()
 			}
 			else {
 				res.status(201).send(newSession.id) 
+				console.log('Succesfully created session with id ' + newSession.id);
 			}
 		}
 		catch (err) {
@@ -47,17 +47,18 @@ module.exports = function (app) {
 	/*
 	 * Get session information.
 	 */
-	app.get('/session', async (req, res) => {
+	app.get('/sessions/:id', async (req, res) => {
 		try {
             const sessionInfo = await getSessionInfoController(
                 redisGetSessionInfo,
-                req.body.id
+                req.params.id
             )
 			if (sessionInfo.host == null) {
 				res.status(400).send()
 			}
 			else {
 				res.status(200).send(sessionInfo) 
+				console.log('Successfully retrieved session information')
 			}
 		}
 		catch (err) {
@@ -82,6 +83,7 @@ module.exports = function (app) {
 			}
 			else {
 				res.status(200).send() 
+				console.log('Successfully joined session ' + req.body.id + ' as user ' + req.account.username);
 			}
 		}
 		catch (err) {

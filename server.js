@@ -65,7 +65,6 @@ app.use((req, res, next) => {
 	}
 
 	// verify the token is valid
-	console.log("TTT: " + process.env.ACCESS_TOKEN_SECRET)
 	jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, account) => {
 		if (err) {
 			console.log("Forbidden")
