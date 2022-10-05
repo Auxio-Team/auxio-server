@@ -45,8 +45,12 @@ const generateRefreshToken = async (account) => {
 const encryptRefreshToken = async (refreshToken) => {
 	const saltRounds = 10 
 	const salt = await bcrypt.genSalt(saltRounds)
-	const encryptedToken = await bcrypt.hash(
-		refreshToken.substring(refreshToken.length - 72, refreshToken.length - 1), salt)
+	// bcrypt only encrypts up to 72 bytes
+	var refreshTokenShortened = refreshToken
+	if (refreshToken.length > 72) {
+		refreshTokenShortened = refreshToken.substring(refreshToken.length - 72, refreshToken.length - 1)
+	}
+	const encryptedToken = await bcrypt.hash(refreshTokenShortened, salt)
 	return encryptedToken
 }
 
@@ -76,9 +80,12 @@ const storeRefreshToken = async (dbCreateRefreshToken, dbDeleteRefreshToken, use
  */
 const verifyRefreshToken = async (dbGetRefreshToken, username, refreshToken) => {
 	const databaseToken = await dbGetRefreshToken(username)
+	var refreshTokenShortened = refreshToken
+	if (refreshToken.length > 72) {
+		refreshTokenShortened = refreshToken.substring(refreshToken.length - 72, refreshToken.length - 1)
+	}
 	if (databaseToken == null
-		|| !await bcrypt.compare(refreshToken.substring(
-					refreshToken.length - 72, refreshToken.length - 1), databaseToken)){
+		|| !await bcrypt.compare(refreshTokenShortened, databaseToken)) {
 		return null
 	}
 	else {

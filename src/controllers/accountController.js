@@ -3,10 +3,6 @@ const {
 	encryptPassword,
 } = require('../services/accountService')
 
-const {
-	account
-} = require('../models/account')
-
 /*
  * Create a new account and save it in the database.
  */
@@ -20,7 +16,7 @@ const createAccountController = async (dbUsernameExists, dbPhoneNumberExists, db
 	console.log("Encrypted Password: " + encryptedPassword)
 
 	// save the account to database
-	const newAccount = account(username, encryptedPassword, phoneNumber)
+	const newAccount = { username: username, password: encryptedPassword, phoneNumber: phoneNumber }
 	console.log("Saving new account to database with username=" + newAccount.username)
 	if (await dbCreateAccount(newAccount)) {
 		return newAccount
@@ -48,15 +44,3 @@ module.exports = {
 	createAccountController,
 	getAccountsController
 }
-
-/*
- * Authenticate a user logging into an account.
- */
-/*const accountLoginController = async (dbGetPasswordByUsername, username, password) => {
-	if (await verifyUsernamePassword(dbGetPasswordByUsername, username, password)) {
-		return true
-	}
-	else {
-		return null	
-	}
-}*/

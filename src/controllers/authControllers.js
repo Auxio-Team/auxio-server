@@ -11,7 +11,6 @@ const {
 
 const { dbDeleteRefreshToken } = require('../database/authDatabase')
 
-
 /*
  * Handle login attempt to account.
  */

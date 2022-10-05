@@ -17,7 +17,14 @@ app.use(express.json())
 
 // test creating a new postgres database and connecting to it.
 app.get('/', async (req, res) => {
-	createMusixDatabase()
+	try {
+		await createMusixDatabase()
+		res.status(200).send()
+	}
+	catch (err) {
+		console.log(err)
+		res.status(500).send("Internal Server Error")
+	}
 })
 
 /* import routes */
