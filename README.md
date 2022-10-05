@@ -40,6 +40,23 @@ These are the steps I took to install PostgreSQL on WSL (a Linux subsystem for W
 - `echo $PGPASSWORD` should output your password now
 - If using VSCode, reload terminal before running server
 
+## Useful commands to use in the Postgres CLI
+- To use Postgres from command line run the command: `psql`
+  - if working correctly, you will see something line this:
+    `psql (14.5)`
+    `Type "help" for help.`
+
+    `<name>=#`
+- To see the databases on your server, use the command: `\l`
+- To switch to a database, use the command: `\c <name of database>`
+- To see the list of relations in the database, use the command: `\d`
+- To see the structure of a specific relation, use the command: `\d <name of relation>`
+- To run a query on the database, use the following commands:
+  - `\g`
+  - `<the query you want to run> (Ex. "SELECT * from account")`
+  - `\g`
+- To stop the connection to the database, use the command: `\q`
+
 # Install Redis
 
 - Use these instructions to install Redis on your machine: https://redis.io/docs/getting-started/
