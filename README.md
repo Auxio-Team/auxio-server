@@ -42,8 +42,10 @@ These are the steps I took to install PostgreSQL on WSL (a Linux subsystem for W
 
 ## Useful commands to use in the Postgres CLI
 - To use Postgres from command line run the command: `psql`
-  - if working correctly, you will see something line this:
+  - if working correctly, you will see something like this:
+
     `psql (14.5)`
+
     `Type "help" for help.`
 
     `<name>=#`
