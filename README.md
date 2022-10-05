@@ -1,6 +1,8 @@
 # Start the server
 Run the server using command: `node server.js`
 
+# Start the authentication server
+Run the server using command: `node authServer.js`
 
 # Folder Structure
 - routes/database/redis: rely on third-party dependency (as name suggest)
