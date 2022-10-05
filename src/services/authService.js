@@ -25,7 +25,7 @@ const generateAccessToken = async (account) => {
 	return jwt.sign(
 		account,
 		process.env.ACCESS_TOKEN_SECRET,
-		{ expiresIn: '20s'})
+		{ expiresIn: '24h'})
 }
 
 /*

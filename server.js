@@ -37,6 +37,11 @@ require('./src/routes/accountRoutes')(app)
  * 3. return that user
  */
 app.use((req, res, next) => {
+	// guest user bypass authorization
+	if (req.path.split('/')[1] == 'guest') {
+		return next();
+	}
+
 	// 'authorization': 'Bearer TOKEN'
 	const authHeader = req.headers['authorization']
 	const token = authHeader && authHeader.split(' ')[1]
@@ -57,6 +62,9 @@ app.use((req, res, next) => {
 		next()
 	})
 })
+
+require('./src/routes/sessionRoutes')(app)
+require('./src/routes/guestRoutes')(app)
 
 /* listen on server */
 app.listen(port, () => {
