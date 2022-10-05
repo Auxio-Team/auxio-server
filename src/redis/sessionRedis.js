@@ -6,19 +6,23 @@ const { redisClient } = require('./initRedis');
  * @return -> true if the session is created successfully
  */
 const redisCreateSession = async (sessionId, host) => {
-
-    await redisClient.SADD('hosts', host)
-        .then(() => console.log('host created'))
-        .catch((err) => console.log('unable to add host\n'+err))
-
-    await redisClient.HSET('session:'+sessionId, 'host', host)
-        .then(() => console.log('session info set'))
-        .catch((err) => console.log('unable to set session info\n'+err))
-	
-    return await redisClient.SADD('sessions', sessionId)
+    const respStatus = await redisClient.SADD('sessions', sessionId)
         .then((resp) => resp == 1)
         .catch((err) => console.log('Error when trying to add session id to sessions\n'+ err));
 
+    if (!respStatus) {
+        return respStatus;
+    }
+
+    await redisClient.SADD('hosts', host)
+        .catch((err) => console.log('unable to add host\n'+err))
+
+    await redisClient.HSET('session:'+sessionId, 'host', host)
+        .catch((err) => console.log('unable to set session info\n'+err))
+	
+    await redisJoinSession(sessionId, host);
+
+    return respStatus;
 }
 
 
@@ -33,7 +37,6 @@ const redisJoinSession = async (sessionId, participant) => {
     return await redisClient.SADD('session:'+sessionId+':participants', participant)
         .then((resp) => resp == 1)
         .catch((err) => console.log('unable to join session\n'+err))
-
 }
 
 /*
@@ -46,7 +49,6 @@ const redisVerifyProspectHost = async (username) => {
     return await redisClient.SISMEMBER('hosts', username)
         .then((resp) => resp == 0)
         .catch((err) => console.log('Error verifying prospect host\n' + err));
-
 }
 
 /*
@@ -59,7 +61,6 @@ const redisVerifySessionIdExists = async (sessionId) => {
     return await redisClient.SISMEMBER('sessions', sessionId)
         .then((resp) => resp == 1)
         .catch((err) => 'Error verifying session id\n'+err);
-
 }
 
 /*
@@ -72,7 +73,6 @@ const redisGetSessionInfo = async (sessionId) => {
     return await redisClient.HGETALL('session:'+sessionId)
         .then((resp) => resp)
         .catch((err) => 'Error verifying session id\n'+err);
-
 }
 
 // join session

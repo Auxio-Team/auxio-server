@@ -7,7 +7,6 @@ var random = require('random-string-alphanumeric-generator');
  */
 const generateSessionId = async (redisVerifySessionIdExistsCb) => {
     var sessionid = random.randomAlphanumeric(6, "uppercase");
-    console.log(sessionid)
     while (await redisVerifySessionIdExistsCb(sessionid)) {
         sessionid = random.randomAlphanumeric(6, "uppercase");
     }
