@@ -1,21 +1,36 @@
 // http://localhost:3000
+const fs = require('fs')
+if (!fs.existsSync('./.env')) {
+	const accessTokenSecret = crypto.randomBytes(64).toString('hex')
+	const refreshTokenSecret = crypto.randomBytes(64).toString('hex')
+	const envContent = "ACCESS_TOKEN_SECRET=" + accessTokenSecret
+											+ "\nREFRESH_TOKEN_SECRET=" + refreshTokenSecret
+	console.log(envContent)
+	fs.writeFileSync('.env', envContent)
+}
+
 require('dotenv').config()
 const process = require('process')
 const jwt = require('jsonwebtoken')
+const crypto = require('crypto')
+
 
 const { accountDB } = require('./src/database/accountDatabase')
 const { createMusixDatabase } = require('./src/database/createDatabase')
 
 /* run app on port 3000 */
 const express = require('express')
-const { JsonWebTokenError } = require('jsonwebtoken')
 const app = express()
 const port = 3000
 
 /* middleware handlers */
 app.use(express.json())
 
-// test creating a new postgres database and connecting to it.
+
+/*
+ * Test creating a new postgres database and connecting to it.
+ * Create .env file with new Token Secrets
+ */
 app.get('/', async (req, res) => {
 	try {
 		await createMusixDatabase()
@@ -27,9 +42,6 @@ app.get('/', async (req, res) => {
 	}
 })
 
-/* import routes */
-require('./src/routes/accountRoutes')(app)
-
 /*
  * Middleware function that authenticates a request.
  * 1. get the token they send us (it will come from the header).
@@ -38,7 +50,7 @@ require('./src/routes/accountRoutes')(app)
  */
 app.use((req, res, next) => {
 	// guest user bypass authorization
-	if (req.path.split('/')[1] == 'guest') {
+	if (req.path.split('/')[1] == 'guest' || req.path.split('/')[1] == 'account') {
 		return next();
 	}
 
@@ -53,6 +65,7 @@ app.use((req, res, next) => {
 	}
 
 	// verify the token is valid
+	console.log("TTT: " + process.env.ACCESS_TOKEN_SECRET)
 	jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, account) => {
 		if (err) {
 			console.log("Forbidden")
@@ -63,11 +76,12 @@ app.use((req, res, next) => {
 	})
 })
 
-require('./src/routes/sessionRoutes')(app)
+/* import routes */
+require('./src/routes/accountRoutes')(app)
 require('./src/routes/guestRoutes')(app)
+require('./src/routes/sessionRoutes')(app)
 
 /* listen on server */
 app.listen(port, () => {
   console.log(`Server listening on port ${port}`)
 })
-
