@@ -1,8 +1,6 @@
 const {
 	encryptPassword,
 	validateCreateAccount,
-	verifyUsernamePassword,
-	users
 } = require('../services/accountService')
 
 // import controllers
@@ -16,7 +14,9 @@ const {
 const {
 	dbCreateAccount,
 	dbGetPasswordByUsername,
-	dbGetAccounts
+	dbGetAccounts,
+	dbUsernameExists,
+	dbPhoneNumberExists
 } = require('../database/accountDatabase')
 
 
@@ -27,6 +27,8 @@ module.exports = function (app) {
 	app.post('/account', async (req, res) => {
 		try {
 			const newAccount = await createAccountController(
+				dbUsernameExists,
+				dbPhoneNumberExists,
 				dbCreateAccount,
 				req.body.username,
 				req.body.password,
@@ -46,35 +48,10 @@ module.exports = function (app) {
 	})
 
 	/*
-	 * Use login.
-	 * 200 -> Valid login.
-	 * 400 -> Authentication failed.
-	 * 500 -> Internal server error.
-	 */
-	app.post('/account/login', async (req, res) => {
-		try {
-			const login = await accountLoginController(
-				dbGetPasswordByUsername,
-				req.body.username,
-				req.body.password)
-
-			if (login == null) {
-				res.status(400).send("Authentication failed")
-			}
-			else {
-				res.status(200).send("Successful login")
-			}
-		}
-		catch (err) {
-			console.log(err)
-			res.status(500).send("Internal Server Error")
-		}
-	})
-
-	/*
 	 * Get all accounts (used for testing).
 	 */
 	app.get('/accounts', async (req, res) => {
+		//console.log("My account: " + req.account.username)
 		try {
 			const accounts = await getAccountsController(dbGetAccounts)
 			res.status(200).send(accounts)
