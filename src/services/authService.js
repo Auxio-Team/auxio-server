@@ -22,6 +22,7 @@ const verifyUsernamePassword = async (dbGetPassword, username, password) => {
  * Generate access token.
  */
 const generateAccessToken = async (account) => {
+	console.log("AAA: " + process.env.ACCESS_TOKEN_SECRET)
 	return jwt.sign(
 		account,
 		process.env.ACCESS_TOKEN_SECRET,
@@ -60,7 +61,6 @@ const encryptRefreshToken = async (refreshToken) => {
 const storeRefreshToken = async (dbCreateRefreshToken, dbDeleteRefreshToken, username, refreshToken) => {
 	// encrypt the refresh token
 	const encryptedToken = await encryptRefreshToken(refreshToken)
-	console.log("Encrypted Refresh Token", encryptedToken)
 
 	// remove any old refresh token
 	await dbDeleteRefreshToken(username)

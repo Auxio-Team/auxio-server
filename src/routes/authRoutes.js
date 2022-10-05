@@ -31,6 +31,7 @@ module.exports = function (app) {
 				req.body.password)
 			// if logged in, return the object which contains access token and refresh token
 			if (loggedIn) {
+				console.log("Logged in as: " + loggedIn.username)
 				res.status(200).send(loggedIn)
 			}
 			else {

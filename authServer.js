@@ -1,4 +1,14 @@
 // http://localhost:4000
+const fs = require('fs')
+if (!fs.existsSync('./.env')) {
+	const accessTokenSecret = crypto.randomBytes(64).toString('hex')
+	const refreshTokenSecret = crypto.randomBytes(64).toString('hex')
+	const envContent = "ACCESS_TOKEN_SECRET=" + accessTokenSecret
+											+ "\nREFRESH_TOKEN_SECRET=" + refreshTokenSecret
+	console.log(envContent)
+	fs.writeFileSync('.env', envContent)
+}
+
 require('dotenv').config()
 const process = require('process')
 
@@ -12,10 +22,6 @@ app.use(express.json())
 
 /* import routes */
 require('./src/routes/authRoutes')(app)
-
-// TODO: we want to store refresh tokens in database.
-// for now use local list of refresh tokens
-var refreshTokens = []
 
 /* listen on server */
 app.listen(port, () => {

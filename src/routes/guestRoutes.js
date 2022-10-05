@@ -16,7 +16,6 @@ const {
 } = require('../models/sessionModels')
 
 module.exports = function (app) {
-
 	/*
 	 * Get session information.
 	 */
@@ -62,8 +61,13 @@ module.exports = function (app) {
 			res.status(500).send("Internal Server Error")
 		}
 	})
+
+	/*
+	 * Leave session
+	 */
+
+	/* 
+	 * End session
+	 */
+
 }
-
-// leave session
-
-// end session

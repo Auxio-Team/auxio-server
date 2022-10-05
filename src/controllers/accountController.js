@@ -13,7 +13,6 @@ const createAccountController = async (dbUsernameExists, dbPhoneNumberExists, db
 	}
 	// encrypt the password
 	const encryptedPassword = await encryptPassword(password)
-	console.log("Encrypted Password: " + encryptedPassword)
 
 	// save the account to database
 	const newAccount = { username: username, password: encryptedPassword, phoneNumber: phoneNumber }
