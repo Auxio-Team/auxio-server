@@ -22,7 +22,6 @@ const verifyUsernamePassword = async (dbGetPassword, username, password) => {
  * Generate access token.
  */
 const generateAccessToken = async (account) => {
-	console.log("AAA: " + process.env.ACCESS_TOKEN_SECRET)
 	return jwt.sign(
 		account,
 		process.env.ACCESS_TOKEN_SECRET,
