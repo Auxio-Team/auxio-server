@@ -19,11 +19,11 @@ module.exports = function (app) {
 	/*
 	 * Get session information.
 	 */
-	app.get('/guest/session', async (req, res) => {
+	app.get('/guest/sessions/:id', async (req, res) => {
 		try {
             const sessionInfo = await getSessionInfoController(
                 redisGetSessionInfo,
-                req.body.id
+                req.params.id
             )
 			if (sessionInfo.host == null) {
 				res.status(400).send()
