@@ -13,14 +13,26 @@ const {
  * Create a new account and save it in the database.
  */
 const createSessionController = 
-        async ( redisCreateSessionCb, redisVerifyProspectHostCb, redisVerifySessionIdExistsCb, username ) => {
+        async ( redisCreateSessionCb, redisVerifyProspectHostCb, redisVerifySessionIdExistsCb, username, body ) => {
 	// verify user as valid host
     if (!await redisVerifyProspectHostCb(username)) {
         console.log('Error creating session: User cannot be a host');
         return null;
     }
-	// generate session id
-    const sessionId = await generateSessionId(redisVerifySessionIdExistsCb);
+
+    var sessionId = '';
+    if (body.id) {
+        // user entered custom session id
+        if (body.id.length !== 6 || await redisVerifySessionIdExistsCb(body.id)) {
+            console.log('Error creating session: Bad custom session code')
+            return null;
+        }
+        sessionId = body.id;
+    }
+    else {
+	    // generate session id
+        sessionId = await generateSessionId(redisVerifySessionIdExistsCb);
+    }
 
 	// save the new session to server
 	if (await redisCreateSessionCb(sessionId, username)) {

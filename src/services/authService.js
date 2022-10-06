@@ -3,10 +3,8 @@ const process = require('process')
 const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
 const random = require('random-string-alphanumeric-generator');
-console.log(process.env.TWILIO_ACCOUNT_SID);
-console.log(process.env.TWILIO_AUTH_TOKEN);
-const twilioClient = require('twilio')(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN);
 
+const twilioClient = require('twilio')(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN);
 const twilioPhoneNumber = "+13392296710";
 
 /*
