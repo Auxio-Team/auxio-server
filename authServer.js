@@ -1,5 +1,6 @@
 // http://localhost:4000
 const fs = require('fs')
+const crypto = require('crypto')
 if (!fs.existsSync('./.env')) {
 	const accessTokenSecret = crypto.randomBytes(64).toString('hex')
 	const refreshTokenSecret = crypto.randomBytes(64).toString('hex')
