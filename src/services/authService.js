@@ -7,7 +7,6 @@ console.log(process.env.TWILIO_ACCOUNT_SID);
 console.log(process.env.TWILIO_AUTH_TOKEN);
 const twilioClient = require('twilio')(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN);
 
-// const twilioClient = new twilio(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN);
 const twilioPhoneNumber = "+13392296710";
 
 /*
