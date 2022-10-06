@@ -26,6 +26,7 @@
     "notenv": "^2.0.3",
     "pg": "^8.8.0",
     "random-string-alphanumeric-generator": "^0.12.2",
-    "redis": "^4.3.1"
+    "redis": "^4.3.1",
+    "twilio": "^3.82.2"
   }
 }
