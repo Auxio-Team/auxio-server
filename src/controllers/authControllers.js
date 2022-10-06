@@ -6,10 +6,17 @@ const {
 	generateRefreshToken,
 	encryptRefreshToken,
 	verifyRefreshToken,
-	storeRefreshToken
+	storeRefreshToken,
+	verifyCodeToken,
+	generateResetAccessToken,
+	generatePasswordAccessToken,
+	verifyPasswordToken,
+	textCode,
+	generateCode
 } = require('../services/authService')
 
 const { dbDeleteRefreshToken } = require('../database/authDatabase')
+const { encryptPassword } = require('../services/accountService')
 
 /*
  * Handle login attempt to account.
@@ -63,7 +70,66 @@ const tokenController = async (dbGetRefreshToken, refreshToken) => {
 		}
 }
 
+/*
+ * Start reset password by validating username and phone number.
+ */
+const initResetPasswordController = async (dbUsernameExists, dbPhoneNumberExistsForUser, username, phoneNumber) => {
+	// validate username
+	if (!await dbUsernameExists(username)) {
+		return null;
+	}
+
+	// validate phone number is associated with username
+	if (!await dbPhoneNumberExistsForUser(username, phoneNumber)) {
+		return null;
+	}
+
+	// generate code
+	const code = generateCode();
+
+	// text code to user
+	textCode(code, phoneNumber);	
+
+	// generate authorization token
+	const authToken = await generateResetAccessToken({ code: code, username: username });
+
+	// return code in token
+	return { accessToken: authToken }
+}
+
+/*
+ * Verify code in token.
+ */
+const verifyCodeController = async (token, code) => {
+	// validate token
+	const decryptedBody = await verifyCodeToken(token);
+
+	// validate code
+	if (code == decryptedBody.code) {
+		const authToken = await generatePasswordAccessToken({username: decryptedBody.username})
+		return { accessToken: authToken }
+	}
+	return null;
+}
+
+/*
+ * Reset password.
+ */
+const resetPasswordController = async (dbResetPassword, token, newpass) => {
+	// validate token
+	const username = await verifyPasswordToken(token);
+
+	// encrypt password
+	const passEncrypted = await encryptPassword(newpass);
+
+	// update password in database
+	return await dbResetPassword(username, passEncrypted);
+}
+
 module.exports = {
 	loginController,
-	tokenController
+	tokenController,
+	initResetPasswordController,
+	verifyCodeController,
+	resetPasswordController
 }

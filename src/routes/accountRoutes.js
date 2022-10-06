@@ -51,7 +51,6 @@ module.exports = function (app) {
 	 * Get all accounts (used for testing).
 	 */
 	app.get('/accounts', async (req, res) => {
-		//console.log("My account: " + req.account.username)
 		try {
 			const accounts = await getAccountsController(dbGetAccounts)
 			res.status(200).send(accounts)

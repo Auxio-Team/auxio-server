@@ -1,6 +1,13 @@
+require('dotenv').config();
 const process = require('process')
 const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
+const random = require('random-string-alphanumeric-generator');
+console.log(process.env.TWILIO_ACCOUNT_SID);
+console.log(process.env.TWILIO_AUTH_TOKEN);
+const twilioClient = require('twilio')(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN);
+
+const twilioPhoneNumber = "+13392296710";
 
 /*
  * Verify that the username exists and that the password matches (compare with Bcrypt)
@@ -92,11 +99,82 @@ const verifyRefreshToken = async (dbGetRefreshToken, username, refreshToken) => 
 	}
 }
 
+/*
+ * Generate a random code to verify phone number
+ * @return -> code of length 6 as a string
+ */
+const generateCode = () => {
+    return random.randomNumber(6);
+}
+
+/*
+ * Generate access token for reset password.
+ */
+const generateResetAccessToken = async (body) => {
+	return jwt.sign(
+		body,
+		process.env.CODE_TOKEN_SECRET,
+		{ expiresIn: '24h'})
+}
+
+/*
+ * Generate access token for password after code verified.
+ */
+const generatePasswordAccessToken = async (username) => {
+	return jwt.sign(
+		username,
+		process.env.PASSWORD_TOKEN_SECRET,
+		{ expiresIn: '24h'})
+}
+
+/*
+ * Verify token and return code.
+ */
+const verifyCodeToken = async (token) => {
+	return jwt.verify(token, process.env.CODE_TOKEN_SECRET, (err, body) => {
+		if (err) {
+			console.log("Forbidden")
+			return null;
+		}
+		return body;
+	})
+}
+
+/*
+ * Verify token and return code.
+ */
+const verifyPasswordToken = async (token) => {
+	return jwt.verify(token, process.env.PASSWORD_TOKEN_SECRET, (err, body) => {
+		if (err) {
+			console.log("Forbidden")
+			return null;
+		}
+		return body.username;
+	})
+}
+
+/*
+ * Text code to user
+ */
+const textCode = async (code, phoneNumber) => {
+	twilioClient.messages.create({
+  		to: '+1'+phoneNumber,
+  		from: twilioPhoneNumber,
+  		body: 'Musix code: ' + code
+	});
+}
+
 module.exports = {
 	verifyUsernamePassword,
 	generateAccessToken,
 	generateRefreshToken,
 	encryptRefreshToken,
 	storeRefreshToken,
-	verifyRefreshToken
+	verifyRefreshToken,
+	generateCode,
+	generateResetAccessToken,
+	verifyCodeToken,
+	generatePasswordAccessToken,
+	verifyPasswordToken,
+	textCode
 }

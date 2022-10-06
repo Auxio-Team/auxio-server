@@ -2,8 +2,17 @@
 /* import controllers */
 const {
 	loginController,
-	tokenController
+	tokenController,
+	initResetPasswordController,
+	resetPasswordController,
+	verifyCodeController
 } = require('../controllers/authControllers')
+
+const { 
+	dbPhoneNumberExistsForUser,
+	dbUsernameExists,
+	dbResetPassword
+} = require('../database/accountDatabase')
 
 /* import database functions */
 const {
@@ -29,13 +38,13 @@ module.exports = function (app) {
 				dbDeleteRefreshToken,
 				req.body.username,
 				req.body.password)
-			// if logged in, return the object which contains access token and refresh token
+
 			if (loggedIn) {
-				console.log("Logged in as: " + loggedIn.username)
+				console.log("Logged in as: " + req.body.username)
 				res.status(200).send(loggedIn)
 			}
 			else {
-				res.status(403).send("Authentication failed")
+				res.status(401).send("Authentication failed")
 			}
 		}
 		catch (err) {
@@ -63,6 +72,77 @@ module.exports = function (app) {
 			}
 			else {
 				res.status(403).send("Could not generate access token. Permission denied.")
+			}
+		}
+		catch (err) {
+			console.log(err)
+			res.status(500).send("Internal Server Error")
+		}
+	})
+
+	/*
+	 * Start reseting password by entering username and phone number.
+	 */
+	app.post('/reset', async (req, res) => {
+		try {
+			const resetAccount = await initResetPasswordController(
+				dbUsernameExists,
+				dbPhoneNumberExistsForUser,
+				req.body.username,
+				req.body.phoneNumber)
+
+			if (resetAccount == null) {
+				res.status(400).send()
+			}
+			else {
+				res.status(201).send(resetAccount) 
+			}
+		}
+		catch (err) {
+			console.log(err)
+			res.status(500).send("Internal Server Error")
+		}
+	})
+
+	/*
+	 * Verify code that user entered.
+	 */
+	app.post('/reset/verify', async (req, res) => {
+		try {
+			const verifiedCode = await verifyCodeController(
+				req.headers['authorization'].split(' ')[1],
+				req.body.code
+			)
+
+			if (verifiedCode == null) {
+				res.status(400).send()
+			}
+			else {
+				res.status(201).send(verifiedCode)
+			}
+		}
+		catch (err) {
+			console.log(err)
+			res.status(500).send("Internal Server Error")
+		}
+	})
+
+	/*
+	 * Reset the password.
+	 */
+	app.put('/reset/password', async (req, res) => {
+		try {
+			const passReset = await resetPasswordController(
+				dbResetPassword,
+				req.headers['authorization'].split(' ')[1],
+				req.body.password
+			)
+
+			if (!passReset) {
+				res.status(400).send()
+			}
+			else {
+				res.status(201).send()
 			}
 		}
 		catch (err) {
