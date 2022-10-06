@@ -7,7 +7,8 @@ const {
 const {
 	createAccountController,
 	accountLoginController,
-	getAccountsController
+	getAccountsController,
+	updatePreferredPlatformController
 } = require('../controllers/accountController')
 
 // import database functions
@@ -16,7 +17,8 @@ const {
 	dbGetPasswordByUsername,
 	dbGetAccounts,
 	dbUsernameExists,
-	dbPhoneNumberExists
+	dbPhoneNumberExists,
+	dbUpdatePreferredPlatform
 } = require('../database/accountDatabase')
 
 
@@ -54,6 +56,26 @@ module.exports = function (app) {
 		try {
 			const accounts = await getAccountsController(dbGetAccounts)
 			res.status(200).send(accounts)
+		}
+		catch (err) {
+			console.log(err)
+			res.status(500).send("Internal Server Error")
+		}
+	})
+
+	/*
+	 * Update the preferred streaming platform of a user to a new value
+	 */
+	app.put('/platform', async (req, res) => {
+		try {
+			const updated = await updatePreferredPlatformController(
+				dbUpdatePreferredPlatform, req.account.username, req.body.preferredPlatform)
+			if (updated) {
+				res.status(200).send()
+			}
+			else {
+				res.status(400).send()
+			}
 		}
 		catch (err) {
 			console.log(err)

@@ -6,7 +6,7 @@ const {
 	initResetPasswordController,
 	resetPasswordController,
 	verifyCodeController
-} = require('../controllers/authControllers')
+} = require('../controllers/authController')
 
 const { 
 	dbPhoneNumberExistsForUser,
