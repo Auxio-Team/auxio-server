@@ -52,9 +52,22 @@ const updatePreferredPlatformController = async (dbUpdatePreferredPlatform, user
 	}
 }
 
+/*
+ * Set the dark mode of a user to a new value
+ * @return -> true if it was updated, otherwise null.
+ */
+const updateDarkModeController = async (dbUpdateDarkMode, username, value) => {
+	if (await dbUpdateDarkMode(username, value)) {
+		return true
+	}
+	else {
+		return null
+	}
+}
 
 module.exports = {
 	createAccountController,
 	getAccountsController,
-	updatePreferredPlatformController
+	updatePreferredPlatformController,
+	updateDarkModeController
 }
