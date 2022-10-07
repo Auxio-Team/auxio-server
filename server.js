@@ -55,7 +55,8 @@ app.get('/', async (req, res) => {
  */
 app.use((req, res, next) => {
 	// guest user bypass authorization
-	if (req.path.split('/')[1] == 'guest' || req.path.split('/')[1] == 'account') {
+	if (req.path.split('/')[1] == 'guest' ||
+			(req.path.split('/')[1] == 'account' && req.method == 'POST')) {
 		return next();
 	}
 

@@ -40,6 +40,15 @@ const getAccountsController = async (dbGetAccounts) => {
 }
 
 /*
+ * Get account info for user with username=username.
+ * @return -> the account data in a json.
+ */
+const getAccountController = async (dbGetAccount, username) => {
+	const account = await dbGetAccount(username)
+	return account ? account : null
+}
+
+/*
  * Set the preferred streaming platform of a user to a new value:w
  * @return -> true if it was updated, otherwise null.
  */
@@ -68,6 +77,7 @@ const updateDarkModeController = async (dbUpdateDarkMode, username, value) => {
 module.exports = {
 	createAccountController,
 	getAccountsController,
+	getAccountController,
 	updatePreferredPlatformController,
 	updateDarkModeController
 }

@@ -152,6 +152,32 @@ const dbGetAccounts = async () => {
 }
 
 /*
+ * Set the dark mode of the account with username=username to value.
+ */
+const dbGetAccount = async (username) => {
+	const query = {
+		text: "SELECT username, phone_number, preferred_streaming_platform, dark_mode_enabled "
+		    + "FROM account "
+				+ "WHERE username = $1",
+		values: [username],
+	}
+
+	const client = createClient("musixdb")
+	await client.connect()
+	const account = await client.query(query)
+	.then(res => {
+		return res.rows[0]
+	})
+	.catch(e => {
+		console.error(e.stack)
+		return null
+	})
+	await client.end()
+	return account ? account : null
+}
+
+
+/*
  * Checks if the phone number exists for a given user.
  * @return -> true if it already exists, otherwise false.
  */
@@ -279,5 +305,6 @@ module.exports = {
 	dbPhoneNumberExistsForUser,
 	dbResetPassword,
 	dbUpdatePreferredPlatform,
-	dbUpdateDarkMode
+	dbUpdateDarkMode,
+	dbGetAccount
 }
