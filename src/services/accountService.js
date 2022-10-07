@@ -19,8 +19,11 @@ const encryptPassword = async (password) => {
  * @return -> true if both username/password are valid, otherwise false.
  */
 const validateCreateAccount = async (dbUsernameExists, dbPhoneNumberExists, username, phoneNumber) => {
-	if (await dbUsernameExists(username) || await dbPhoneNumberExists(phoneNumber)) {
-		return false
+	if (await dbUsernameExists(username)) {
+		return -1
+	}
+	else if (await dbPhoneNumberExists(phoneNumber)) {
+		return -2
 	}
 	else {
 		return true

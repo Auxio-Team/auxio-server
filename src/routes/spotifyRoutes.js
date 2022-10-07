@@ -1,33 +1,18 @@
 
 /* import controllers */
 const {
-	loginController,
-	tokenController,
-	initResetPasswordController,
-	resetPasswordController,
-	verifyCodeController
-} = require('../controllers/authController')
+} = require('../controllers/spotifyController')
+
 
 /* import database functions */
 const {
-	dbGetPassword,
-	dbCreateRefreshToken,
-	dbGetRefreshToken,
-	dbDeleteRefreshToken
-} = require("../database/authDatabase")
 
-const { 
-	dbPhoneNumberExistsForUser,
-	dbUsernameExists,
-	dbResetPassword
-} = require('../database/accountDatabase')
+} = require("../database/spotifyDatabase")
 
 
 module.exports = function (app) {
 	/*
-	 * Handle user login.
-	 * 200 -> user succesfully logged in.
-	 * 403 -> authentication failed. 
+	 *
 	 */
 	app.post('/login', async (req, res) => {
 		// authenticate user by checking username and password
