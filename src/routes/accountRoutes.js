@@ -41,10 +41,10 @@ module.exports = function (app) {
 				req.body.phoneNumber)
 
 			if (newAccount == -1) {
-				res.status(400).send("Invalid Username")
+				res.status(400).send({ 'message': 'Invalid Username' })
 			}
 			else if (newAccount == -2) {
-				res.status(400).send("Invalid Phone Number")
+				res.status(400).send({ 'message': 'Invalid Phone Number' })
 			}
 			else {
 				res.status(201).send(newAccount) 
