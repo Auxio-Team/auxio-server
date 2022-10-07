@@ -35,7 +35,7 @@ module.exports = function (app) {
 				res.status(400).send()
 			}
 			else {
-				res.status(201).send(newSession.id) 
+				res.status(201).send({ id: newSession.id }) 
 				console.log('Succesfully created session with id ' + newSession.id);
 			}
 		}
