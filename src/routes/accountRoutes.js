@@ -8,6 +8,7 @@ const {
 	createAccountController,
 	accountLoginController,
 	getAccountsController,
+	getAccountController,
 	updatePreferredPlatformController,
 	updateDarkModeController
 } = require('../controllers/accountController')
@@ -20,7 +21,8 @@ const {
 	dbUsernameExists,
 	dbPhoneNumberExists,
 	dbUpdatePreferredPlatform,
-	dbUpdateDarkMode
+	dbUpdateDarkMode,
+	dbGetAccount
 } = require('../database/accountDatabase')
 
 
@@ -58,6 +60,25 @@ module.exports = function (app) {
 		try {
 			const accounts = await getAccountsController(dbGetAccounts)
 			res.status(200).send(accounts)
+		}
+		catch (err) {
+			console.log(err)
+			res.status(500).send("Internal Server Error")
+		}
+	})
+
+	/*
+	 * Get account info for account that is making this request
+	 */
+	app.get('/account', async (req, res) => {
+		try {
+			const account = await getAccountController(dbGetAccount, req.account.username)
+			if (account) {
+				res.status(200).send(account)
+			}
+			else {
+				res.status(400).send("Couldn't find account")
+			}
 		}
 		catch (err) {
 			console.log(err)
