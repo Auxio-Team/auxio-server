@@ -8,8 +8,12 @@ const {
  */
 const createAccountController = async (dbUsernameExists, dbPhoneNumberExists, dbCreateAccount, username, password, phoneNumber) => {
 	// validate username and password
-	if (!await validateCreateAccount(dbUsernameExists, dbPhoneNumberExists, username, phoneNumber)) {
-		return null
+	const validated = await validateCreateAccount(dbUsernameExists, dbPhoneNumberExists, username, phoneNumber)
+	if (validated == -1) {
+		return -1
+	}
+	else if (validated == -2) {
+		return -2
 	}
 	// encrypt the password
 	const encryptedPassword = await encryptPassword(password)
