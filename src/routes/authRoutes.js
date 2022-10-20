@@ -178,12 +178,15 @@ module.exports = function (app) {
 
 		try {
 			const tokens = await updateUsernameController(
-				dbUpdateUsername, dbCreateRefreshToken, dbDeleteRefreshToken, req.account.username, req.body.username)
-			if (tokens) {
-				res.status(200).send(tokens)
+				dbUpdateUsername, dbUsernameExists, dbCreateRefreshToken, dbDeleteRefreshToken, req.account.username, req.body.username)
+			if (tokens == -1) {
+				res.status(400).send({ message: "Username is already taken" })
+			}
+			else if (tokens == -2) {
+				res.status(400).send({ message: "Could not update username" })
 			}
 			else {
-				res.status(400).send()
+				res.status(200).send(tokens)
 			}
 		}
 		catch (err) {

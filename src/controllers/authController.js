@@ -130,7 +130,12 @@ const resetPasswordController = async (dbResetPassword, token, newpass) => {
  * Set the username of a user to a new value
  * @return -> true if it was updated, otherwise null.
  */
-const updateUsernameController = async (dbUpdateUsername, dbCreateRefreshToken, dbDeleteRefreshToken, username, value) => {
+const updateUsernameController = async (dbUpdateUsername, dbUsernameExists, dbCreateRefreshToken, dbDeleteRefreshToken, username, value) => {
+	// check if the username already exists
+	if (await dbUsernameExists(value)) {
+		return -1
+	}
+
 	if (await dbUpdateUsername(username, value)) {
 		// get new AccessToken and RefreshToken
 		const account = { username: value }
@@ -147,10 +152,11 @@ const updateUsernameController = async (dbUpdateUsername, dbCreateRefreshToken, 
 			value,
 			refreshToken)
 
+			console.log("Updated username from", username, "to", value)
 		return { accessToken: accessToken, refreshToken: refreshToken }
 	}
 	else {
-		return null
+		return -2
 	}
 }
 
