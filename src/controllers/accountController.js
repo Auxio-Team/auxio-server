@@ -48,13 +48,12 @@ const getAccountsController = async (dbGetAccounts) => {
  * @return -> the account data in a json.
  */
 const getAccountController = async (dbGetAccount, username) => {
-	console.log("USERNAME ---> " + username)
 	const account = await dbGetAccount(username)
 	return account ? account : null
 }
 
 /*
- * Set the preferred streaming platform of a user to a new value:w
+ * Set the preferred streaming platform of a user to a new value
  * @return -> true if it was updated, otherwise null.
  */
 const updatePreferredPlatformController = async (dbUpdatePreferredPlatform, username, value) => {

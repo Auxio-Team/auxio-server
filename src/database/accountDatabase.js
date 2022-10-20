@@ -280,5 +280,5 @@ module.exports = {
 	dbPhoneNumberExistsForUser,
 	dbResetPassword,
 	dbUpdatePreferredPlatform,
-	dbGetAccount
+	dbGetAccount,
 }

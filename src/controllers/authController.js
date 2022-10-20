@@ -126,10 +126,39 @@ const resetPasswordController = async (dbResetPassword, token, newpass) => {
 	return await dbResetPassword(username, passEncrypted);
 }
 
+/*
+ * Set the username of a user to a new value
+ * @return -> true if it was updated, otherwise null.
+ */
+const updateUsernameController = async (dbUpdateUsername, dbCreateRefreshToken, dbDeleteRefreshToken, username, value) => {
+	if (await dbUpdateUsername(username, value)) {
+		// get new AccessToken and RefreshToken
+		const account = { username: value }
+		const accessToken = await generateAccessToken(account)
+		const refreshToken = await generateRefreshToken(account)
+
+		// delete refresh token for old username
+		await dbDeleteRefreshToken(username)
+
+		// store the refresh token in the database for new username (value)
+		const stored = await storeRefreshToken(
+			dbCreateRefreshToken,
+			dbDeleteRefreshToken,
+			value,
+			refreshToken)
+
+		return { accessToken: accessToken, refreshToken: refreshToken }
+	}
+	else {
+		return null
+	}
+}
+
 module.exports = {
 	loginController,
 	tokenController,
 	initResetPasswordController,
 	verifyCodeController,
-	resetPasswordController
+	resetPasswordController,
+	updateUsernameController
 }

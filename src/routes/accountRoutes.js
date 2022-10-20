@@ -20,7 +20,7 @@ const {
 	dbUsernameExists,
 	dbPhoneNumberExists,
 	dbUpdatePreferredPlatform,
-	dbGetAccount
+	dbGetAccount,
 } = require('../database/accountDatabase')
 
 
