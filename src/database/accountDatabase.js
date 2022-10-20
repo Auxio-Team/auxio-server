@@ -9,10 +9,10 @@ const { createClient, createPool } = require('./createClientPool')
 const dbCreateAccount = async (account) => {
 	const query = {
 		text: "INSERT INTO account "
-				+ "(username, pass, phone_number, dark_mode_enabled) "
+				+ "(username, pass, phone_number, preferred_streaming_platform) "
 				+ "VALUES "
 				+ "($1, $2, $3, $4);",
-		values: [account.username, account.password, account.phoneNumber, false],
+		values: [account.username, account.password, account.phoneNumber, "Apple Music"],
 	}
 
 	const pool = createPool("musixdb")
@@ -156,7 +156,7 @@ const dbGetAccounts = async () => {
  */
 const dbGetAccount = async (username) => {
 	const query = {
-		text: "SELECT username, phone_number, preferred_streaming_platform, dark_mode_enabled "
+		text: "SELECT username, phone_number, preferred_streaming_platform "
 		    + "FROM account "
 				+ "WHERE username = $1",
 		values: [username],
@@ -272,31 +272,6 @@ const dbUpdatePreferredPlatform = async (username, value) => {
 	return response	
 }
 
-/*
- * Set the dark mode of the account with username=username to value.
- */
-const dbUpdateDarkMode = async (username, value) => {
-	const query = {
-		text: "UPDATE account "
-		    + "SET dark_mode_enabled = $1 "
-				+ "WHERE username = $2",
-		values: [value, username],
-	}
-
-	const client = createClient("musixdb")
-	await client.connect()
-	const response = await client.query(query)
-	.then(res => {
-		return res
-	})
-	.catch(e => {
-		console.error(e.stack)
-		return null
-	})
-	await client.end()
-	return response	
-}
-
 module.exports = {
 	dbCreateAccount,
 	dbGetAccounts,
@@ -305,6 +280,5 @@ module.exports = {
 	dbPhoneNumberExistsForUser,
 	dbResetPassword,
 	dbUpdatePreferredPlatform,
-	dbUpdateDarkMode,
 	dbGetAccount
 }
