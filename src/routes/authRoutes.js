@@ -1,3 +1,4 @@
+const jwt = require('jsonwebtoken')
 
 /* import controllers */
 const {
@@ -5,7 +6,8 @@ const {
 	tokenController,
 	initResetPasswordController,
 	resetPasswordController,
-	verifyCodeController
+	verifyCodeController,
+	updateUsernameController
 } = require('../controllers/authController')
 
 /* import database functions */
@@ -13,7 +15,8 @@ const {
 	dbGetPassword,
 	dbCreateRefreshToken,
 	dbGetRefreshToken,
-	dbDeleteRefreshToken
+	dbDeleteRefreshToken,
+	dbUpdateUsername
 } = require("../database/authDatabase")
 
 const { 
@@ -21,7 +24,6 @@ const {
 	dbUsernameExists,
 	dbResetPassword
 } = require('../database/accountDatabase')
-
 
 module.exports = function (app) {
 	/*
@@ -143,6 +145,45 @@ module.exports = function (app) {
 			}
 			else {
 				res.status(201).send()
+			}
+		}
+		catch (err) {
+			console.log(err)
+			res.status(500).send("Internal Server Error")
+		}
+	})
+
+	/*
+	 * Update the username of a user with new value.
+	 */
+	app.put('/username', async (req, res) => {
+		// 'authorization': 'Bearer TOKEN'
+		const authHeader = req.headers['authorization']
+		const token = authHeader && authHeader.split(' ')[1]
+
+		// check if there is a token
+		if (token == null) {
+			console.log("Unauthorized")
+			return res.status(401).send()
+		}
+
+		// verify the token is valid
+		jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, account) => {
+			if (err) {
+				console.log("Forbidden")
+				return res.status(403).send()
+			}
+			req.account = account
+		})
+
+		try {
+			const tokens = await updateUsernameController(
+				dbUpdateUsername, dbCreateRefreshToken, dbDeleteRefreshToken, req.account.username, req.body.username)
+			if (tokens) {
+				res.status(200).send(tokens)
+			}
+			else {
+				res.status(400).send()
 			}
 		}
 		catch (err) {

@@ -48,22 +48,8 @@ const getAccountsController = async (dbGetAccounts) => {
  * @return -> the account data in a json.
  */
 const getAccountController = async (dbGetAccount, username) => {
-	console.log("USERNAME ---> " + username)
 	const account = await dbGetAccount(username)
 	return account ? account : null
-}
-
-/*
- * Set the username of a user to a new value
- * @return -> true if it was updated, otherwise null.
- */
-const updateUsernameController = async (dbUpdateUsername, username, value) => {
-	if (await dbUpdateUsername(username, value)) {
-		return true
-	}
-	else {
-		return null
-	}
 }
 
 /*
@@ -84,5 +70,4 @@ module.exports = {
 	getAccountsController,
 	getAccountController,
 	updatePreferredPlatformController,
-	updateUsernameController
 }
