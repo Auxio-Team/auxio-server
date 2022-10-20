@@ -10,6 +10,7 @@ const {
 	getAccountsController,
 	getAccountController,
 	updatePreferredPlatformController,
+	updateUsernameController
 } = require('../controllers/accountController')
 
 // import database functions
@@ -20,7 +21,8 @@ const {
 	dbUsernameExists,
 	dbPhoneNumberExists,
 	dbUpdatePreferredPlatform,
-	dbGetAccount
+	dbGetAccount,
+	dbUpdateUsername
 } = require('../database/accountDatabase')
 
 
@@ -79,6 +81,27 @@ module.exports = function (app) {
 			}
 			else {
 				res.status(400).send("Couldn't find account")
+			}
+		}
+		catch (err) {
+			console.log(err)
+			res.status(500).send("Internal Server Error")
+		}
+	})
+
+	/*
+	 * TODO:
+	 * Update the username of a user with new value
+	 */
+	app.put('/username', async (req, res) => {
+		try {
+			const updated = await updateUsernameController(
+				dbUpdateUsername, req.account.username, req.body.username)
+			if (updated) {
+				res.status(200).send()
+			}
+			else {
+				res.status(400).send()
 			}
 		}
 		catch (err) {

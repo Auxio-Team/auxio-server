@@ -247,6 +247,33 @@ const dbResetPassword = async (username, newpass) => {
 }
 
 /*
+ * TODO:
+ * Set the prefered platform for the account with username=username
+ * to value.
+ */
+const dbUpdateUsername = async (username, value) => {
+	const query = {
+		text: "UPDATE account "
+		    + "SET username = $1 "
+				+ "WHERE username = $2",
+		values: [value, username],
+	}
+
+	const client = createClient("musixdb")
+	await client.connect()
+	const response = await client.query(query)
+	.then(res => {
+		return res
+	})
+	.catch(e => {
+		console.error(e.stack)
+		return null
+	})
+	await client.end()
+	return response	
+}
+
+/*
  * Set the prefered platform for the account with username=username
  * to value.
  */
@@ -280,5 +307,6 @@ module.exports = {
 	dbPhoneNumberExistsForUser,
 	dbResetPassword,
 	dbUpdatePreferredPlatform,
-	dbGetAccount
+	dbGetAccount,
+	dbUpdateUsername
 }

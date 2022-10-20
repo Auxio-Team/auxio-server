@@ -54,7 +54,20 @@ const getAccountController = async (dbGetAccount, username) => {
 }
 
 /*
- * Set the preferred streaming platform of a user to a new value:w
+ * Set the username of a user to a new value
+ * @return -> true if it was updated, otherwise null.
+ */
+const updateUsernameController = async (dbUpdateUsername, username, value) => {
+	if (await dbUpdateUsername(username, value)) {
+		return true
+	}
+	else {
+		return null
+	}
+}
+
+/*
+ * Set the preferred streaming platform of a user to a new value
  * @return -> true if it was updated, otherwise null.
  */
 const updatePreferredPlatformController = async (dbUpdatePreferredPlatform, username, value) => {
@@ -71,4 +84,5 @@ module.exports = {
 	getAccountsController,
 	getAccountController,
 	updatePreferredPlatformController,
+	updateUsernameController
 }
