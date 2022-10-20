@@ -10,7 +10,6 @@ const {
 	getAccountsController,
 	getAccountController,
 	updatePreferredPlatformController,
-	updateDarkModeController
 } = require('../controllers/accountController')
 
 // import database functions
@@ -21,7 +20,6 @@ const {
 	dbUsernameExists,
 	dbPhoneNumberExists,
 	dbUpdatePreferredPlatform,
-	dbUpdateDarkMode,
 	dbGetAccount
 } = require('../database/accountDatabase')
 
@@ -96,26 +94,6 @@ module.exports = function (app) {
 		try {
 			const updated = await updatePreferredPlatformController(
 				dbUpdatePreferredPlatform, req.account.username, req.body.preferredPlatform)
-			if (updated) {
-				res.status(200).send()
-			}
-			else {
-				res.status(400).send()
-			}
-		}
-		catch (err) {
-			console.log(err)
-			res.status(500).send("Internal Server Error")
-		}
-	})
-
-	/*
-	 * Update the dark mode of a user with new value.
-	 */
-	app.put('/darkmode', async (req, res) => {
-		try {
-			const updated = await updateDarkModeController(
-				dbUpdateDarkMode, req.account.username, req.body.darkMode)
 			if (updated) {
 				res.status(200).send()
 			}
