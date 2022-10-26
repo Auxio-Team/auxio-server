@@ -12,11 +12,22 @@ const joinError = (error) => ({
     error: error
 });
 
+const leaveSuccess = () => ({
+    status: SUCCESS
+});
+
+const leaveError = (error) => ({
+    status: FAILURE,
+    error: error
+});
+
 module.exports = {
     SUCCESS,
     FAILURE,
     INVALID_ID,
     INVALID_NAME,
     joinSuccess,
-    joinError
+    joinError,
+    leaveSuccess,
+    leaveError
 }
