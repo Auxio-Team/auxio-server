@@ -39,7 +39,7 @@ module.exports = function (app) {
 			}
 			else {
 				res.status(201).send({ id: newSession.id }) 
-				console.log('Succesfully created session with id ' + newSession.id);
+				console.log(`Succesfully created session with id ${newSession.id}`);
 			}
 		}
 		catch (err) {
@@ -87,7 +87,7 @@ module.exports = function (app) {
 			}
 			else {
 				res.status(200).send() 
-				console.log('Successfully joined session ' + req.body.id + ' as user ' + req.account.username);
+				console.log(`Successfully joined session ${req.params.id} as user ${req.account.username}`);
 			}
 		}
 		catch (err) {
