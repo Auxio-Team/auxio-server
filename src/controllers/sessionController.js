@@ -5,8 +5,11 @@ const {
 const {
     INVALID_ID,
     INVALID_NAME,
+    FAILURE,
     joinSuccess,
-    joinError
+    joinError,
+    leaveSuccess,
+    leaveError
 } = require('../models/sessionModels')
 
 /*
@@ -52,7 +55,7 @@ const getSessionInfoController = async ( redisGetSessionInfoCb, sessionId ) => {
 }
 
 /*
- * Get session information.
+ * Join a session.
  */
 const joinSessionController = async ( redisVerifySessionIdExistsCb, redisJoinSessionCb, sessionId, username ) => {
     if (!await redisVerifySessionIdExistsCb(sessionId)) {
@@ -69,8 +72,30 @@ const joinSessionController = async ( redisVerifySessionIdExistsCb, redisJoinSes
     
 }
 
+/*
+ * Leave a session.
+ */
+const leaveSessionController = async ( redisVerifySessionIdExistsCb, redisVerifyParticipantExistsCb, redisLeaveSessionCb, sessionId, username ) => {
+    if (!await redisVerifySessionIdExistsCb(sessionId)) {
+        console.log('Error leaving session: Session ID not valid')
+        return leaveError(INVALID_ID);
+    } else if (!await redisVerifyParticipantExistsCb(sessionId, username)) {
+        console.log(`Error leaving session: User not in session ${sessionId}`)
+        return leaveError(INVALID_NAME)
+    }
+    return await redisLeaveSessionCb(sessionId, username)
+        .then((res) => {
+            if (res) {
+                return leaveSuccess();
+            }
+            return joinError(FAILURE);
+        });
+    
+}
+
 module.exports = { 
     createSessionController,
     getSessionInfoController,
-    joinSessionController
+    joinSessionController,
+    leaveSessionController
 }

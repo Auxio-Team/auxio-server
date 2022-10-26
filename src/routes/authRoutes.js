@@ -111,6 +111,10 @@ module.exports = function (app) {
 	 */
 	app.post('/reset/verify', async (req, res) => {
 		try {
+			if (!req.headers['authorization'] || !req.headers['authorization'].split(' ')) {
+				res.status(401).send()
+				return
+			}
 			const verifiedCode = await verifyCodeController(
 				req.headers['authorization'].split(' ')[1],
 				req.body.code
@@ -134,6 +138,10 @@ module.exports = function (app) {
 	 */
 	app.put('/reset/password', async (req, res) => {
 		try {
+			if (!req.headers['authorization'] || !req.headers['authorization'].split(' ')) {
+				res.status(401).send()
+				return
+			}
 			const passReset = await resetPasswordController(
 				dbResetPassword,
 				req.headers['authorization'].split(' ')[1],
