@@ -74,12 +74,12 @@ module.exports = function (app) {
 	/*
 	 * Join a session.
 	 */
-	app.put('/session/join', async (req, res) => {
+	app.post('/sessions/:id/join', async (req, res) => {
 		try {
             const joinSession = await joinSessionController(
                 redisVerifySessionIdExists,
                 redisJoinSession,
-                req.body.id,
+                req.params.id,
                 req.account.username
             )
 			if (joinSession.status === FAILURE) {
