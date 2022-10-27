@@ -10,9 +10,10 @@ const {
 	getAccountsController,
 	getAccountController,
 	updatePreferredPlatformController,
+	logoutController,
 } = require('../controllers/accountController')
 
-// import database functions
+// import account database functions
 const {
 	dbCreateAccount,
 	dbGetPasswordByUsername,
@@ -22,6 +23,11 @@ const {
 	dbUpdatePreferredPlatform,
 	dbGetAccount,
 } = require('../database/accountDatabase')
+
+// import auth database functions
+const {
+	dbDeleteRefreshToken,
+} = require('../database/authDatabase')
 
 
 module.exports = function (app) {
@@ -96,6 +102,31 @@ module.exports = function (app) {
 				dbUpdatePreferredPlatform, req.account.username, req.body.preferredPlatform)
 			if (updated) {
 				res.status(200).send()
+			}
+			else {
+				res.status(400).send()
+			}
+		}
+		catch (err) {
+			console.log(err)
+			res.status(500).send("Internal Server Error")
+		}
+	})
+
+
+	/*
+	 * Log the user out by deleting the refresh token
+	 */
+	app.post('/logout', async (req, res) => {
+		try {
+			const deleted = await logoutController(dbDeleteRefreshToken, req.account.username)
+			if (deleted > 0) {
+				console.log("Logged out user: " + req.account.username)
+				res.status(200).send()
+			}
+			else if (deleted == 0) {
+				// tried to logout, but no rows were deleted
+				res.status(404).send()
 			}
 			else {
 				res.status(400).send()

@@ -114,6 +114,9 @@ const dbDeleteRefreshToken = async (username) => {
 		return null
 	})
 	await client.end()
+	
+	// returns the number of rows that were deleted
+	return response["rowCount"]
 }
 
 /*

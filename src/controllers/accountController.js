@@ -65,9 +65,26 @@ const updatePreferredPlatformController = async (dbUpdatePreferredPlatform, user
 	}
 }
 
+/*
+ * Log the user out by deleting the refresh token
+ * @return -> the number of rows deleted, or null on failure.
+ */
+const logoutController = async (dbDeleteRefreshToken, username) => {
+	
+	const deleted = await dbDeleteRefreshToken(username)
+	if (deleted >= 0) {
+		return deleted
+	}
+	else {
+		// logout failed
+		return null
+	}
+}
+
 module.exports = {
 	createAccountController,
 	getAccountsController,
 	getAccountController,
 	updatePreferredPlatformController,
+	logoutController,
 }
