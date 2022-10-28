@@ -5,8 +5,8 @@ const {
     redisVerifySessionIdExists,
     redisGetSessionInfo,
     redisJoinSession,
-	redisVerifyParticipantExists,
-	redisLeaveSession
+		redisVerifyParticipantExists,
+		redisLeaveSession
 } = require('../redis/sessionRedis')
 
 // import controller functions
@@ -14,8 +14,13 @@ const {
     createSessionController,
     getSessionInfoController,
     joinSessionController,
-	leaveSessionController
+		leaveSessionController
 } = require('../controllers/sessionController')
+
+// import database functions
+const {
+		dbGetPreferredPlatform
+} = require('../database/accountDatabase')
 
 const {
     FAILURE,
@@ -50,14 +55,16 @@ module.exports = function (app) {
 
 	/*
 	 * Get session information.
+	 * returns host and preferredPlatform in the body.
 	 */
 	app.get('/sessions/:id', async (req, res) => {
 		try {
             const sessionInfo = await getSessionInfoController(
                 redisGetSessionInfo,
+								dbGetPreferredPlatform,
                 req.params.id
             )
-			if (sessionInfo.host == null) {
+			if (sessionInfo == null) {
 				res.status(400).send()
 			}
 			else {
