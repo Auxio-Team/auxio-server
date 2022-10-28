@@ -63,7 +63,7 @@ const getSessionInfoController = async ( redisGetSessionInfoCb, dbGetPreferredPl
         return null
     }
 
-    return { host: sessionInfo.host, preferredPlatform: response.preferred_streaming_platform }
+    return { host: sessionInfo.host, platform: response.preferred_streaming_platform }
 }
 
 /*
