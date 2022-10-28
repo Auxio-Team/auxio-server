@@ -11,6 +11,11 @@ const {
     joinSessionController
 } = require('../controllers/sessionController')
 
+// import database functions
+const {
+		dbGetPreferredPlatform
+} = require('../database/accountDatabase')
+
 const {
     FAILURE,
 } = require('../models/sessionModels')
@@ -23,9 +28,10 @@ module.exports = function (app) {
 		try {
             const sessionInfo = await getSessionInfoController(
                 redisGetSessionInfo,
+								dbGetPreferredPlatform,
                 req.params.id
             )
-			if (sessionInfo.host == null) {
+			if (sessionInfo == null) {
 				res.status(400).send()
 			}
 			else {
