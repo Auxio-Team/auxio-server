@@ -23,7 +23,7 @@ module.exports = function (app) {
 	 * 
 	 * body format:
 	 * {
-	 *    song: <int_song_id>
+	 *    song: <str_song_id>
 	 * }
 	 */
 	app.post('/sessions/:id/song', async (req, res) => {
@@ -57,7 +57,7 @@ module.exports = function (app) {
 	})
 
 	/*
-	 * Remove an upvote (decrement priority) to a song in a session queue.
+	 * Remove an upvote (decrement priority) from a song in a session queue.
 	 */
 	app.delete('/sessions/:id/songs/:song_id/upvote', async (req, res) => {
 		console.log('endpoint not yet implemented - sorry!')
@@ -65,7 +65,7 @@ module.exports = function (app) {
 	})
 
 	/*
-	 * Get songs from a session queue.
+	 * Get all songs from a session queue. (we might not need this? depends on how subscribing to redis works)
 	 */
 	app.get('/sessions/:id/songs', async (req, res) => {
 		console.log('endpoint not yet implemented - sorry!')
@@ -73,9 +73,35 @@ module.exports = function (app) {
 	})
 
 	/*
-	 * Get next song in a session queue.
+	 * Get next song in a session queue.  (we might not need this? depends on how subscribing to redis works)
 	 */
 	app.get('/sessions/:id/songs/next', async (req, res) => {
+		console.log('endpoint not yet implemented - sorry!')
+		res.status(405).send("endpoint not yet implemented") 
+	})
+
+	/*
+	 * Get current song in a session queue. (we might not need this? depends on how subscribing to redis works)
+	 */
+	app.get('/sessions/:id/songs/current', async (req, res) => {
+		console.log('endpoint not yet implemented - sorry!')
+		res.status(405).send("endpoint not yet implemented") 
+	})
+
+	/*
+	 * TODO: Set the up next song in a session queue.
+	 * (only the host should be able to make this call)
+	 */
+	app.put('/sessions/:id/songs/next', async (req, res) => {
+		console.log('endpoint not yet implemented - sorry!')
+		res.status(405).send("endpoint not yet implemented") 
+	})
+
+	/*
+	 * TODO: Set the current song in a session queue.
+	 * (only the host should be able to make this call)
+	 */
+	app.put('/sessions/:id/songs/current', async (req, res) => {
 		console.log('endpoint not yet implemented - sorry!')
 		res.status(405).send("endpoint not yet implemented") 
 	})

@@ -61,7 +61,7 @@ module.exports = function (app) {
 		try {
             const sessionInfo = await getSessionInfoController(
                 redisGetSessionInfo,
-								dbGetPreferredPlatform,
+				dbGetPreferredPlatform,
                 req.params.id
             )
 			if (sessionInfo == null) {
@@ -130,7 +130,7 @@ module.exports = function (app) {
 	})
 
 	/*
-	 * End a session.
+	 * TODO: End a session.
 	 */
 	app.post('/sessions/:id/end', async (req, res) => {
 		console.log('endpoint not yet implemented - sorry!')
