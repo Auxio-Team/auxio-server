@@ -74,6 +74,8 @@ These are the steps I took to install PostgreSQL on WSL (a Linux subsystem for W
 - `smembers hosts` - list all users that are hosts
 - `smembers session:<session id>:participants` - list all participants in the given session
 - `hgetall session:<session id>` - get information about the given session
+- all redis commands listed here: https://redis.io/commands/
+- description of redis node package: https://www.npmjs.com/package/redis
 
 ## Redis song queue protocol
 
