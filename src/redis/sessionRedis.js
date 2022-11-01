@@ -17,7 +17,7 @@ const redisCreateSession = async (sessionId, host) => {
     await redisClient.SADD('hosts', host)
         .catch((err) => console.log('unable to add host\n'+err))
 
-    await redisClient.HSET(`sessions:${sessionId}`, 'host', host)
+    await redisClient.sendCommand(['HSET', `sessions:${sessionId}`, 'host', host, 'curr', '', 'next', ''])
         .catch((err) => console.log('unable to set session info\n'+err))
 	
     await redisJoinSession(sessionId, host);

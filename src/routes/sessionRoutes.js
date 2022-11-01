@@ -5,8 +5,8 @@ const {
     redisVerifySessionIdExists,
     redisGetSessionInfo,
     redisJoinSession,
-		redisVerifyParticipantExists,
-		redisLeaveSession
+	redisVerifyParticipantExists,
+	redisLeaveSession
 } = require('../redis/sessionRedis')
 
 // import controller functions
@@ -14,7 +14,7 @@ const {
     createSessionController,
     getSessionInfoController,
     joinSessionController,
-		leaveSessionController
+	leaveSessionController
 } = require('../controllers/sessionController')
 
 // import database functions
@@ -61,7 +61,7 @@ module.exports = function (app) {
 		try {
             const sessionInfo = await getSessionInfoController(
                 redisGetSessionInfo,
-								dbGetPreferredPlatform,
+				dbGetPreferredPlatform,
                 req.params.id
             )
 			if (sessionInfo == null) {
@@ -104,51 +104,6 @@ module.exports = function (app) {
 	})
 
 	/*
-	 * Add song to a session queue.
-	 * 
-	 * body format:
-	 * {
-	 *    song: <int_song_id>
-	 * }
-	 */
-	app.post('/sessions/:id/song', async (req, res) => {
-		console.log('endpoint not yet implemented - sorry!')
-		res.status(405).send("endpoint not yet implemented") 
-	})
-
-	/*
-	 * Add an upvote (increment priority) to a song in a session queue.
-	 */
-	app.post('/sessions/:id/songs/:song_id/upvote', async (req, res) => {
-		console.log('endpoint not yet implemented - sorry!')
-		res.status(405).send("endpoint not yet implemented") 
-	})
-
-	/*
-	 * Remove an upvote (decrement priority) to a song in a session queue.
-	 */
-	app.delete('/sessions/:id/songs/:song_id/upvote', async (req, res) => {
-		console.log('endpoint not yet implemented - sorry!')
-		res.status(405).send("endpoint not yet implemented") 
-	})
-
-	/*
-	 * Get songs from a session queue.
-	 */
-	app.get('/sessions/:id/songs', async (req, res) => {
-		console.log('endpoint not yet implemented - sorry!')
-		res.status(405).send("endpoint not yet implemented") 
-	})
-
-	/*
-	 * Get next song in a session queue.
-	 */
-	app.get('/sessions/:id/songs/next', async (req, res) => {
-		console.log('endpoint not yet implemented - sorry!')
-		res.status(405).send("endpoint not yet implemented") 
-	})
-
-	/*
 	 * Leave a session.
 	 */
 	app.post('/sessions/:id/leave', async (req, res) => {
@@ -175,7 +130,7 @@ module.exports = function (app) {
 	})
 
 	/*
-	 * End a session.
+	 * TODO: End a session.
 	 */
 	app.post('/sessions/:id/end', async (req, res) => {
 		console.log('endpoint not yet implemented - sorry!')

@@ -6,10 +6,8 @@ const {
     INVALID_ID,
     INVALID_NAME,
     FAILURE,
-    joinSuccess,
-    joinError,
-    leaveSuccess,
-    leaveError
+    sessionSuccess,
+    sessionError
 } = require('../models/sessionModels')
 
 /*
@@ -72,14 +70,14 @@ const getSessionInfoController = async ( redisGetSessionInfoCb, dbGetPreferredPl
 const joinSessionController = async ( redisVerifySessionIdExistsCb, redisJoinSessionCb, sessionId, username ) => {
     if (!await redisVerifySessionIdExistsCb(sessionId)) {
         console.log('Error joining session: Session ID not valid')
-        return joinError(INVALID_ID);
+        return sessionError(INVALID_ID);
     }
     return await redisJoinSessionCb(sessionId, username)
         .then((res) => {
             if (res) {
-                return joinSuccess();
+                return sessionSuccess();
             }
-            return joinError(INVALID_NAME);
+            return sessionError(INVALID_NAME);
         });
     
 }
@@ -90,17 +88,17 @@ const joinSessionController = async ( redisVerifySessionIdExistsCb, redisJoinSes
 const leaveSessionController = async ( redisVerifySessionIdExistsCb, redisVerifyParticipantExistsCb, redisLeaveSessionCb, sessionId, username ) => {
     if (!await redisVerifySessionIdExistsCb(sessionId)) {
         console.log('Error leaving session: Session ID not valid')
-        return leaveError(INVALID_ID);
+        return sessionError(INVALID_ID);
     } else if (!await redisVerifyParticipantExistsCb(sessionId, username)) {
         console.log(`Error leaving session: User not in session ${sessionId}`)
-        return leaveError(INVALID_NAME)
+        return sessionError(INVALID_NAME)
     }
     return await redisLeaveSessionCb(sessionId, username)
         .then((res) => {
             if (res) {
-                return leaveSuccess();
+                return sessionSuccess();
             }
-            return joinError(FAILURE);
+            return sessionError(FAILURE);
         });
     
 }

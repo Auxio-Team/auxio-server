@@ -85,6 +85,7 @@ app.use((req, res, next) => {
 require('./src/routes/accountRoutes')(app)
 require('./src/routes/guestRoutes')(app)
 require('./src/routes/sessionRoutes')(app)
+require('./src/routes/queueRoutes')(app)
 
 /* listen on server */
 app.listen(port, () => {
