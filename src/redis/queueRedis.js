@@ -29,10 +29,10 @@ const redisAddSongToSession = async (sessionId, songId) => {
     ).then((resp) => resp)
     .catch((err) => console.log('Error when counting number of songs in queue\n' + err))
 
-    const prio = (count + 1) * 100 + 01
+    const prio = (01 * 100000) + (99999 - count)
 
     // add new song to queue
-    return await redisClient.sendCommand([
+    const resp = await redisClient.sendCommand([
         'ZADD',
         `sessions:${sessionId}:queue`,
         'NX',
@@ -40,6 +40,18 @@ const redisAddSongToSession = async (sessionId, songId) => {
         `${songId}`
     ]).then((resp) => resp == 1)
     .catch((err) => console.log(`Error when trying to add song to queue\n${err}`))
+
+    // notify subscribers that a song was added to the queue
+    if (resp) {
+        await redisClient.sendCommand([
+            'PUBLISH',
+            `sessions:${sessionId}`,
+            'queueUpdated'
+        ])
+        console.log("published")
+    }
+
+    return resp
 }
 
 module.exports = { 
