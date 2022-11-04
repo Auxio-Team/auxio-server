@@ -80,6 +80,22 @@ const redisVerifyParticipantExists = async (sessionId, username) => {
 }
 
 /*
+ * Verify that the user is the host of the given session
+ * @param sessionid -> the sessionid to be checked
+ * @param username -> the username to be checked as the host
+ * @return -> true if the user is the host of the session
+ */
+const redisVerifyHostExists = async (sessionId, username) => {
+
+    return await redisClient.HGET(
+        `sessions:${sessionId}`, 
+        'host'
+    )
+        .then((resp) => resp == username)
+        .catch((err) => 'Error verifying host\n'+err);
+}
+
+/*
  * Get the session info for the given session
  * @param sessionid -> the sessionid to be checked
  * @return -> the session information
@@ -104,7 +120,67 @@ const redisLeaveSession = async (sessionId, username) => {
         .catch((err) => 'Error removing participant from session\n'+err);
 }
 
-// end session
+/*
+ * End the given session
+ * @param sessionid -> the sessionid to be ended
+ * @return -> the resp
+ */
+const redisEndSession = async (sessionId, host) => {
+    // publish end session
+    await redisClient.sendCommand([
+        'PUBLISH',
+        `sessions:${sessionId}`,
+        'sessionEnded'
+    ])
+    console.log("published sessionEnded")
+
+    // cleanup Redis
+    // remove all songs from queue
+    await redisClient.sendCommand([
+        'ZREMRANGEBYRANK',
+        `sessions:${sessionId}:queue`,
+        '0',
+        '-1'
+    ]).then((resp) => resp)
+    .catch((err) => console.log(`Error when removing songs from queue\n${err}`))
+
+    // remove all participants
+    const participantCount = await redisClient.sendCommand([
+        'SCARD',
+        `sessions:${sessionId}:participants`
+    ]).then((resp) => resp)
+    .catch((err) => console.log(`Error when trying to count participants\n${err}`))
+    console.log("count:")
+    console.log(participantCount)
+
+    await redisClient.SPOP(
+        `sessions:${sessionId}:participants`, 
+        participantCount
+        ).then((resp) => resp)
+    .catch((err) => console.log(`Error when trying to remove participants\n${err}`))
+
+    // remove all session info
+    await redisClient.sendCommand([
+        'HDEL',
+        `sessions:${sessionId}`,
+        'host',
+        'curr',
+        'next'
+    ]).then((resp) => resp)
+    .catch((err) => console.log(`Error when trying to delete session info\n${err}`))
+
+    // remove host from list of hosts
+    await redisClient.SREM('hosts', host)
+        .then((resp) => resp)
+        .catch((err) => 'Error removing host from list of hosts\n'+err);
+
+    // remove session id from list of sessions
+    await redisClient.SREM('sessions', sessionId)
+        .then((resp) => resp)
+        .catch((err) => 'Error removing session id from list of sessions\n'+err);
+
+    return true
+}
 
 
 module.exports = { 
@@ -114,5 +190,7 @@ module.exports = {
     redisGetSessionInfo,
     redisJoinSession,
     redisVerifyParticipantExists,
-    redisLeaveSession
+    redisLeaveSession,
+    redisVerifyHostExists,
+    redisEndSession
 }

@@ -6,7 +6,9 @@ const {
     redisGetSessionInfo,
     redisJoinSession,
 	redisVerifyParticipantExists,
-	redisLeaveSession
+	redisLeaveSession,
+	redisVerifyHostExists,
+	redisEndSession
 } = require('../redis/sessionRedis')
 
 // import controller functions
@@ -14,7 +16,8 @@ const {
     createSessionController,
     getSessionInfoController,
     joinSessionController,
-	leaveSessionController
+	leaveSessionController,
+	endSessionController
 } = require('../controllers/sessionController')
 
 // import database functions
@@ -130,10 +133,29 @@ module.exports = function (app) {
 	})
 
 	/*
-	 * TODO: End a session.
+	 * End a session.
+	 * (this route should only be callable from a host)
 	 */
 	app.post('/sessions/:id/end', async (req, res) => {
-		console.log('endpoint not yet implemented - sorry!')
-		res.status(405).send("endpoint not yet implemented") 
+		try {
+            const endSession = await endSessionController(
+                redisVerifySessionIdExists,
+				redisVerifyHostExists,
+                redisEndSession,
+                req.params.id,
+                req.account.username
+            )
+			if (endSession.status === FAILURE) {
+				res.status(400).send({ error: endSession.error })
+			}
+			else {
+				res.status(200).send() 
+				console.log(`Successfully ended session ${req.params.id} as host ${req.account.username}`);
+			}
+		}
+		catch (err) {
+			console.log(err)
+			res.status(500).send("Internal Server Error")
+		}
 	})
 }
