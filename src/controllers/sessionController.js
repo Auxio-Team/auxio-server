@@ -100,6 +100,26 @@ const leaveSessionController = async ( redisVerifySessionIdExistsCb, redisVerify
             }
             return sessionError(FAILURE);
         });
+}
+
+/*
+ * Leave a session.
+ */
+const endSessionController = async ( redisVerifySessionIdExistsCb, redisVerifyHostExistsCb, redisEndSessionCb, sessionId, username ) => {
+    if (!await redisVerifySessionIdExistsCb(sessionId)) {
+        console.log('Error ending session: Session ID not valid')
+        return sessionError(INVALID_ID);
+    } else if (!await redisVerifyHostExistsCb(sessionId, username)) {
+        console.log('Error ending session: Invalid host')
+        return sessionError(INVALID_NAME)
+    }
+    return await redisEndSessionCb(sessionId, username)
+        .then((res) => {
+            if (res) {
+                return sessionSuccess();
+            }
+            return sessionError(FAILURE);
+        });
     
 }
 
@@ -107,5 +127,6 @@ module.exports = {
     createSessionController,
     getSessionInfoController,
     joinSessionController,
-    leaveSessionController
+    leaveSessionController,
+    endSessionController
 }
