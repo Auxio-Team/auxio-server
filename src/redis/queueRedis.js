@@ -163,9 +163,21 @@ const redisSetCurrentSongForSession = async (sessionId) => {
     return true
 }
 
+const redisGetSessionQueue = async (sessionId) => {
+    // get queue
+    return await redisClient.sendCommand([
+        'ZREVRANGE',
+        `sessions:${sessionId}:queue`,
+        '0',
+        '-1'
+    ]).then((resp) => resp)
+    .catch((err) => console.log(`Error when getting queue\n${err}`))
+}
+
 module.exports = { 
     redisAddSongToSession,
     redisVerifySongInQueue,
     redisDequeueSongFromSession,
-    redisSetCurrentSongForSession
+    redisSetCurrentSongForSession,
+    redisGetSessionQueue
 }
