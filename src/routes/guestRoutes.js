@@ -8,7 +8,8 @@ const {
 } = require('../redis/sessionRedis')
 
 const {
-	redisAddSongToSession
+	redisAddSongToSession,
+	redisGetSessionQueue
 } = require('../redis/queueRedis')
 
 // import controller functions
@@ -19,7 +20,8 @@ const {
 } = require('../controllers/sessionController')
 
 const {
-	addSongController
+	addSongController,
+	getSessionQueueController
 } = require('../controllers/queueController')
 
 // import database functions
@@ -138,5 +140,29 @@ module.exports = function (app) {
 	/* 
 	 * End session
 	 */
+
+	/*
+	 * Get all songs from a session queue.
+	 */
+	app.get('/guest/sessions/:id/songs', async (req, res) => {
+		try {
+            const queue = await getSessionQueueController(
+				redisVerifySessionIdExists,
+                redisGetSessionQueue,
+                req.params.id
+            )
+			if (queue == null) {
+				res.status(400).send()
+			}
+			else {
+				res.status(200).send({"queue": queue}) 
+				console.log('Successfully retrieved session information')
+			}
+		}
+		catch (err) {
+			console.log(err)
+			res.status(500).send("Internal Server Error")
+		}
+	})
 
 }

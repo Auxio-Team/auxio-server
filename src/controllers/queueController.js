@@ -64,8 +64,26 @@ const setCurrentSongController = async ( redisVerifySessionIdExistsCb, redisSetC
         });
 }
 
+/*
+ * Get the queue.
+ */
+const getSessionQueueController = async ( redisVerifySessionIdExistsCb, redisGetSessionQueueCb, sessionId) => {
+    if (!await redisVerifySessionIdExistsCb(sessionId)) {
+        console.log('Error getting queue: Session ID not valid')
+        return queueError(INVALID_ID);
+    }
+
+    return await redisGetSessionQueueCb(sessionId)
+        .then((res) => {
+            console.log("QUEUE:")
+            console.log(res)
+            return res
+        });
+}
+
 module.exports = { 
     addSongController,
     dequeueSongController,
-    setCurrentSongController
+    setCurrentSongController,
+    getSessionQueueController
 }
