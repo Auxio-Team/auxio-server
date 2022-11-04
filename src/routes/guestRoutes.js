@@ -2,14 +2,25 @@
 const {
     redisVerifySessionIdExists,
     redisGetSessionInfo,
-    redisJoinSession
+    redisJoinSession,
+	redisVerifyParticipantExists,
+	redisLeaveSession,
 } = require('../redis/sessionRedis')
+
+const {
+	redisAddSongToSession
+} = require('../redis/queueRedis')
 
 // import controller functions
 const {
     getSessionInfoController,
-    joinSessionController
+    joinSessionController,
+	leaveSessionController
 } = require('../controllers/sessionController')
+
+const {
+	addSongController
+} = require('../controllers/queueController')
 
 // import database functions
 const {
@@ -71,6 +82,58 @@ module.exports = function (app) {
 	/*
 	 * Leave session
 	 */
+	app.post('/guest/session/:id/leave', async (req, res) => {
+		try {
+            const leaveSession = await leaveSessionController(
+                redisVerifySessionIdExists,
+				redisVerifyParticipantExists,
+                redisLeaveSession,
+				req.params.id,
+                req.body.name
+            )
+			if (leaveSession.status === FAILURE) {
+				res.status(400).send({ error: leaveSession.error })
+			}
+			else {
+				res.status(200).send() 
+				console.log(`Successfully left session ${req.body.id} as user ${req.body.name}`);
+			}
+		}
+		catch (err) {
+			console.log(err)
+			res.status(500).send("Internal Server Error")
+		}
+	})
+
+	/*
+	 * Add song to a session queue.
+	 * 
+	 * body format:
+	 * {
+	 *    song: <str_song_id>
+	 * }
+	 */
+	app.post('/guest/session/:id/song', async (req, res) => {
+		try {
+			const addSong = await addSongController(
+				redisVerifySessionIdExists,
+				redisAddSongToSession,
+				req.params.id,
+				req.body.song
+			)
+			if (addSong.status === FAILURE) {
+				res.status(400).send({ error: addSong.error })
+			}
+			else {
+				res.status(200).send() 
+				console.log(`Successfully added song to queue for session ${req.params.id}`);
+			}
+		}
+		catch (err) {
+			console.log(err)
+			res.status(500).send("Internal Server Error")
+		}
+	})
 
 	/* 
 	 * End session
