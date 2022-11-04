@@ -4,12 +4,16 @@ const {
 } = require('../redis/sessionRedis')
 
 const {
-	redisAddSongToSession
+	redisAddSongToSession,
+	redisDequeueSongFromSession,
+	redisSetCurrentSongForSession
 } = require('../redis/queueRedis')
 
 // import controller functions
 const {
-	addSongController
+	addSongController,
+	dequeueSongController,
+	setCurrentSongController
 } = require('../controllers/queueController')
 
 // import models 
@@ -89,20 +93,52 @@ module.exports = function (app) {
 	})
 
 	/*
-	 * TODO: Set the up next song in a session queue.
+	 * Set the up next song in a session queue.
 	 * (only the host should be able to make this call)
 	 */
-	app.put('/sessions/:id/songs/next', async (req, res) => {
-		console.log('endpoint not yet implemented - sorry!')
-		res.status(405).send("endpoint not yet implemented") 
+	app.post('/sessions/:id/songs/next', async (req, res) => {
+		try {
+            const dequeueSong = await dequeueSongController(
+                redisVerifySessionIdExists,
+				redisDequeueSongFromSession,
+                req.params.id
+            )
+			if (dequeueSong.status === FAILURE) {
+				res.status(400).send({ error: dequeueSong.error })
+			}
+			else {
+				res.status(200).send() 
+				console.log(`Successfully added song to queue for session ${req.params.id}`);
+			}
+		}
+		catch (err) {
+			console.log(err)
+			res.status(500).send("Internal Server Error")
+		}
 	})
 
 	/*
-	 * TODO: Set the current song in a session queue.
+	 * Set the current song in a session queue.
 	 * (only the host should be able to make this call)
 	 */
-	app.put('/sessions/:id/songs/current', async (req, res) => {
-		console.log('endpoint not yet implemented - sorry!')
-		res.status(405).send("endpoint not yet implemented") 
+	app.post('/sessions/:id/songs/current', async (req, res) => {
+		try {
+            const setCurr = await setCurrentSongController(
+                redisVerifySessionIdExists,
+				redisSetCurrentSongForSession,
+                req.params.id
+            )
+			if (setCurr.status === FAILURE) {
+				res.status(400).send({ error: setCurr.error })
+			}
+			else {
+				res.status(200).send() 
+				console.log(`Successfully added song to queue for session ${req.params.id}`);
+			}
+		}
+		catch (err) {
+			console.log(err)
+			res.status(500).send("Internal Server Error")
+		}
 	})
 }

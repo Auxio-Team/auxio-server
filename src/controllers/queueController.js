@@ -28,6 +28,44 @@ const addSongController = async ( redisVerifySessionIdExistsCb, redisAddSongToSe
         });
 }
 
+/*
+ * Pop the next song from the queue and add it to up next.
+ */
+const dequeueSongController = async ( redisVerifySessionIdExistsCb, redisDequeueSongFromSessionCb, sessionId) => {
+    if (!await redisVerifySessionIdExistsCb(sessionId)) {
+        console.log('Error adding song to queue: Session ID not valid')
+        return queueError(INVALID_ID);
+    }
+
+    return await redisDequeueSongFromSessionCb(sessionId)
+        .then((res) => {
+            if (res) {
+                return queueSuccess();
+            }
+            return queueError(FAILURE);
+        });
+}
+
+/*
+ * Set the current song to the queue.
+ */
+const setCurrentSongController = async ( redisVerifySessionIdExistsCb, redisSetCurrentSongForSessionCb, sessionId) => {
+    if (!await redisVerifySessionIdExistsCb(sessionId)) {
+        console.log('Error adding song to queue: Session ID not valid')
+        return queueError(INVALID_ID);
+    }
+
+    return await redisSetCurrentSongForSessionCb(sessionId)
+        .then((res) => {
+            if (res) {
+                return queueSuccess();
+            }
+            return queueError(FAILURE);
+        });
+}
+
 module.exports = { 
-    addSongController
+    addSongController,
+    dequeueSongController,
+    setCurrentSongController
 }
