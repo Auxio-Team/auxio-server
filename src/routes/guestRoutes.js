@@ -144,7 +144,7 @@ module.exports = function (app) {
 	/*
 	 * Get all songs from a session queue.
 	 */
-	app.get('/guest/sessions/:id/songs', async (req, res) => {
+	app.get('/guest/session/:id/songs', async (req, res) => {
 		try {
             const queue = await getSessionQueueController(
 				redisVerifySessionIdExists,
