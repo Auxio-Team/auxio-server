@@ -5,16 +5,17 @@ const {
 const {
     INVALID_ID,
     INVALID_NAME,
+    MAX_CAPACITY,
     FAILURE,
     sessionSuccess,
-    sessionError
+    sessionError,
 } = require('../models/sessionModels')
 
 /*
  * Create a new account and save it in the database.
  */
 const createSessionController = 
-        async ( redisCreateSessionCb, redisVerifyProspectHostCb, redisVerifySessionIdExistsCb, username, body ) => {
+        async ( redisCreateSessionCb, redisVerifyProspectHostCb, redisVerifySessionIdExistsCb, username, id, capacity ) => {
 	// verify user as valid host
     if (!await redisVerifyProspectHostCb(username)) {
         console.log('Error creating session: User cannot be a host');
@@ -22,13 +23,13 @@ const createSessionController =
     }
 
     var sessionId = '';
-    if (body.id) {
+    if (id) {
         // user entered custom session id
-        if (body.id.length !== 6 || await redisVerifySessionIdExistsCb(body.id)) {
+        if (id.length !== 6 || await redisVerifySessionIdExistsCb(id)) {
             console.log('Error creating session: Bad custom session code')
             return null;
         }
-        sessionId = body.id;
+        sessionId = id;
     }
     else {
 	    // generate session id
@@ -36,7 +37,7 @@ const createSessionController =
     }
 
 	// save the new session to server
-	if (await redisCreateSessionCb(sessionId, username)) {
+	if (await redisCreateSessionCb(sessionId, username, capacity)) {
 		return {id: sessionId};
 	}
 	else {
@@ -74,10 +75,13 @@ const joinSessionController = async ( redisVerifySessionIdExistsCb, redisJoinSes
     }
     return await redisJoinSessionCb(sessionId, username)
         .then((res) => {
-            if (res) {
+            if (res == MAX_CAPACITY) {
+                return sessionError(res);
+            } else if (res == INVALID_NAME) {
+                return sessionError(INVALID_NAME);
+            } else {
                 return sessionSuccess();
             }
-            return sessionError(INVALID_NAME);
         });
     
 }

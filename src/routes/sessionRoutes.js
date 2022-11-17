@@ -40,7 +40,8 @@ module.exports = function (app) {
                 redisVerifyProspectHost,
                 redisVerifySessionIdExists,
                 req.account.username,
-				req.body
+				req.body.id,
+				req.body.capacity
             )
 			if (newSession == null) {
 				res.status(400).send()
