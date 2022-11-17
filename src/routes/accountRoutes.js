@@ -37,12 +37,8 @@ module.exports = function (app) {
 	app.post('/account', async (req, res) => {
 		try {
 			const newAccount = await createAccountController(
-				dbUsernameExists,
-				dbPhoneNumberExists,
-				dbCreateAccount,
-				req.body.username,
-				req.body.password,
-				req.body.phoneNumber)
+				dbUsernameExists, dbPhoneNumberExists, dbCreateAccount,
+				req.body.username, req.body.password, req.body.phoneNumber)
 
 			if (newAccount == -1) {
 				res.status(400).send({ 'message': 'Invalid Username' })
