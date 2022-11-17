@@ -1,5 +1,10 @@
 const { redisClient } = require('./initRedis');
 
+const {
+    INVALID_NAME,
+    MAX_CAPACITY,
+} = require('../models/sessionModels')
+
 /*
  * Create a session.
  * @param sessionId -> the 6-digit alphanumeric session id associated with the session.
@@ -41,11 +46,15 @@ const redisJoinSession = async (sessionId, participant) => {
 
     if (val < capacity) {
         return await redisClient.SADD(`sessions:${sessionId}:participants`, participant)
-            .then((resp) => resp == 0)
-            .catch((err) => console.log('unable to join session\n'+err))
+            .then(res => {
+                if (res != 1) {
+                    console.log('invalid name\n');
+                    return INVALID_NAME;
+                }
+            })
     } else {
         console.log('hit max capacity\n');
-        return 1;
+        return MAX_CAPACITY;
     }
 }
 
