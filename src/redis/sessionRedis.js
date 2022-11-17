@@ -5,7 +5,7 @@ const { redisClient } = require('./initRedis');
  * @param sessionId -> the 6-digit alphanumeric session id associated with the session.
  * @return -> true if the session is created successfully
  */
-const redisCreateSession = async (sessionId, host) => {
+const redisCreateSession = async (sessionId, host, capacity) => {
     const respStatus = await redisClient.SADD('sessions', sessionId)
         .then((resp) => resp == 1)
         .catch((err) => console.log('Error when trying to add session id to sessions\n'+ err));
@@ -17,9 +17,12 @@ const redisCreateSession = async (sessionId, host) => {
     await redisClient.SADD('hosts', host)
         .catch((err) => console.log('unable to add host\n'+err))
 
+
     await redisClient.sendCommand(['HSET', `sessions:${sessionId}`, 'host', host, 'curr', '', 'next', ''])
         .catch((err) => console.log('unable to set session info\n'+err))
 	
+    await redisClient.HSET(`sessions:${sessionId}`, 'capacity', capacity)
+    
     await redisJoinSession(sessionId, host);
 
     return respStatus;
@@ -33,10 +36,17 @@ const redisCreateSession = async (sessionId, host) => {
  * @return -> true if the session is created successfully
  */
 const redisJoinSession = async (sessionId, participant) => {
+    let capacity = await redisClient.HGET(`sessions:${sessionId}`, 'capacity');
+    let val = await redisClient.SCARD(`sessions:${sessionId}:participants`);
 
-    return await redisClient.SADD(`sessions:${sessionId}:participants`, participant)
-        .then((resp) => resp == 1)
-        .catch((err) => console.log('unable to join session\n'+err))
+    if (val < capacity) {
+        return await redisClient.SADD(`sessions:${sessionId}:participants`, participant)
+            .then((resp) => resp == 0)
+            .catch((err) => console.log('unable to join session\n'+err))
+    } else {
+        console.log('hit max capacity\n');
+        return 1;
+    }
 }
 
 /*

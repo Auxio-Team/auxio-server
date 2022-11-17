@@ -5,9 +5,10 @@ const {
 const {
     INVALID_ID,
     INVALID_NAME,
+    MAX_CAPACITY,
     FAILURE,
     sessionSuccess,
-    sessionError
+    sessionError,
 } = require('../models/sessionModels')
 
 /*
@@ -36,7 +37,7 @@ const createSessionController =
     }
 
 	// save the new session to server
-	if (await redisCreateSessionCb(sessionId, username)) {
+	if (await redisCreateSessionCb(sessionId, username, body.capacity)) {
 		return {id: sessionId};
 	}
 	else {
@@ -74,8 +75,10 @@ const joinSessionController = async ( redisVerifySessionIdExistsCb, redisJoinSes
     }
     return await redisJoinSessionCb(sessionId, username)
         .then((res) => {
-            if (res) {
+            if (res == 0) {
                 return sessionSuccess();
+            } else if (res == 1) {
+                return sessionError(MAX_CAPACITY);
             }
             return sessionError(INVALID_NAME);
         });
