@@ -6,7 +6,6 @@ const {
 // import controllers
 const {
 	createAccountController,
-	accountLoginController,
 	getAccountsController,
 	getAccountController,
 	updatePreferredPlatformController,
@@ -16,12 +15,11 @@ const {
 // import account database functions
 const {
 	dbCreateAccount,
-	dbGetPasswordByUsername,
 	dbGetAccounts,
 	dbUsernameExists,
 	dbPhoneNumberExists,
 	dbUpdatePreferredPlatform,
-	dbGetAccount,
+	dbGetAccount
 } = require('../database/accountDatabase')
 
 // import auth database functions
@@ -62,6 +60,7 @@ module.exports = function (app) {
 
 	/*
 	 * Get all accounts (used for testing).
+	 * TODO: make sure that the response from getAccountsController contains the id of the user.
 	 */
 	app.get('/accounts', async (req, res) => {
 		try {
@@ -76,6 +75,7 @@ module.exports = function (app) {
 
 	/*
 	 * Get account info for account that is making this request
+	 * TODO: make sure that the response from getAccountController contains the id of the user.
 	 */
 	app.get('/account', async (req, res) => {
 		try {

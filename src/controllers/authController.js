@@ -15,20 +15,22 @@ const {
 	generateCode
 } = require('../services/authService')
 
-const { dbDeleteRefreshToken } = require('../database/authDatabase')
 const { encryptPassword } = require('../services/accountService')
 
 /*
  * Handle login attempt to account.
  */
-const loginController = async (dbGetPassword, dbCreateRefreshToken, dbDeleteRefreshToken, username, password) => {
+const loginController = async (dbGetPassword, dbGetAccountId, dbStoreRefreshToken, username, password) => {
 	// verify that the username and password are valid.
-	if (!await verifyUsernamePassword(dbGetPassword, username, password)) {
+	const accountId = await verifyUsernamePassword(dbGetPassword, dbGetAccountId, username, password)
+	if (!accountId) {
 		return null
 	}
 
 	// generate account that we want to sign
-	const newAccount = { username: username }
+	const newAccount = {
+		accountId: accountId,
+	}
 
 	// generate access token and refresh token
 	const accessToken = await generateAccessToken(newAccount)
@@ -36,9 +38,8 @@ const loginController = async (dbGetPassword, dbCreateRefreshToken, dbDeleteRefr
 
 	// store the refresh token in the database
 	const stored = await storeRefreshToken(
-		dbCreateRefreshToken,
-		dbDeleteRefreshToken,
-		username,
+		dbStoreRefreshToken,
+		accountId,
 		refreshToken)
 	
 	const tokens = { accessToken: accessToken, refreshToken: refreshToken }
@@ -133,7 +134,7 @@ const resetPasswordController = async (dbResetPassword, token, newpass) => {
 const updateUsernameController = async (dbUpdateUsername, dbUsernameExists, dbCreateRefreshToken, dbDeleteRefreshToken, username, value) => {
 	// check if the username already exists
 	if (await dbUsernameExists(value)) {
-		return -1
+		return -1 // TODO: define a constant to return
 	}
 
 	if (await dbUpdateUsername(username, value)) {
@@ -156,7 +157,7 @@ const updateUsernameController = async (dbUpdateUsername, dbUsernameExists, dbCr
 		return { accessToken: accessToken, refreshToken: refreshToken }
 	}
 	else {
-		return -2
+		return -2 // TODO: define a constant to return
 	}
 }
 

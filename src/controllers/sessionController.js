@@ -12,7 +12,7 @@ const {
 } = require('../models/sessionModels')
 
 /*
- * Create a new account and save it in the database.
+ * Create a new session and save it in Redis.
  */
 const createSessionController = 
         async ( redisCreateSessionCb, redisVerifyProspectHostCb, redisVerifySessionIdExistsCb, username, id, capacity ) => {

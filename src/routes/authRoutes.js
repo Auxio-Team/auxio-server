@@ -13,7 +13,7 @@ const {
 /* import database functions */
 const {
 	dbGetPassword,
-	dbCreateRefreshToken,
+	dbStoreRefreshToken,
 	dbGetRefreshToken,
 	dbDeleteRefreshToken,
 	dbUpdateUsername
@@ -22,13 +22,15 @@ const {
 const { 
 	dbPhoneNumberExistsForUser,
 	dbUsernameExists,
-	dbResetPassword
+	dbResetPassword,
+	dbGetAccountId
 } = require('../database/accountDatabase')
 
 module.exports = function (app) {
 	/*
 	 * Handle user login.
-	 * 200 -> user succesfully logged in.
+	 * 200 -> user succesfully logged in, send accessToken and refreshToken.
+	 * 				The accessToken and refreshToken contain the account id of the user.
 	 * 403 -> authentication failed. 
 	 */
 	app.post('/login', async (req, res) => {
@@ -36,13 +38,13 @@ module.exports = function (app) {
 		try {
 			const loggedIn = await loginController(
 				dbGetPassword,
-				dbCreateRefreshToken,
-				dbDeleteRefreshToken,
+				dbGetAccountId,
+				dbStoreRefreshToken,
 				req.body.username,
 				req.body.password)
 
 			if (loggedIn) {
-				console.log("Logged in as: " + req.body.username)
+				console.log("Logged in as:",  req.body.username)
 				res.status(200).send(loggedIn)
 			}
 			else {
@@ -53,10 +55,10 @@ module.exports = function (app) {
 			console.log(err)
 			res.status(500).send("Internal Server Error")
 		}
-
 	})
 
 	/*
+	 * TODO: make sure that the access token contains the account id
 	 * User is requesting a new access token using their refresh token.
 	 * 200 -> successfuly generated new access token.
 	 * 403 -> could not generate new access token.
