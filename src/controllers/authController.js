@@ -56,10 +56,10 @@ const tokenController = async (dbGetRefreshToken, refreshToken) => {
 		try {
 			// verify the refresh token
 			const account = jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET) 
-			console.log("New Access Token for: " + account.username)
+			console.log("New Access Token for account with id=" + account.accountId)
 			// verify the refresh token exists
-			if (await verifyRefreshToken(dbGetRefreshToken, account.username, refreshToken)) {
-				const accessToken = generateAccessToken({ username: account.username} )
+			if (await verifyRefreshToken(dbGetRefreshToken, account.accountId, refreshToken)) {
+				const accessToken = generateAccessToken({ accountId: account.accountId} )
 				return accessToken
 			}
 			else {

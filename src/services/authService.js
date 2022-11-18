@@ -73,21 +73,20 @@ const storeRefreshToken = async (dbStoreRefreshToken, accountId, refreshToken) =
 }
 
 /*
- * TODO: Refactor to use account id instead of username
  * Verify that the refresh token exists for this user (compare with Bcrypt)
  * @param username -> the username belonging to the refresh token.
  * @param refreshToken -> the token that was sent.
  * @return -> true if the token exists, otherwise false.
  */
-const verifyRefreshToken = async (dbGetRefreshToken, username, refreshToken) => {
-	const databaseToken = await dbGetRefreshToken(username)
+const verifyRefreshToken = async (dbGetRefreshToken, accountId, refreshToken) => {
+	const databaseToken = await dbGetRefreshToken(accountId)
 	var refreshTokenShortened = refreshToken
 	if (refreshToken.length > 72) {
 		refreshTokenShortened = refreshToken.substring(refreshToken.length - 72, refreshToken.length - 1)
 	}
 	if (databaseToken == null
 		|| !await bcrypt.compare(refreshTokenShortened, databaseToken)) {
-		return null
+		return false
 	}
 	else {
 		return true
