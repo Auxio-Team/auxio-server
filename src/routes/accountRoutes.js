@@ -99,7 +99,7 @@ module.exports = function (app) {
 	app.put('/platform', async (req, res) => {
 		try {
 			const updated = await updatePreferredPlatformController(
-				dbUpdatePreferredPlatform, req.account.username, req.body.preferredPlatform)
+				dbUpdatePreferredPlatform, req.account.accountId, req.body.preferredPlatform)
 			if (updated) {
 				res.status(200).send()
 			}

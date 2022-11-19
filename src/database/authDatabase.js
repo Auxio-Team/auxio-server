@@ -2,7 +2,6 @@ const { Client, Pool } = require('pg')
 const { createClient, createPool } = require('./createClientPool')
 
 /*
- * TODO: refactor this database function
  * Get the password of an account given a username.
  * @param username -> the username of the account we want the password from.
  * @return -> the password of the account with username=username, 
@@ -14,34 +13,19 @@ const dbGetPassword = async (username) => {
 		text: "SELECT pass FROM account WHERE username=$1",
 		values: [username]
 	}
-	const pool = createPool("musixdb")
-	const password = await pool.connect()
-	.then(client => {
-    return client
-      .query(query)
-      .then(res => {
-				if (!res.rows[0]) {
-					console.log("Username " + username + " doesn't exist")
-					client.release()
-					return null
-				}
-				else {
-					client.release()
-					return res.rows[0].pass
-				}
-			})
-      .catch(err => {
-				console.log(err)
-        client.release()
-				return null
-      })
+
+	const client = createClient("musixdb")
+	await client.connect()
+	const response = await client.query(query)
+	.then(res => {
+		return res.rows[0] ? res.rows[0].pass : null
 	})
 	.catch(err => {
-		console.log("Error getting password from username: " + err)
+		console.error(e.stack)
 		return null
 	})
-	await pool.end()
-	return password ? password : null
+	await client.end()
+	return response
 }
 
 /*
@@ -64,7 +48,7 @@ const dbStoreRefreshToken = async (accountId, token) => {
 	.then(res => {
 		return res
 	})
-	.catch(e => {
+	.catch(err => {
 		console.error(e.stack)
 		return null
 	})
@@ -88,7 +72,7 @@ const dbGetRefreshToken = async (accountId) => {
 	.then(res => {
 		return res.rows[0]
 	})
-	.catch(e => {
+	.catch(err => {
 		console.error(e.stack)
 		return null
 	})
@@ -113,7 +97,7 @@ const dbDeleteRefreshToken = async (accountId) => {
 	.then(res => {
 		return res
 	})
-	.catch(e => {
+	.catch(err => {
 		console.error(e.stack)
 		return null
 	})
@@ -142,7 +126,7 @@ const dbUpdateUsername = async (username, value) => {
 	.then(res => {
 		return res
 	})
-	.catch(e => {
+	.catch(err => {
 		console.error(e.stack)
 		return null
 	})

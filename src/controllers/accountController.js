@@ -56,13 +56,8 @@ const getAccountController = async (dbGetAccount, username) => {
  * Set the preferred streaming platform of a user to a new value
  * @return -> true if it was updated, otherwise null.
  */
-const updatePreferredPlatformController = async (dbUpdatePreferredPlatform, username, value) => {
-	if (await dbUpdatePreferredPlatform(username, value)) {
-		return true
-	}
-	else {
-		return null
-	}
+const updatePreferredPlatformController = async (dbUpdatePreferredPlatform, accountId, value) => {
+	return await dbUpdatePreferredPlatform(accountId, value)
 }
 
 /*
