@@ -7,7 +7,6 @@ const {
 	initResetPasswordController,
 	resetPasswordController,
 	verifyCodeController,
-	updateUsernameController
 } = require('../controllers/authController')
 
 /* import database functions */
@@ -16,7 +15,6 @@ const {
 	dbStoreRefreshToken,
 	dbGetRefreshToken,
 	dbDeleteRefreshToken,
-	dbUpdateUsername
 } = require("../database/authDatabase")
 
 const { 
@@ -58,7 +56,6 @@ module.exports = function (app) {
 	})
 
 	/*
-	 * TODO: make sure that the access token contains the account id
 	 * User is requesting a new access token using their refresh token.
 	 * 200 -> successfuly generated new access token.
 	 * 403 -> could not generate new access token.
@@ -155,48 +152,6 @@ module.exports = function (app) {
 			}
 			else {
 				res.status(201).send()
-			}
-		}
-		catch (err) {
-			console.log(err)
-			res.status(500).send("Internal Server Error")
-		}
-	})
-
-	/*
-	 * Update the username of a user with new value.
-	 */
-	app.put('/username', async (req, res) => {
-		// 'authorization': 'Bearer TOKEN'
-		const authHeader = req.headers['authorization']
-		const token = authHeader && authHeader.split(' ')[1]
-
-		// check if there is a token
-		if (token == null) {
-			console.log("Unauthorized")
-			return res.status(401).send()
-		}
-
-		// verify the token is valid
-		jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, account) => {
-			if (err) {
-				console.log("Forbidden")
-				return res.status(403).send()
-			}
-			req.account = account
-		})
-
-		try {
-			const tokens = await updateUsernameController(
-				dbUpdateUsername, dbUsernameExists, dbCreateRefreshToken, dbDeleteRefreshToken, req.account.username, req.body.username)
-			if (tokens == -1) {
-				res.status(400).send({ message: "Username is already taken" })
-			}
-			else if (tokens == -2) {
-				res.status(400).send({ message: "Could not update username" })
-			}
-			else {
-				res.status(200).send(tokens)
 			}
 		}
 		catch (err) {

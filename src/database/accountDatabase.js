@@ -1,7 +1,9 @@
 const { Client, Pool } = require('pg')
 const { createClient, createPool } = require('./createClientPool')
+const { USERNAME_TAKEN } = require('../models/accountModels')
 
 /*
+ * TODO: check for contraint violations and return appropriate constant.
  * Create an account in the database.
  * @param account -> the "account" object we want save.
  * @return -> true if the account is created successfully, otherwise false
@@ -22,7 +24,7 @@ const dbCreateAccount = async (account) => {
 		return true
 	})
 	.catch(err => {
-		console.error(e.stack)
+		console.error(err.stack)
 		console.log("Error creating account: " + err)
 		return false
 	})
@@ -47,7 +49,7 @@ const dbUsernameExists = async (username) => {
 		return res.rows[0] ? true : false
 	})
 	.catch(err => {
-		console.error(e.stack)
+		console.error(err.stack)
 		return false
 	})
 	await client.end()
@@ -71,7 +73,7 @@ const dbPhoneNumberExists = async (phoneNumber) => {
 		return res.rows[0] ? true : false
 	})
 	.catch(err => {
-		console.error(e.stack)
+		console.error(err.stack)
 		return false
 	})
 	await client.end()
@@ -95,7 +97,7 @@ const dbGetAccounts = async () => {
 		return res.rows
 	})
 	.catch(err => {
-		console.error(e.stack)
+		console.error(err.stack)
 		return false
 	})
 	await client.end()
@@ -119,8 +121,8 @@ const dbGetAccount = async (accountId) => {
 	.then(res => {
 		return res.rows[0]
 	})
-	.catch(e => {
-		console.error(e.stack)
+	.catch(err => {
+		console.error(err.stack)
 		return null
 	})
 	await client.end()
@@ -144,7 +146,7 @@ const dbPhoneNumberExistsForUser = async (username, phoneNumber) => {
 		return res.rows[0] === phoneNumber
 	})
 	.catch(err => {
-		console.error(e.stack)
+		console.error(err.stack)
 		return false
 	})
 	await client.end()
@@ -168,7 +170,7 @@ const dbResetPassword = async (username, newpass) => {
 		return true
 	})
 	.catch(err => {
-		console.error(e.stack)
+		console.error(err.stack)
 		return false
 	})
 	await client.end()
@@ -194,8 +196,8 @@ const dbUpdatePreferredPlatform = async (accountId, value) => {
 	.then(res => {
 		return true
 	})
-	.catch(e => {
-		console.error(e.stack)
+	.catch(err => {
+		console.error(err.stack)
 		return false
 	})
 	await client.end()
@@ -220,8 +222,8 @@ const dbGetPreferredPlatform = async (accountId) => {
 	.then(res => {
 		return res.rows[0]
 	})
-	.catch(e => {
-		console.error(e.stack)
+	.catch(err => {
+		console.error(err.stack)
 		return null
 	})
 	await client.end()
@@ -230,6 +232,7 @@ const dbGetPreferredPlatform = async (accountId) => {
 
 /*
  * Get the id (primary key) of the account with username=username.
+ * @return -> the account id, otherwise null.
  */
 const dbGetAccountId = async (username) => {
 	const query = {
@@ -244,12 +247,43 @@ const dbGetAccountId = async (username) => {
 	.then(res => {
 		return res.rows[0]
 	})
-	.catch(e => {
-		console.error(e.stack)
+	.catch(err => {
+		console.error(err.stack)
 		return null
 	})
 	await client.end()
 	return response ? response.id : null
+}
+
+/*
+ * Set the prefered platform for the account with id=accountId
+ * to value.
+ */
+const dbUpdateUsername = async (accountId, value) => {
+	const query = {
+		text: "UPDATE account "
+		    + "SET username = $1 "
+				+ "WHERE id = $2",
+		values: [value, accountId],
+	}
+
+	const client = createClient("musixdb")
+	await client.connect()
+	const response = await client.query(query)
+	.then(res => {
+		return true
+	})
+	.catch(err => {
+		console.error(err.stack)
+		if (err.code === 23505) {
+			return USERNAME_TAKEN 
+		}
+		else {
+			return false
+		}
+	})
+	await client.end()
+	return response	
 }
 
 module.exports = {
@@ -262,5 +296,6 @@ module.exports = {
 	dbUpdatePreferredPlatform,
 	dbGetPreferredPlatform,
 	dbGetAccount,
-	dbGetAccountId
+	dbGetAccountId,
+	dbUpdateUsername
 }

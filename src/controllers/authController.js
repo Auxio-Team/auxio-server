@@ -75,6 +75,7 @@ const tokenController = async (dbGetRefreshToken, refreshToken) => {
  * Start reset password by validating username and phone number.
  */
 const initResetPasswordController = async (dbUsernameExists, dbPhoneNumberExistsForUser, username, phoneNumber) => {
+	// TODO: these 2 if-statements can be refactored to be the same call
 	// validate username
 	if (!await dbUsernameExists(username)) {
 		return null;
@@ -127,45 +128,10 @@ const resetPasswordController = async (dbResetPassword, token, newpass) => {
 	return await dbResetPassword(username, passEncrypted);
 }
 
-/*
- * Set the username of a user to a new value
- * @return -> true if it was updated, otherwise null.
- */
-const updateUsernameController = async (dbUpdateUsername, dbUsernameExists, dbCreateRefreshToken, dbDeleteRefreshToken, username, value) => {
-	// check if the username already exists
-	if (await dbUsernameExists(value)) {
-		return -1 // TODO: define a constant to return
-	}
-
-	if (await dbUpdateUsername(username, value)) {
-		// get new AccessToken and RefreshToken
-		const account = { username: value }
-		const accessToken = await generateAccessToken(account)
-		const refreshToken = await generateRefreshToken(account)
-
-		// delete refresh token for old username
-		await dbDeleteRefreshToken(username)
-
-		// store the refresh token in the database for new username (value)
-		const stored = await storeRefreshToken(
-			dbCreateRefreshToken,
-			dbDeleteRefreshToken,
-			value,
-			refreshToken)
-
-			console.log("Updated username from", username, "to", value)
-		return { accessToken: accessToken, refreshToken: refreshToken }
-	}
-	else {
-		return -2 // TODO: define a constant to return
-	}
-}
-
 module.exports = {
 	loginController,
 	tokenController,
 	initResetPasswordController,
 	verifyCodeController,
-	resetPasswordController,
-	updateUsernameController
+	resetPasswordController
 }

@@ -9,6 +9,7 @@ const {
 	getAccountsController,
 	getAccountController,
 	updatePreferredPlatformController,
+	updateUsernameController,
 	logoutController,
 } = require('../controllers/accountController')
 
@@ -19,14 +20,11 @@ const {
 	dbUsernameExists,
 	dbPhoneNumberExists,
 	dbUpdatePreferredPlatform,
+	dbUpdateUsername,
 	dbGetAccount
 } = require('../database/accountDatabase')
 
-// import auth database functions
-const {
-	dbDeleteRefreshToken,
-} = require('../database/authDatabase')
-
+const { USERNAME_TAKEN } = require('../models/accountModels')
 
 module.exports = function (app) {
 	/*
@@ -75,11 +73,10 @@ module.exports = function (app) {
 
 	/*
 	 * Get account info for account that is making this request
-	 * TODO: make sure that the response from getAccountController contains the id of the user.
 	 */
 	app.get('/account', async (req, res) => {
 		try {
-			const account = await getAccountController(dbGetAccount, req.account.username)
+			const account = await getAccountController(dbGetAccount, req.account.accountId)
 			if (account) {
 				res.status(200).send(account)
 			}
@@ -113,6 +110,28 @@ module.exports = function (app) {
 		}
 	})
 
+	/*
+	 * Update the username of a user with new value.
+	 */
+	app.put('/username', async (req, res) => {
+		try {
+			const updated = await updateUsernameController(
+				dbUpdateUsername, req.account.accountId, req.body.username)
+			if (updated == USERNAME_TAKEN) {
+				res.status(400).send({ message: "Username is already taken" })
+			}
+			else if (updated) {
+				res.status(200).send()
+			}
+			else {
+				res.status(400).send({ message: "Could not update username" })
+			}
+		}
+		catch (err) {
+			console.log(err)
+			res.status(500).send("Internal Server Error")
+		}
+	})
 
 	/*
 	 * Log the user out by deleting the refresh token

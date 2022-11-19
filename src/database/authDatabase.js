@@ -8,7 +8,6 @@ const { createClient, createPool } = require('./createClientPool')
  * 						and if the username doesn't exist return null.
  */
 const dbGetPassword = async (username) => {
-	// get account password from database
 	const query = {
 		text: "SELECT pass FROM account WHERE username=$1",
 		values: [username]
@@ -21,7 +20,7 @@ const dbGetPassword = async (username) => {
 		return res.rows[0] ? res.rows[0].pass : null
 	})
 	.catch(err => {
-		console.error(e.stack)
+		console.error(err.stack)
 		return null
 	})
 	await client.end()
@@ -49,7 +48,7 @@ const dbStoreRefreshToken = async (accountId, token) => {
 		return res
 	})
 	.catch(err => {
-		console.error(e.stack)
+		console.error(err.stack)
 		return null
 	})
 	await client.end()
@@ -73,7 +72,7 @@ const dbGetRefreshToken = async (accountId) => {
 		return res.rows[0]
 	})
 	.catch(err => {
-		console.error(e.stack)
+		console.error(err.stack)
 		return null
 	})
 	await client.end()
@@ -98,7 +97,7 @@ const dbDeleteRefreshToken = async (accountId) => {
 		return res
 	})
 	.catch(err => {
-		console.error(e.stack)
+		console.error(err.stack)
 		return null
 	})
 	await client.end()
@@ -107,38 +106,9 @@ const dbDeleteRefreshToken = async (accountId) => {
 	return response["rowCount"]
 }
 
-/*
- * TODO:
- * Set the prefered platform for the account with username=username
- * to value.
- */
-const dbUpdateUsername = async (username, value) => {
-	const query = {
-		text: "UPDATE account "
-		    + "SET username = $1 "
-				+ "WHERE username = $2",
-		values: [value, username],
-	}
-
-	const client = createClient("musixdb")
-	await client.connect()
-	const response = await client.query(query)
-	.then(res => {
-		return res
-	})
-	.catch(err => {
-		console.error(e.stack)
-		return null
-	})
-	await client.end()
-	return response	
-}
-
-
 module.exports = {
 	dbGetPassword,
 	dbStoreRefreshToken,
 	dbGetRefreshToken,
 	dbDeleteRefreshToken,
-	dbUpdateUsername
 }
