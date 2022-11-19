@@ -62,7 +62,6 @@ const redisJoinSession = async (sessionId, participant) => {
  * @return -> true if the user is a valid host
  */
 const redisVerifyProspectHost = async (accountId) => {
-
     return await redisClient.SISMEMBER('hosts', accountId)
         .then((resp) => resp == 0)
         .catch((err) => console.log('Error verifying prospect host\n' + err));
@@ -74,7 +73,6 @@ const redisVerifyProspectHost = async (accountId) => {
  * @return -> true if the session id exists
  */
 const redisVerifySessionIdExists = async (sessionId) => {
-
     return await redisClient.SISMEMBER('sessions', sessionId)
         .then((resp) => resp == 1)
         .catch((err) => 'Error verifying session id\n'+err);
@@ -86,11 +84,10 @@ const redisVerifySessionIdExists = async (sessionId) => {
  * @param username -> the username to be checked
  * @return -> true if the participant exists in the session
  */
-const redisVerifyParticipantExists = async (sessionId, username) => {
-
+const redisVerifyParticipantExists = async (sessionId, accountId) => {
     return await redisClient.SISMEMBER(
         `sessions:${sessionId}:participants`, 
-        username
+        accountId
     )
         .then((resp) => resp == 1)
         .catch((err) => 'Error verifying participant\n'+err);
@@ -102,13 +99,12 @@ const redisVerifyParticipantExists = async (sessionId, username) => {
  * @param username -> the username to be checked as the host
  * @return -> true if the user is the host of the session
  */
-const redisVerifyHostExists = async (sessionId, username) => {
-
+const redisVerifyHostExists = async (sessionId, accountId) => {
     return await redisClient.HGET(
         `sessions:${sessionId}`, 
         'host'
     )
-        .then((resp) => resp == username)
+        .then((resp) => resp == accountId)
         .catch((err) => 'Error verifying host\n'+err);
 }
 
@@ -118,7 +114,6 @@ const redisVerifyHostExists = async (sessionId, username) => {
  * @return -> the session information
  */
 const redisGetSessionInfo = async (sessionId) => {
-
     return await redisClient.HGETALL(`sessions:${sessionId}`)
         .then((resp) => resp)
         .catch((err) => 'Error getting session information\n'+err);
@@ -130,9 +125,8 @@ const redisGetSessionInfo = async (sessionId) => {
  * @param username -> the username leaving the session
  * @return -> the resp
  */
-const redisLeaveSession = async (sessionId, username) => {
-
-    return await redisClient.SREM(`sessions:${sessionId}:participants`, username)
+const redisLeaveSession = async (sessionId, accountId) => {
+    return await redisClient.SREM(`sessions:${sessionId}:participants`, accountId)
         .then((resp) => resp)
         .catch((err) => 'Error removing participant from session\n'+err);
 }
@@ -198,7 +192,6 @@ const redisEndSession = async (sessionId, host) => {
 
     return true
 }
-
 
 module.exports = { 
     redisCreateSession, 
