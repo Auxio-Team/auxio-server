@@ -11,7 +11,6 @@ const {
 } = require('../models/databaseModels')
 
 /*
- * TODO: check for contraint violations and return appropriate constant.
  * Create an account in the database.
  * @param account -> the "account" object we want save.
  * @return -> true if the account is created successfully, otherwise false
@@ -46,58 +45,6 @@ const dbCreateAccount = async (account) => {
 	await client.end()
 	return response
 }
-
-/*
- * TODO: depricate
- * Checks if the username exists in the database.
- * @return -> true if it already exists, otherwise false
- */
-/*const dbUsernameExists = async (username) => {
-	const query = {
-		text: "SELECT 1 FROM account WHERE username = $1",
-		values: [username],
-	}
-
-	const client = createClient("musixdb")
-	await client.connect()
-	const response = await client.query(query)
-	.then(res => {
-		return res.rows[0] ? true : false
-	})
-	.catch(err => {
-		console.error(err.stack)
-		return false
-	})
-	await client.end()
-	return response
-}*/
-
-/*
- * TODO: depricate
- * Checks if the phone number exists in the database.
- * @return -> true if it already exists, otherwise false.
- */
-/*const dbPhoneNumberExists = async (phoneNumber) => {
-	const query = {
-		text: "SELECT 1 FROM account WHERE phone_number = $1",
-		values: [phoneNumber],
-	}
-
-	const client = createClient("musixdb")
-	await client.connect()
-	const response = await client.query(query)
-	.then(res => {
-		return res.rows[0] ? true : false
-	})
-	.catch(err => {
-		console.error(err.stack)
-		return false
-	})
-	await client.end()
-	return response
-}*/
-
-
 
 /*
  * Query for all the accounts from the datase.

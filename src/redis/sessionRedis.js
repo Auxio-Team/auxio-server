@@ -22,14 +22,12 @@ const redisCreateSession = async (sessionId, host, capacity) => {
     await redisClient.SADD('hosts', host)
         .catch((err) => console.log('unable to add host\n'+err))
 
-
     await redisClient.sendCommand(['HSET', `sessions:${sessionId}`, 'host', host, 'curr', '', 'next', ''])
         .catch((err) => console.log('unable to set session info\n'+err))
 	
     await redisClient.HSET(`sessions:${sessionId}`, 'capacity', capacity)
     
     await redisJoinSession(sessionId, host);
-
     return respStatus;
 }
 
@@ -63,9 +61,9 @@ const redisJoinSession = async (sessionId, participant) => {
  * @param username -> the username of the user
  * @return -> true if the user is a valid host
  */
-const redisVerifyProspectHost = async (username) => {
+const redisVerifyProspectHost = async (accountId) => {
 
-    return await redisClient.SISMEMBER('hosts', username)
+    return await redisClient.SISMEMBER('hosts', accountId)
         .then((resp) => resp == 0)
         .catch((err) => console.log('Error verifying prospect host\n' + err));
 }

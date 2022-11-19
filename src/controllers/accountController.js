@@ -7,15 +7,6 @@ const {
  * Create a new account and save it in the database.
  */
 const createAccountController = async (dbCreateAccount, username, password, phoneNumber) => {
-	// validate username and password (TODO: can become depricated - use postgres contraints)
-	/*const validated = await validateCreateAccount(dbUsernameExists, dbPhoneNumberExists, username, phoneNumber)
-	if (validated == -1) {
-		return -1
-	}
-	else if (validated == -2) {
-		return -2
-	}*/
-
 	// do password strength checking...
 
 	// encrypt the password
@@ -24,7 +15,6 @@ const createAccountController = async (dbCreateAccount, username, password, phon
 	// save the account to database
 	const newAccount = { username: username, password: encryptedPassword, phoneNumber: phoneNumber }
 	console.log("Saving new account to database with username=" + newAccount.username)
-
 	return await dbCreateAccount(newAccount)
 }
 

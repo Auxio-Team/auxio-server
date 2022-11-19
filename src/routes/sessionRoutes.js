@@ -1,10 +1,10 @@
 // import redis functions
 const {
-    redisCreateSession,
-    redisVerifyProspectHost,
-    redisVerifySessionIdExists,
-    redisGetSessionInfo,
-    redisJoinSession,
+	redisCreateSession,
+	redisVerifyProspectHost,
+	redisVerifySessionIdExists,
+	redisGetSessionInfo,
+	redisJoinSession,
 	redisVerifyParticipantExists,
 	redisLeaveSession,
 	redisVerifyHostExists,
@@ -13,20 +13,20 @@ const {
 
 // import controller functions
 const {
-    createSessionController,
-    getSessionInfoController,
-    joinSessionController,
+	createSessionController,
+	getSessionInfoController,
+	joinSessionController,
 	leaveSessionController,
 	endSessionController
 } = require('../controllers/sessionController')
 
 // import database functions
 const {
-		dbGetPreferredPlatform
+	dbGetPreferredPlatform
 } = require('../database/accountDatabase')
 
 const {
-    FAILURE,
+	FAILURE,
 } = require('../models/sessionModels')
 
 module.exports = function (app) {
@@ -35,14 +35,15 @@ module.exports = function (app) {
 	 */
 	app.post('/session', async (req, res) => {
 		try {
-            const newSession = await createSessionController(
-                redisCreateSession,
-                redisVerifyProspectHost,
-                redisVerifySessionIdExists,
-                req.account.username,
+			const newSession = await createSessionController(
+				redisCreateSession,
+				redisVerifyProspectHost,
+				redisVerifySessionIdExists,
+				req.account.accountId,
 				req.body.id,
 				req.body.capacity
-            )
+			)
+
 			if (newSession == null) {
 				res.status(400).send()
 			}
@@ -63,11 +64,12 @@ module.exports = function (app) {
 	 */
 	app.get('/sessions/:id', async (req, res) => {
 		try {
-            const sessionInfo = await getSessionInfoController(
-                redisGetSessionInfo,
+			const sessionInfo = await getSessionInfoController(
+				redisGetSessionInfo,
 				dbGetPreferredPlatform,
-                req.params.id
-            )
+				req.params.id
+			)
+
 			if (sessionInfo == null) {
 				res.status(400).send()
 			}

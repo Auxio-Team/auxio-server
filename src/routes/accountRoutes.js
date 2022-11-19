@@ -60,7 +60,6 @@ module.exports = function (app) {
 
 	/*
 	 * Get all accounts (used for testing).
-	 * TODO: make sure that the response from getAccountsController contains the id of the user.
 	 */
 	app.get('/accounts', async (req, res) => {
 		try {
