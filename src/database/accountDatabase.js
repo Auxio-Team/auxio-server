@@ -1,6 +1,14 @@
 const { Client, Pool } = require('pg')
 const { createClient, createPool } = require('./createClientPool')
-const { USERNAME_TAKEN } = require('../models/accountModels')
+const {
+	USERNAME_TAKEN,
+	PHONE_NUMBER_TAKEN
+} = require('../models/accountModels')
+const {
+	CONSTRAINT_VIOLATION_CODE,
+	USERNAME_CONSTRAINT,
+	PHONE_NUMBER_CONSTRAINT
+} = require('../models/databaseModels')
 
 /*
  * TODO: check for contraint violations and return appropriate constant.
@@ -25,18 +33,26 @@ const dbCreateAccount = async (account) => {
 	})
 	.catch(err => {
 		console.error(err.stack)
-		console.log("Error creating account: " + err)
-		return false
+		if (err.code == 23505 && err.constraint == USERNAME_CONSTRAINT) {
+			return USERNAME_TAKEN
+		}
+		else if (err.code == 23505 && err.constraint == PHONE_NUMBER_CONSTRAINT) {
+			return PHONE_NUMBER_TAKEN
+		}
+		else {
+			return null
+		}
 	})
 	await client.end()
 	return response
 }
 
 /*
+ * TODO: depricate
  * Checks if the username exists in the database.
  * @return -> true if it already exists, otherwise false
  */
-const dbUsernameExists = async (username) => {
+/*const dbUsernameExists = async (username) => {
 	const query = {
 		text: "SELECT 1 FROM account WHERE username = $1",
 		values: [username],
@@ -54,13 +70,14 @@ const dbUsernameExists = async (username) => {
 	})
 	await client.end()
 	return response
-}
+}*/
 
 /*
+ * TODO: depricate
  * Checks if the phone number exists in the database.
  * @return -> true if it already exists, otherwise false.
  */
-const dbPhoneNumberExists = async (phoneNumber) => {
+/*const dbPhoneNumberExists = async (phoneNumber) => {
 	const query = {
 		text: "SELECT 1 FROM account WHERE phone_number = $1",
 		values: [phoneNumber],
@@ -78,7 +95,9 @@ const dbPhoneNumberExists = async (phoneNumber) => {
 	})
 	await client.end()
 	return response
-}
+}*/
+
+
 
 /*
  * Query for all the accounts from the datase.
@@ -275,7 +294,7 @@ const dbUpdateUsername = async (accountId, value) => {
 	})
 	.catch(err => {
 		console.error(err.stack)
-		if (err.code === 23505) {
+		if (err.code == CONSTRAINT_VIOLATION_CODE) {
 			return USERNAME_TAKEN 
 		}
 		else {
@@ -289,8 +308,6 @@ const dbUpdateUsername = async (accountId, value) => {
 module.exports = {
 	dbCreateAccount,
 	dbGetAccounts,
-	dbUsernameExists,
-	dbPhoneNumberExists,
 	dbPhoneNumberExistsForUser,
 	dbResetPassword,
 	dbUpdatePreferredPlatform,

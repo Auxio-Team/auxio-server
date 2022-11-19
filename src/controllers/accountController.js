@@ -3,34 +3,29 @@ const {
 	encryptPassword
 } = require('../services/accountService')
 
-const { USERNAME_TAKEN } = require('../models/accountModels')
-
 /*
  * Create a new account and save it in the database.
  */
-const createAccountController = async (dbUsernameExists, dbPhoneNumberExists, dbCreateAccount, username, password, phoneNumber) => {
-	// TODO: check strength of password ? 
-
+const createAccountController = async (dbCreateAccount, username, password, phoneNumber) => {
 	// validate username and password (TODO: can become depricated - use postgres contraints)
-	const validated = await validateCreateAccount(dbUsernameExists, dbPhoneNumberExists, username, phoneNumber)
+	/*const validated = await validateCreateAccount(dbUsernameExists, dbPhoneNumberExists, username, phoneNumber)
 	if (validated == -1) {
 		return -1
 	}
 	else if (validated == -2) {
 		return -2
-	}
+	}*/
+
+	// do password strength checking...
+
 	// encrypt the password
 	const encryptedPassword = await encryptPassword(password)
 
 	// save the account to database
 	const newAccount = { username: username, password: encryptedPassword, phoneNumber: phoneNumber }
 	console.log("Saving new account to database with username=" + newAccount.username)
-	if (await dbCreateAccount(newAccount)) {
-		return newAccount
-	}
-	else {
-		return null
-	}
+
+	return await dbCreateAccount(newAccount)
 }
 
 /*
@@ -76,9 +71,8 @@ const updateUsernameController = async (dbUpdateUsername, accountId, value) => {
  * Log the user out by deleting the refresh token
  * @return -> the number of rows deleted, or null on failure.
  */
-const logoutController = async (dbDeleteRefreshToken, username) => {
-	
-	const deleted = await dbDeleteRefreshToken(username)
+const logoutController = async (dbDeleteRefreshToken, accountId) => {
+	const deleted = await dbDeleteRefreshToken(accountId)
 	if (deleted >= 0) {
 		return deleted
 	}

@@ -1,13 +1,8 @@
-// TODO: create constants for errors returned to the user for
-//       account endpoint repsonses 
-
-// createAccount - username not unique
-// createAccount - phoneNumber not unique
-
-// updateUsername - username taken
-const USERNAME_TAKEN = "USERNAME_TAKEN"
+const USERNAME_TAKEN = 'USERNAME_TAKEN'
+const PHONE_NUMBER_TAKEN = 'PHONE_NUMBER_TAKEN'
 
 module.exports = {
-	USERNAME_TAKEN
+	USERNAME_TAKEN,
+	PHONE_NUMBER_TAKEN
 }
 

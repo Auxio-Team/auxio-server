@@ -17,14 +17,15 @@ const {
 const {
 	dbCreateAccount,
 	dbGetAccounts,
-	dbUsernameExists,
-	dbPhoneNumberExists,
 	dbUpdatePreferredPlatform,
 	dbUpdateUsername,
 	dbGetAccount
 } = require('../database/accountDatabase')
 
-const { USERNAME_TAKEN } = require('../models/accountModels')
+const {
+	USERNAME_TAKEN,
+	PHONE_NUMBER_TAKEN
+} = require('../models/accountModels')
 
 module.exports = function (app) {
 	/*
@@ -33,21 +34,22 @@ module.exports = function (app) {
 	app.post('/account', async (req, res) => {
 		try {
 			const newAccount = await createAccountController(
-				dbUsernameExists,
-				dbPhoneNumberExists,
 				dbCreateAccount,
 				req.body.username,
 				req.body.password,
 				req.body.phoneNumber)
 
-			if (newAccount == -1) {
+			if (newAccount == USERNAME_TAKEN) {
 				res.status(400).send({ 'message': 'Invalid Username' })
 			}
-			else if (newAccount == -2) {
+			else if (newAccount == PHONE_NUMBER_TAKEN) {
 				res.status(400).send({ 'message': 'Invalid Phone Number' })
 			}
-			else {
-				res.status(201).send(newAccount) 
+			else if (newAccount) { 
+				res.status(201).send(newAccount)
+			}
+			else { 
+				res.status(400).send({ 'message': 'Unable to Create Acccount' })
 			}
 		}
 		catch (err) {
@@ -138,9 +140,9 @@ module.exports = function (app) {
 	 */
 	app.post('/logout', async (req, res) => {
 		try {
-			const deleted = await logoutController(dbDeleteRefreshToken, req.account.username)
+			const deleted = await logoutController(dbDeleteRefreshToken, req.account.accountId)
 			if (deleted > 0) {
-				console.log("Logged out user: " + req.account.username)
+				console.log("Logged out user: " + req.account.accountId)
 				res.status(200).send()
 			}
 			else if (deleted == 0) {

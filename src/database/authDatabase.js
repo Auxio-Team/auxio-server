@@ -80,7 +80,7 @@ const dbGetRefreshToken = async (accountId) => {
 }
 
 /*
- * TODO: could use this function if we implement delete account
+ * TODO: could also use this function if we implement delete account
  * Delete the refresh token for the account with account_id=accountId.
  */
 const dbDeleteRefreshToken = async (accountId) => {
