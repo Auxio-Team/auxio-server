@@ -31,7 +31,6 @@ const redisCreateSession = async (sessionId, host, capacity) => {
     return respStatus;
 }
 
-
 /*
  * Join a session.
  * @param sessionId -> the 6-digit alphanumeric session id associated with the session.

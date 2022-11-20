@@ -75,7 +75,7 @@ const dbGetAccounts = async () => {
  */
 const dbGetAccount = async (accountId) => {
 	const query = {
-		text: "SELECT id, username, preferred_streaming_platform "
+		text: "SELECT username, preferred_streaming_platform "
 		    + "FROM account "
 				+ "WHERE id = $1",
 		values: [accountId],

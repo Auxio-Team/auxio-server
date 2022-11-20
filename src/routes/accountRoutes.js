@@ -23,6 +23,10 @@ const {
 } = require('../database/accountDatabase')
 
 const {
+	dbDeleteRefreshToken
+} = require('../database/authDatabase')
+
+const {
 	USERNAME_TAKEN,
 	PHONE_NUMBER_TAKEN
 } = require('../models/accountModels')
