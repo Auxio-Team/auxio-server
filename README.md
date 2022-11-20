@@ -86,16 +86,15 @@ The song queue is a redis sorted set.  A sorted set has elements sorted by their
   - so if a song is newly added to the queue, the 2 rightmost integers will be `01` since the person that added the song cannot upvote their own song
   - 2 digits is sufficient for this since the max number of participants in a given session is 50, so the maximum number of upvotes a song could have is 50.
 - The 5 leftmost integers will be the position in the queue for the given number of upvotes
-  - so if two songs both have 5 upvotes, the one that reached 5 upvotes first would have the position `00001` and the one that reached the 5 upvotes second would have the position `00002`
+  - so if two songs both have 5 upvotes, the one that reached 5 upvotes first would have the position `99999` and the one that reached the 5 upvotes second would have the position `99998`
   - 5 digits is sufficient for this since assuming a given session has maxed out at the 50 participants in the session, it would allow for each participant to queue more than 1000 songs each
     - for reference, Spotify has a maximum queue length of somewhere between 50 - 90 songs, so a queue with 50,000 songs is sufficiently large
     - also since the max priority of an element in redis is 2^53, this queue could theoretically support up to about that many
 - Example:
   - Assume a queue has 5 songs
   - Assume 2 of the songs both have 2 upvotes and the other 3 have no upvotes
-  - If a song S is added, its initial priority will be `0000401`
-  - If that song S then receives 2 upvotes, its new priority will be `0000303`
-  - If that song S receives a third upvote, its new priority will then be `0000104`
+  - If a song S is added, its initial priority will be `0199999`
+  - If that song S then receives 2 upvotes, its new priority will be `0399999`
 
 ## TODO items with Redis
 - TODO implement redis server start automatically with server

@@ -6,14 +6,17 @@ const {
 const {
 	redisAddSongToSession,
 	redisDequeueSongFromSession,
-	redisSetCurrentSongForSession
+	redisSetCurrentSongForSession,
+	redisVerifySongInQueue,
+	redisAddUpvote
 } = require('../redis/queueRedis')
 
 // import controller functions
 const {
 	addSongController,
 	dequeueSongController,
-	setCurrentSongController
+	setCurrentSongController,
+	addUpvoteController
 } = require('../controllers/queueController')
 
 // import models 
@@ -56,8 +59,26 @@ module.exports = function (app) {
 	 * Add an upvote (increment priority) to a song in a session queue.
 	 */
 	app.post('/sessions/:id/songs/:song_id/upvote', async (req, res) => {
-		console.log('endpoint not yet implemented - sorry!')
-		res.status(405).send("endpoint not yet implemented") 
+		try {
+            const addUpvote = await addUpvoteController(
+                redisVerifySessionIdExists,
+                redisVerifySongInQueue,
+				redisAddUpvote,
+                req.params.id,
+                req.params.song_id
+            )
+			if (addUpvote.status === FAILURE) {
+				res.status(400).send({ error: addUpvote.error })
+			}
+			else {
+				res.status(200).send() 
+				console.log(`Successfully added upvote to song ${req.params.song_id} in session ${req.params.id}`);
+			}
+		}
+		catch (err) {
+			console.log(err)
+			res.status(500).send("Internal Server Error")
+		}
 	})
 
 	/*

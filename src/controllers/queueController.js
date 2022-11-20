@@ -81,9 +81,32 @@ const getSessionQueueController = async ( redisVerifySessionIdExistsCb, redisGet
         });
 }
 
+/*
+ * Upvote song in the queue.
+ */
+const addUpvoteController = async ( redisVerifySessionIdExistsCb, redisVerifySongInQueueCb, redisAddUpvoteCb, sessionId, songId ) => {
+    if (!await redisVerifySessionIdExistsCb(sessionId)) {
+        console.log('Error adding upvote: Session ID not valid')
+        return queueError(INVALID_ID);
+    }
+    if (!await redisVerifySongInQueueCb(sessionId, songId)) {
+        console.log('Error adding upvote: Song ID not valid')
+        return queueError(INVALID_SONG);
+    }
+
+    return await redisAddUpvoteCb(sessionId, songId)
+        .then((res) => {
+            if (res) {
+                return queueSuccess();
+            }
+            return queueError(FAILURE);
+        });
+}
+
 module.exports = { 
     addSongController,
     dequeueSongController,
     setCurrentSongController,
-    getSessionQueueController
+    getSessionQueueController,
+    addUpvoteController
 }
