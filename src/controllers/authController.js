@@ -15,20 +15,22 @@ const {
 	generateCode
 } = require('../services/authService')
 
-const { dbDeleteRefreshToken } = require('../database/authDatabase')
 const { encryptPassword } = require('../services/accountService')
 
 /*
  * Handle login attempt to account.
  */
-const loginController = async (dbGetPassword, dbCreateRefreshToken, dbDeleteRefreshToken, username, password) => {
+const loginController = async (dbGetPassword, dbGetAccountId, dbStoreRefreshToken, username, password) => {
 	// verify that the username and password are valid.
-	if (!await verifyUsernamePassword(dbGetPassword, username, password)) {
+	const accountId = await verifyUsernamePassword(dbGetPassword, dbGetAccountId, username, password)
+	if (!accountId) {
 		return null
 	}
 
 	// generate account that we want to sign
-	const newAccount = { username: username }
+	const newAccount = {
+		accountId: accountId,
+	}
 
 	// generate access token and refresh token
 	const accessToken = await generateAccessToken(newAccount)
@@ -36,9 +38,8 @@ const loginController = async (dbGetPassword, dbCreateRefreshToken, dbDeleteRefr
 
 	// store the refresh token in the database
 	const stored = await storeRefreshToken(
-		dbCreateRefreshToken,
-		dbDeleteRefreshToken,
-		username,
+		dbStoreRefreshToken,
+		accountId,
 		refreshToken)
 	
 	const tokens = { accessToken: accessToken, refreshToken: refreshToken }
@@ -55,10 +56,10 @@ const tokenController = async (dbGetRefreshToken, refreshToken) => {
 		try {
 			// verify the refresh token
 			const account = jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET) 
-			console.log("New Access Token for: " + account.username)
+			console.log("New Access Token for account with id=" + account.accountId)
 			// verify the refresh token exists
-			if (await verifyRefreshToken(dbGetRefreshToken, account.username, refreshToken)) {
-				const accessToken = generateAccessToken({ username: account.username} )
+			if (await verifyRefreshToken(dbGetRefreshToken, account.accountId, refreshToken)) {
+				const accessToken = generateAccessToken({ accountId: account.accountId} )
 				return accessToken
 			}
 			else {
@@ -74,6 +75,7 @@ const tokenController = async (dbGetRefreshToken, refreshToken) => {
  * Start reset password by validating username and phone number.
  */
 const initResetPasswordController = async (dbUsernameExists, dbPhoneNumberExistsForUser, username, phoneNumber) => {
+	// TODO: these 2 if-statements can be refactored to be the same call
 	// validate username
 	if (!await dbUsernameExists(username)) {
 		return null;
@@ -126,45 +128,10 @@ const resetPasswordController = async (dbResetPassword, token, newpass) => {
 	return await dbResetPassword(username, passEncrypted);
 }
 
-/*
- * Set the username of a user to a new value
- * @return -> true if it was updated, otherwise null.
- */
-const updateUsernameController = async (dbUpdateUsername, dbUsernameExists, dbCreateRefreshToken, dbDeleteRefreshToken, username, value) => {
-	// check if the username already exists
-	if (await dbUsernameExists(value)) {
-		return -1
-	}
-
-	if (await dbUpdateUsername(username, value)) {
-		// get new AccessToken and RefreshToken
-		const account = { username: value }
-		const accessToken = await generateAccessToken(account)
-		const refreshToken = await generateRefreshToken(account)
-
-		// delete refresh token for old username
-		await dbDeleteRefreshToken(username)
-
-		// store the refresh token in the database for new username (value)
-		const stored = await storeRefreshToken(
-			dbCreateRefreshToken,
-			dbDeleteRefreshToken,
-			value,
-			refreshToken)
-
-			console.log("Updated username from", username, "to", value)
-		return { accessToken: accessToken, refreshToken: refreshToken }
-	}
-	else {
-		return -2
-	}
-}
-
 module.exports = {
 	loginController,
 	tokenController,
 	initResetPasswordController,
 	verifyCodeController,
-	resetPasswordController,
-	updateUsernameController
+	resetPasswordController
 }

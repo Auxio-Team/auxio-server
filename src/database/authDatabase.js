@@ -8,51 +8,37 @@ const { createClient, createPool } = require('./createClientPool')
  * 						and if the username doesn't exist return null.
  */
 const dbGetPassword = async (username) => {
-	// TODO: get account password from database
 	const query = {
 		text: "SELECT pass FROM account WHERE username=$1",
 		values: [username]
 	}
-	const pool = createPool("musixdb")
-	const password = await pool.connect()
-	.then(client => {
-    return client
-      .query(query)
-      .then(res => {
-				if (!res.rows[0]) {
-					console.log("Username " + username + " doesn't exist")
-					client.release()
-					return null
-				}
-				else {
-					client.release()
-					return res.rows[0].pass
-				}
-			})
-      .catch(err => {
-				console.log(err)
-        client.release()
-				return null
-      })
+
+	const client = createClient("musixdb")
+	await client.connect()
+	const response = await client.query(query)
+	.then(res => {
+		return res.rows[0] ? res.rows[0].pass : null
 	})
 	.catch(err => {
-		console.log("Error getting password from username: " + err)
+		console.error(err.stack)
 		return null
 	})
-	await pool.end()
-	return password ? password : null
+	await client.end()
+	return response
 }
 
 /*
- * Stores a refresh token in the database in the refresh_token table.
+ * Stores refresh token for account in the refresh_token table.
+ * If there is already a refresh token stored for this account, then
+ * the row is updated with the new refresh token.
  */
-const dbCreateRefreshToken = async (username, token) => {
+const dbStoreRefreshToken = async (accountId, token) => {
 	const query = {
-		text: "INSERT INTO refresh_token"
-				+ "(username, token) "
-				+ "VALUES "
-				+ "($1, $2);",
-		values: [username, token],
+		text: "INSERT INTO refresh_token (account_id, token) "
+				+ "VALUES ($1, $2) "
+				+ "ON CONFLICT (account_id) "
+				+ "DO UPDATE SET token = $2;",
+		values: [accountId, token],
 	}
 
 	const client = createClient("musixdb")
@@ -61,8 +47,8 @@ const dbCreateRefreshToken = async (username, token) => {
 	.then(res => {
 		return res
 	})
-	.catch(e => {
-		console.error(e.stack)
+	.catch(err => {
+		console.error(err.stack)
 		return null
 	})
 	await client.end()
@@ -70,13 +56,13 @@ const dbCreateRefreshToken = async (username, token) => {
 }
 
 /*
- * Get the refesh token for the account with username=username.
+ * Get the refesh token for the account with account_id=accountId.
  */
-const dbGetRefreshToken = async (username) => {
+const dbGetRefreshToken = async (accountId) => {
 	const query = {
 		text: "SELECT token FROM refresh_token "
-				+ "WHERE username=$1",
-		values: [username],
+				+ "WHERE account_id=$1",
+		values: [accountId],
 	}
 
 	const client = createClient("musixdb")
@@ -85,8 +71,8 @@ const dbGetRefreshToken = async (username) => {
 	.then(res => {
 		return res.rows[0]
 	})
-	.catch(e => {
-		console.error(e.stack)
+	.catch(err => {
+		console.error(err.stack)
 		return null
 	})
 	await client.end()
@@ -94,13 +80,14 @@ const dbGetRefreshToken = async (username) => {
 }
 
 /*
- * Delete the refresh token for the account with username=username.
+ * TODO: could also use this function if we implement delete account
+ * Delete the refresh token for the account with account_id=accountId.
  */
-const dbDeleteRefreshToken = async (username) => {
+const dbDeleteRefreshToken = async (accountId) => {
 	const query = {
 		text: "DELETE FROM refresh_token "
-				+ "WHERE username=$1",
-		values: [username],
+				+ "WHERE account_id=$1",
+		values: [accountId],
 	}
 
 	const client = createClient("musixdb")
@@ -109,8 +96,8 @@ const dbDeleteRefreshToken = async (username) => {
 	.then(res => {
 		return res
 	})
-	.catch(e => {
-		console.error(e.stack)
+	.catch(err => {
+		console.error(err.stack)
 		return null
 	})
 	await client.end()
@@ -119,38 +106,9 @@ const dbDeleteRefreshToken = async (username) => {
 	return response["rowCount"]
 }
 
-/*
- * TODO:
- * Set the prefered platform for the account with username=username
- * to value.
- */
-const dbUpdateUsername = async (username, value) => {
-	const query = {
-		text: "UPDATE account "
-		    + "SET username = $1 "
-				+ "WHERE username = $2",
-		values: [value, username],
-	}
-
-	const client = createClient("musixdb")
-	await client.connect()
-	const response = await client.query(query)
-	.then(res => {
-		return res
-	})
-	.catch(e => {
-		console.error(e.stack)
-		return null
-	})
-	await client.end()
-	return response	
-}
-
-
 module.exports = {
 	dbGetPassword,
-	dbCreateRefreshToken,
+	dbStoreRefreshToken,
 	dbGetRefreshToken,
 	dbDeleteRefreshToken,
-	dbUpdateUsername
 }

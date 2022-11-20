@@ -11,15 +11,16 @@ const twilioPhoneNumber = "+13392296710";
  * Verify that the username exists and that the password matches (compare with Bcrypt)
  * @param username -> the username that was entered.
  * @param password -> the password that was entered.
- * @return -> true if the username/password matches a valid account, otherwise false.
+ * @return -> the id of the acccount if username/password matches a valid account, otherwise null.
  */
-const verifyUsernamePassword = async (dbGetPassword, username, password) => {
+const verifyUsernamePassword = async (dbGetPassword, dbGetAccountId, username, password) => {
 	const accountPassword = await dbGetPassword(username)
 	if (accountPassword == null || !await bcrypt.compare(password, accountPassword)) {
-		return false
+		return null
 	}
 	else {
-		return true
+		// get the id of the account
+		return await dbGetAccountId(username)
 	}
 }
 
@@ -61,19 +62,14 @@ const encryptRefreshToken = async (refreshToken) => {
 
 /*
  * Store new refresh token in the database.
+ * The row contains account id, and the encrypted refresh token
  */
-const storeRefreshToken = async (dbCreateRefreshToken, dbDeleteRefreshToken, username, refreshToken) => {
+const storeRefreshToken = async (dbStoreRefreshToken, accountId, refreshToken) => {
 	// encrypt the refresh token
 	const encryptedToken = await encryptRefreshToken(refreshToken)
 
-	// remove any old refresh token
-	await dbDeleteRefreshToken(username)
-
-	// create the new refresh token 
-	if (!await dbCreateRefreshToken(username, encryptedToken)) {
-		return null
-	}
-	return true
+	// store the new refresh token 
+	return await dbStoreRefreshToken(accountId, encryptedToken)
 }
 
 /*
@@ -82,15 +78,15 @@ const storeRefreshToken = async (dbCreateRefreshToken, dbDeleteRefreshToken, use
  * @param refreshToken -> the token that was sent.
  * @return -> true if the token exists, otherwise false.
  */
-const verifyRefreshToken = async (dbGetRefreshToken, username, refreshToken) => {
-	const databaseToken = await dbGetRefreshToken(username)
+const verifyRefreshToken = async (dbGetRefreshToken, accountId, refreshToken) => {
+	const databaseToken = await dbGetRefreshToken(accountId)
 	var refreshTokenShortened = refreshToken
 	if (refreshToken.length > 72) {
 		refreshTokenShortened = refreshToken.substring(refreshToken.length - 72, refreshToken.length - 1)
 	}
 	if (databaseToken == null
 		|| !await bcrypt.compare(refreshTokenShortened, databaseToken)) {
-		return null
+		return false
 	}
 	else {
 		return true

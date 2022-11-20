@@ -1,5 +1,14 @@
 const { Client, Pool } = require('pg')
 const { createClient, createPool } = require('./createClientPool')
+const {
+	USERNAME_TAKEN,
+	PHONE_NUMBER_TAKEN
+} = require('../models/accountModels')
+const {
+	CONSTRAINT_VIOLATION_CODE,
+	USERNAME_CONSTRAINT,
+	PHONE_NUMBER_CONSTRAINT
+} = require('../models/databaseModels')
 
 /*
  * Create an account in the database.
@@ -15,107 +24,26 @@ const dbCreateAccount = async (account) => {
 		values: [account.username, account.password, account.phoneNumber, "Apple Music"],
 	}
 
-	const pool = createPool("musixdb")
-	pool.connect()
-	.then(client => {
-    return client
-      .query(query)
-      .then(res => {
-        client.release()
-				return true
-      })
-      .catch(err => {
-				console.log(err)
-        client.release()
-				return false
-      })
-  })
-	.catch(err => {
-		console.log("Error creating account: " + err)
-		return false
+	const client = createClient("musixdb")
+	await client.connect()
+	const response = await client.query(query)
+	.then(res => {
+		return true
 	})
-	await pool.end()
-	return true
-}
-
-/*
- * Checks if the username exists in the database.
- * @return -> true if it already exists, otherwise false
- */
-const dbUsernameExists = async (username) => {
-	const query = {
-		text: "SELECT 1 FROM account WHERE username = $1",
-		values: [username],
-	}
-
-	const pool = createPool("musixdb")
-	const exists = await pool.connect()
-	.then(client => {
-    return client
-      .query(query)
-      .then(res => {
-				if (!res.rows[0]) {
-					console.log("Username doesn't exist")
-					client.release()
-					return null 
-				}
-				else {
-					console.log("Username already exists")
-					client.release()
-					return res.rows[0]
-				}
-      })
-      .catch(err => {
-				console.log(err)
-        client.release()
-				return true
-      })
-  })
 	.catch(err => {
-		console.log("Error checking if username exists: " + err)
+		console.error(err.stack)
+		if (err.code == 23505 && err.constraint == USERNAME_CONSTRAINT) {
+			return USERNAME_TAKEN
+		}
+		else if (err.code == 23505 && err.constraint == PHONE_NUMBER_CONSTRAINT) {
+			return PHONE_NUMBER_TAKEN
+		}
+		else {
+			return null
+		}
 	})
-	await pool.end()	
-	return exists ? true : false
-}
-
-/*
- * Checks if the phone number exists in the database.
- * @return -> true if it already exists, otherwise false.
- */
-const dbPhoneNumberExists = async (phoneNumber) => {
-	const query = {
-		text: "SELECT 1 FROM account WHERE phone_number = $1",
-		values: [phoneNumber],
-	}
-
-	const pool = createPool("musixdb")
-	const exists = await pool.connect()
-	.then(client => {
-    return client
-      .query(query)
-      .then(res => {
-				if (!res.rows[0]) {
-					console.log("Phone number doesn't exist")
-					client.release()
-					return null 
-				}
-				else {
-					console.log("Phone number already exists")
-					client.release()
-					return res.rows[0]
-				}
-      })
-      .catch(err => {
-				console.log(err)
-        client.release()
-				return true
-      })
-  })
-	.catch(err => {
-		console.log("Error checking if phone number exists: " + err)
-	})
-	await pool.end()	
-	return exists ? true : false
+	await client.end()
+	return response
 }
 
 /*
@@ -127,39 +55,30 @@ const dbGetAccounts = async () => {
 		text: "SELECT * FROM account",
 		values: []
 	}
-	const pool = createPool("musixdb")
-	const accounts = await pool.connect()
-	.then(client => {
-    return client
-      .query(query)
-      .then(res => {
-        client.release()
-				return res.rows
-			})
-      .catch(err => {
-				console.log(err)
-        client.release()
-				return null
-      })
+
+	const client = createClient("musixdb")
+	await client.connect()
+	const response = await client.query(query)
+	.then(res => {
+		return res.rows
 	})
 	.catch(err => {
-		console.log("Error getting accounts: " + err)
-		return null
+		console.error(err.stack)
+		return false
 	})
-		
-	await pool.end()	
-	return accounts
+	await client.end()
+	return response
 }
 
 /*
  * Set the dark mode of the account with username=username to value.
  */
-const dbGetAccount = async (username) => {
+const dbGetAccount = async (accountId) => {
 	const query = {
-		text: "SELECT username, phone_number, preferred_streaming_platform "
+		text: "SELECT username, preferred_streaming_platform "
 		    + "FROM account "
-				+ "WHERE username = $1",
-		values: [username],
+				+ "WHERE id = $1",
+		values: [accountId],
 	}
 
 	const client = createClient("musixdb")
@@ -168,54 +87,41 @@ const dbGetAccount = async (username) => {
 	.then(res => {
 		return res.rows[0]
 	})
-	.catch(e => {
-		console.error(e.stack)
+	.catch(err => {
+		console.error(err.stack)
 		return null
 	})
 	await client.end()
 	return account ? account : null
 }
 
-
 /*
  * Checks if the phone number exists for a given user.
- * @return -> true if it already exists, otherwise false.
+ * @return -> true if the phone number belongs to the user, otherwise false.
  */
 const dbPhoneNumberExistsForUser = async (username, phoneNumber) => {
 	const query = {
 		text: "SELECT phone_number FROM account WHERE username = $1",
 		values: [username],
 	}
-	console.log(query)
 
-	const pool = createPool("musixdb")
-	const exists = await pool.connect()
-	.then(client => {
-    	return client
-    		.query(query)
-    		.then(res => {
-				console.log(res.rows[0])
-				client.release()
-				return res.rows[0].phone_number === phoneNumber;
-    		})
-			.catch(err => {
-				console.log(err)
-        		client.release()
-				return false
-      		})
-  	})
-	.catch(err => {
-		console.log("Error checking if phone number exists: " + err)
+	const client = createClient("musixdb")
+	await client.connect()
+	const response = await client.query(query)
+	.then(res => {
+		return res.rows[0] === phoneNumber
 	})
-	console.log('waiting for pool to end')
-	await pool.end()	
-	console.log('finished db query', exists)
-	return exists ? true : false
+	.catch(err => {
+		console.error(err.stack)
+		return false
+	})
+	await client.end()
+	return response
 }
 
 /*
  * Resets the password in the database.
- * @return -> true if reset was a success
+ * @return -> true if reset was a success, otherwise false.
  */
 const dbResetPassword = async (username, newpass) => {
 	const query = {
@@ -223,49 +129,67 @@ const dbResetPassword = async (username, newpass) => {
 		values: [newpass, username],
 	}
 
-	const pool = createPool("musixdb")
-	const exists = await pool.connect()
-	.then(client => {
-    return client
-      .query(query)
-      .then(res => {
-		console.log(res)
-        client.release()
+	const client = createClient("musixdb")
+	await client.connect()
+	const response = await client.query(query)
+	.then(res => {
 		return true
-      })
-      .catch(err => {
-		console.log(err)
-        client.release()
-		return false
-      })
-  })
-	.catch(err => {
-		console.log("Error checking if username exists: " + err)
 	})
-	await pool.end()	
-	return exists ? true : false
+	.catch(err => {
+		console.error(err.stack)
+		return false
+	})
+	await client.end()
+	return response
 }
 
 /*
- * Set the prefered platform for the account with username=username
+ * Set the prefered platform for the account with id=accountId
  * to value.
+ * @return -> true if successfully updated, otherwise false.
  */
-const dbUpdatePreferredPlatform = async (username, value) => {
+const dbUpdatePreferredPlatform = async (accountId, value) => {
 	const query = {
 		text: "UPDATE account "
 		    + "SET preferred_streaming_platform = $1 "
-				+ "WHERE username = $2",
-		values: [value, username],
+				+ "WHERE id = $2",
+		values: [value, accountId],
 	}
 
 	const client = createClient("musixdb")
 	await client.connect()
 	const response = await client.query(query)
 	.then(res => {
-		return res
+		return true
 	})
-	.catch(e => {
-		console.error(e.stack)
+	.catch(err => {
+		console.error(err.stack)
+		return false
+	})
+	await client.end()
+	return response	
+}
+
+/*
+ * Get the prefered platform for the account with id=accountId.
+ * @return the preferred streaming platform if it is found, otherwise null.
+ */
+const dbGetPreferredPlatform = async (accountId) => {
+	const query = {
+		text: "SELECT preferred_streaming_platform "
+		    + "FROM account "
+				+ "WHERE id = $1",
+		values: [accountId],
+	}
+
+	const client = createClient("musixdb")
+	await client.connect()
+	const response = await client.query(query)
+	.then(res => {
+		return res.rows[0]
+	})
+	.catch(err => {
+		console.error(err.stack)
 		return null
 	})
 	await client.end()
@@ -273,13 +197,13 @@ const dbUpdatePreferredPlatform = async (username, value) => {
 }
 
 /*
- * Get the prefered platform for the account with username=username.
+ * Get the id (primary key) of the account with username=username.
+ * @return -> the account id, otherwise null.
  */
-const dbGetPreferredPlatform = async (username) => {
+const dbGetAccountId = async (username) => {
 	const query = {
-		text: "SELECT preferred_streaming_platform "
-		    + "FROM account "
-				+ "WHERE username = $1",
+		text: "SELECT id FROM account "
+				+ "WHERE username=$1",
 		values: [username],
 	}
 
@@ -289,9 +213,40 @@ const dbGetPreferredPlatform = async (username) => {
 	.then(res => {
 		return res.rows[0]
 	})
-	.catch(e => {
-		console.error(e.stack)
+	.catch(err => {
+		console.error(err.stack)
 		return null
+	})
+	await client.end()
+	return response ? response.id : null
+}
+
+/*
+ * Set the prefered platform for the account with id=accountId
+ * to value.
+ */
+const dbUpdateUsername = async (accountId, value) => {
+	const query = {
+		text: "UPDATE account "
+		    + "SET username = $1 "
+				+ "WHERE id = $2",
+		values: [value, accountId],
+	}
+
+	const client = createClient("musixdb")
+	await client.connect()
+	const response = await client.query(query)
+	.then(res => {
+		return true
+	})
+	.catch(err => {
+		console.error(err.stack)
+		if (err.code == CONSTRAINT_VIOLATION_CODE) {
+			return USERNAME_TAKEN 
+		}
+		else {
+			return false
+		}
 	})
 	await client.end()
 	return response	
@@ -300,11 +255,11 @@ const dbGetPreferredPlatform = async (username) => {
 module.exports = {
 	dbCreateAccount,
 	dbGetAccounts,
-	dbUsernameExists,
-	dbPhoneNumberExists,
 	dbPhoneNumberExistsForUser,
 	dbResetPassword,
 	dbUpdatePreferredPlatform,
 	dbGetPreferredPlatform,
 	dbGetAccount,
+	dbGetAccountId,
+	dbUpdateUsername
 }
