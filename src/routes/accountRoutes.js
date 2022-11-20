@@ -6,29 +6,30 @@ const {
 // import controllers
 const {
 	createAccountController,
-	accountLoginController,
 	getAccountsController,
 	getAccountController,
 	updatePreferredPlatformController,
+	updateUsernameController,
 	logoutController,
 } = require('../controllers/accountController')
 
 // import account database functions
 const {
 	dbCreateAccount,
-	dbGetPasswordByUsername,
 	dbGetAccounts,
-	dbUsernameExists,
-	dbPhoneNumberExists,
 	dbUpdatePreferredPlatform,
-	dbGetAccount,
+	dbUpdateUsername,
+	dbGetAccount
 } = require('../database/accountDatabase')
 
-// import auth database functions
 const {
-	dbDeleteRefreshToken,
+	dbDeleteRefreshToken
 } = require('../database/authDatabase')
 
+const {
+	USERNAME_TAKEN,
+	PHONE_NUMBER_TAKEN
+} = require('../models/accountModels')
 
 module.exports = function (app) {
 	/*
@@ -37,21 +38,22 @@ module.exports = function (app) {
 	app.post('/account', async (req, res) => {
 		try {
 			const newAccount = await createAccountController(
-				dbUsernameExists,
-				dbPhoneNumberExists,
 				dbCreateAccount,
 				req.body.username,
 				req.body.password,
 				req.body.phoneNumber)
 
-			if (newAccount == -1) {
+			if (newAccount == USERNAME_TAKEN) {
 				res.status(400).send({ 'message': 'Invalid Username' })
 			}
-			else if (newAccount == -2) {
+			else if (newAccount == PHONE_NUMBER_TAKEN) {
 				res.status(400).send({ 'message': 'Invalid Phone Number' })
 			}
-			else {
-				res.status(201).send(newAccount) 
+			else if (newAccount) { 
+				res.status(201).send(newAccount)
+			}
+			else { 
+				res.status(400).send({ 'message': 'Unable to Create Acccount' })
 			}
 		}
 		catch (err) {
@@ -79,7 +81,7 @@ module.exports = function (app) {
 	 */
 	app.get('/account', async (req, res) => {
 		try {
-			const account = await getAccountController(dbGetAccount, req.account.username)
+			const account = await getAccountController(dbGetAccount, req.account.accountId)
 			if (account) {
 				res.status(200).send(account)
 			}
@@ -99,7 +101,7 @@ module.exports = function (app) {
 	app.put('/platform', async (req, res) => {
 		try {
 			const updated = await updatePreferredPlatformController(
-				dbUpdatePreferredPlatform, req.account.username, req.body.preferredPlatform)
+				dbUpdatePreferredPlatform, req.account.accountId, req.body.preferredPlatform)
 			if (updated) {
 				res.status(200).send()
 			}
@@ -113,15 +115,37 @@ module.exports = function (app) {
 		}
 	})
 
+	/*
+	 * Update the username of a user with new value.
+	 */
+	app.put('/username', async (req, res) => {
+		try {
+			const updated = await updateUsernameController(
+				dbUpdateUsername, req.account.accountId, req.body.username)
+			if (updated == USERNAME_TAKEN) {
+				res.status(400).send({ message: "Username is already taken" })
+			}
+			else if (updated) {
+				res.status(200).send()
+			}
+			else {
+				res.status(400).send({ message: "Could not update username" })
+			}
+		}
+		catch (err) {
+			console.log(err)
+			res.status(500).send("Internal Server Error")
+		}
+	})
 
 	/*
 	 * Log the user out by deleting the refresh token
 	 */
 	app.post('/logout', async (req, res) => {
 		try {
-			const deleted = await logoutController(dbDeleteRefreshToken, req.account.username)
+			const deleted = await logoutController(dbDeleteRefreshToken, req.account.accountId)
 			if (deleted > 0) {
-				console.log("Logged out user: " + req.account.username)
+				console.log("Logged out user: " + req.account.accountId)
 				res.status(200).send()
 			}
 			else if (deleted == 0) {

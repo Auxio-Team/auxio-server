@@ -7,7 +7,6 @@ CREATE TABLE account (
 );
 
 CREATE TABLE refresh_token (
-	id bigserial PRIMARY KEY,
-	username varchar(25) NOT NULL,
+	account_id bigint REFERENCES account(id) PRIMARY KEY,
 	token varchar(320) NOT NULL
 );

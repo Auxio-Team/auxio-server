@@ -7,28 +7,28 @@ const {
 	initResetPasswordController,
 	resetPasswordController,
 	verifyCodeController,
-	updateUsernameController
 } = require('../controllers/authController')
 
 /* import database functions */
 const {
 	dbGetPassword,
-	dbCreateRefreshToken,
+	dbStoreRefreshToken,
 	dbGetRefreshToken,
 	dbDeleteRefreshToken,
-	dbUpdateUsername
 } = require("../database/authDatabase")
 
 const { 
 	dbPhoneNumberExistsForUser,
 	dbUsernameExists,
-	dbResetPassword
+	dbResetPassword,
+	dbGetAccountId
 } = require('../database/accountDatabase')
 
 module.exports = function (app) {
 	/*
 	 * Handle user login.
-	 * 200 -> user succesfully logged in.
+	 * 200 -> user succesfully logged in, send accessToken and refreshToken.
+	 * 				The accessToken and refreshToken contain the account id of the user.
 	 * 403 -> authentication failed. 
 	 */
 	app.post('/login', async (req, res) => {
@@ -36,13 +36,13 @@ module.exports = function (app) {
 		try {
 			const loggedIn = await loginController(
 				dbGetPassword,
-				dbCreateRefreshToken,
-				dbDeleteRefreshToken,
+				dbGetAccountId,
+				dbStoreRefreshToken,
 				req.body.username,
 				req.body.password)
 
 			if (loggedIn) {
-				console.log("Logged in as: " + req.body.username)
+				console.log("Logged in as:",  req.body.username)
 				res.status(200).send(loggedIn)
 			}
 			else {
@@ -53,7 +53,6 @@ module.exports = function (app) {
 			console.log(err)
 			res.status(500).send("Internal Server Error")
 		}
-
 	})
 
 	/*
@@ -153,48 +152,6 @@ module.exports = function (app) {
 			}
 			else {
 				res.status(201).send()
-			}
-		}
-		catch (err) {
-			console.log(err)
-			res.status(500).send("Internal Server Error")
-		}
-	})
-
-	/*
-	 * Update the username of a user with new value.
-	 */
-	app.put('/username', async (req, res) => {
-		// 'authorization': 'Bearer TOKEN'
-		const authHeader = req.headers['authorization']
-		const token = authHeader && authHeader.split(' ')[1]
-
-		// check if there is a token
-		if (token == null) {
-			console.log("Unauthorized")
-			return res.status(401).send()
-		}
-
-		// verify the token is valid
-		jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, account) => {
-			if (err) {
-				console.log("Forbidden")
-				return res.status(403).send()
-			}
-			req.account = account
-		})
-
-		try {
-			const tokens = await updateUsernameController(
-				dbUpdateUsername, dbUsernameExists, dbCreateRefreshToken, dbDeleteRefreshToken, req.account.username, req.body.username)
-			if (tokens == -1) {
-				res.status(400).send({ message: "Username is already taken" })
-			}
-			else if (tokens == -2) {
-				res.status(400).send({ message: "Could not update username" })
-			}
-			else {
-				res.status(200).send(tokens)
 			}
 		}
 		catch (err) {
