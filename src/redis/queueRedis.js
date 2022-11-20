@@ -16,7 +16,7 @@ const redisCalculateScoreForSongEntry = async (sessionId, numUpvotes) => {
     return prio
 }
 
-const redisShiftSongs = async (sessionId, minScore, maxScore) => {
+const redisShiftSongs = async (sessionId, minScore, maxScore, shiftNum = 1) => {
     const songsList = await redisClient.sendCommand([
         'ZRANGE',
         `sessions:${sessionId}:queue`,
@@ -30,7 +30,7 @@ const redisShiftSongs = async (sessionId, minScore, maxScore) => {
         await redisClient.sendCommand([
             'ZINCRBY',
             `sessions:${sessionId}:queue`,
-            `1`,
+            `${shiftNum}`,
             `${id}`
         ]).then((resp) => resp)
         .catch((err) => console.log(`Error when incrementing priority\n${err}`))
@@ -226,11 +226,55 @@ const redisAddUpvote = async (sessionId, songId) => {
     return resp
 }
 
+/*
+ * Remove upvotesong in queue for given session.
+ * @param sessionId -> the 6-digit alphanumeric session id associated with the session.
+ * @param songId -> the song id associated with the song for playback.
+ * @return -> true if the upvote is removed successfully, otherwise false
+ */
+const redisRemoveUpvote = async (sessionId, songId) => {
+    // get current number of upvotes
+    const currPrio = await redisClient.sendCommand([
+        'ZMSCORE',
+        `sessions:${sessionId}:queue`,
+        `${songId}`
+    ]).then((resp) => resp)
+    .catch((err) => console.log(`Error when getting priority of song ${songId}\n${err}`))
+
+    // get current number of upvotes before adding an upvote
+    const currNumUpvotes = Math.trunc(currPrio / 100000)
+    const newPrio = (currNumUpvotes - 1) * 100000 + 99999
+    const newNumUpvotes = Math.trunc(newPrio / 100000)
+    const incrby = newPrio - currPrio
+
+    // shift the priorities of the other songs down
+    let minScore = newNumUpvotes * 100000
+    let maxScore = newPrio
+    await redisShiftSongs(sessionId, minScore, maxScore, shiftNum = -1)
+    
+    // increment song priority
+    const resp = await redisClient.sendCommand([
+        'ZINCRBY',
+        `sessions:${sessionId}:queue`,
+        `${incrby}`,
+        `${songId}`
+    ]).then((resp) => resp >= 0)
+    .catch((err) => console.log(`Error when trying to increment priority of song ${songId}\n${err}`))
+
+    // shift the priorities of the other songs up
+    minScore = currNumUpvotes * 100000
+    maxScore = currPrio
+    redisShiftSongs(sessionId, minScore, maxScore)
+
+    return resp
+}
+
 module.exports = { 
     redisAddSongToSession,
     redisVerifySongInQueue,
     redisDequeueSongFromSession,
     redisSetCurrentSongForSession,
     redisGetSessionQueue,
-    redisAddUpvote
+    redisAddUpvote,
+    redisRemoveUpvote
 }

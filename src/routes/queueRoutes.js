@@ -8,7 +8,8 @@ const {
 	redisDequeueSongFromSession,
 	redisSetCurrentSongForSession,
 	redisVerifySongInQueue,
-	redisAddUpvote
+	redisAddUpvote,
+	redisRemoveUpvote
 } = require('../redis/queueRedis')
 
 // import controller functions
@@ -16,7 +17,8 @@ const {
 	addSongController,
 	dequeueSongController,
 	setCurrentSongController,
-	addUpvoteController
+	addUpvoteController,
+	removeUpvoteController
 } = require('../controllers/queueController')
 
 // import models 
@@ -85,8 +87,26 @@ module.exports = function (app) {
 	 * Remove an upvote (decrement priority) from a song in a session queue.
 	 */
 	app.delete('/sessions/:id/songs/:song_id/upvote', async (req, res) => {
-		console.log('endpoint not yet implemented - sorry!')
-		res.status(405).send("endpoint not yet implemented") 
+		try {
+            const removeUpvote = await removeUpvoteController(
+                redisVerifySessionIdExists,
+                redisVerifySongInQueue,
+				redisRemoveUpvote,
+                req.params.id,
+                req.params.song_id
+            )
+			if (removeUpvote.status === FAILURE) {
+				res.status(400).send({ error: removeUpvote.error })
+			}
+			else {
+				res.status(200).send() 
+				console.log(`Successfully removed upvote from song ${req.params.song_id} in session ${req.params.id}`);
+			}
+		}
+		catch (err) {
+			console.log(err)
+			res.status(500).send("Internal Server Error")
+		}
 	})
 
 	/*

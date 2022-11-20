@@ -103,10 +103,33 @@ const addUpvoteController = async ( redisVerifySessionIdExistsCb, redisVerifySon
         });
 }
 
+/*
+ * Remove upvote from song in the queue.
+ */
+const removeUpvoteController = async ( redisVerifySessionIdExistsCb, redisVerifySongInQueueCb, redisRemoveUpvoteCb, sessionId, songId ) => {
+    if (!await redisVerifySessionIdExistsCb(sessionId)) {
+        console.log('Error removing upvote: Session ID not valid')
+        return queueError(INVALID_ID);
+    }
+    if (!await redisVerifySongInQueueCb(sessionId, songId)) {
+        console.log('Error removing upvote: Song ID not valid')
+        return queueError(INVALID_SONG);
+    }
+
+    return await redisRemoveUpvoteCb(sessionId, songId)
+        .then((res) => {
+            if (res) {
+                return queueSuccess();
+            }
+            return queueError(FAILURE);
+        });
+}
+
 module.exports = { 
     addSongController,
     dequeueSongController,
     setCurrentSongController,
     getSessionQueueController,
-    addUpvoteController
+    addUpvoteController,
+    removeUpvoteController
 }
