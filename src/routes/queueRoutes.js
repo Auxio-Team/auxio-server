@@ -6,7 +6,6 @@ const {
 const {
 	redisAddSongToSession,
 	redisDequeueSongFromSession,
-	redisSetCurrentSongForSession,
 	redisVerifySongInQueue,
 	redisAddUpvote,
 	redisRemoveUpvote
@@ -16,7 +15,6 @@ const {
 const {
 	addSongController,
 	dequeueSongController,
-	setCurrentSongController,
 	addUpvoteController,
 	removeUpvoteController
 } = require('../controllers/queueController')
@@ -123,14 +121,6 @@ module.exports = function (app) {
 	})
 
 	/*
-	 * Get next song in a session queue.  (we might not need this? depends on how subscribing to redis works)
-	 */
-	app.get('/sessions/:id/songs/next', async (req, res) => {
-		console.log('endpoint not yet implemented - sorry!')
-		res.status(405).send("endpoint not yet implemented") 
-	})
-
-	/*
 	 * Get current song in a session queue. (we might not need this? depends on how subscribing to redis works)
 	 */
 	app.get('/sessions/:id/songs/current', async (req, res) => {
@@ -139,39 +129,14 @@ module.exports = function (app) {
 	})
 
 	/*
-	 * Set the up next song in a session queue.
-	 * (only the host should be able to make this call)
-	 */
-	app.post('/sessions/:id/songs/next', async (req, res) => {
-		try {
-            const dequeueSong = await dequeueSongController(
-                redisVerifySessionIdExists,
-				redisDequeueSongFromSession,
-                req.params.id
-            )
-			if (dequeueSong.status === FAILURE) {
-				res.status(400).send({ error: dequeueSong.error })
-			}
-			else {
-				res.status(200).send() 
-				console.log(`Successfully added song to queue for session ${req.params.id}`);
-			}
-		}
-		catch (err) {
-			console.log(err)
-			res.status(500).send("Internal Server Error")
-		}
-	})
-
-	/*
 	 * Set the current song in a session queue.
 	 * (only the host should be able to make this call)
 	 */
 	app.post('/sessions/:id/songs/current', async (req, res) => {
 		try {
-            const setCurr = await setCurrentSongController(
+            const setCurr = await dequeueSongController(
                 redisVerifySessionIdExists,
-				redisSetCurrentSongForSession,
+				redisDequeueSongFromSession,
                 req.params.id
             )
 			if (setCurr.status === FAILURE) {

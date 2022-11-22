@@ -87,7 +87,7 @@ const redisAddSongToSession = async (sessionId, songId) => {
 }
 
 /*
- * Dequeue next song from queue for given session.
+ * Dequeue new current song from queue for given session.
  * @param sessionId -> the 6-digit alphanumeric session id associated with the session.
  * @return -> true if the song was dequeued successfully
  */
@@ -104,71 +104,20 @@ const redisDequeueSongFromSession = async (sessionId) => {
     const maxScore = member.score
     redisShiftSongs(sessionId, minScore, maxScore)
 
-    // update next up song
+    // update current song
     await redisClient.sendCommand([
         'HSET',
         `sessions:${sessionId}`,
-        'next',
+        'curr',
         `${member.value}`
     ]).then((resp) => resp)
-    .catch((err) => console.log(`Error when updating next song\n${err}`))
+    .catch((err) => console.log(`Error when updating current song\n${err}`))
 
     // publish to subscribers
     await redisClient.sendCommand([
         'PUBLISH',
         `sessions:${sessionId}`,
-        'nextUpdated'
-    ])
-    console.log("published next updated")
-
-    return true
-}
-
-/*
- * Set current song for queue for given session.
- * @param sessionId -> the 6-digit alphanumeric session id associated with the session.
- * @return -> true if the song was dequeued successfully
- */
-const redisSetCurrentSongForSession = async (sessionId) => {
-    // get next up song
-    const songId = await redisClient.sendCommand([
-        'HGET',
-        `sessions:${sessionId}`,
-        'next'
-    ]).then((resp) => resp)
-    .catch((err) => console.log(`Error when getting up next song\n${err}`))
-
-    // set current song
-    await redisClient.sendCommand([
-        'HSET',
-        `sessions:${sessionId}`,
-        'curr',
-        `${songId}`
-    ]).then((resp) => resp)
-    .catch((err) => console.log(`Error when setting current\n${err}`))
-
-    // remove next up song assignment
-    await redisClient.sendCommand([
-        'HSET',
-        `sessions:${sessionId}`,
-        'next',
-        ''
-    ]).then((resp) => resp) 
-    .catch((err) => console.log(`Error when removing up next\n${err}`))
-
-    // publish current song
-    await redisClient.sendCommand([
-        'PUBLISH',
-        `sessions:${sessionId}`,
         'currentUpdated'
-    ])
-    console.log("published curr updated")
-
-    // publish next up song
-    await redisClient.sendCommand([
-        'PUBLISH',
-        `sessions:${sessionId}`,
-        'nextUpdated'
     ])
     console.log("published next updated")
 
@@ -286,7 +235,6 @@ module.exports = {
     redisAddSongToSession,
     redisVerifySongInQueue,
     redisDequeueSongFromSession,
-    redisSetCurrentSongForSession,
     redisGetSessionQueue,
     redisAddUpvote,
     redisRemoveUpvote
