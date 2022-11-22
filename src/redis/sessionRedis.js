@@ -22,11 +22,14 @@ const redisCreateSession = async (sessionId, host, capacity) => {
     await redisClient.SADD('hosts', host)
         .catch((err) => console.log('unable to add host\n'+err))
 
-    await redisClient.sendCommand(['HSET', `sessions:${sessionId}`, 'host', host, 'curr', '', 'next', ''])
-        .catch((err) => console.log('unable to set session info\n'+err))
+    await redisClient.sendCommand([
+        'HSET', 
+        `sessions:${sessionId}`, 
+        'host', host, 
+        'curr', '',
+        'capacity', `${capacity}`
+    ]).catch((err) => console.log('unable to set session info\n'+err))
 	
-    await redisClient.HSET(`sessions:${sessionId}`, 'capacity', capacity)
-    
     await redisJoinSession(sessionId, host);
     return respStatus;
 }
@@ -39,9 +42,9 @@ const redisCreateSession = async (sessionId, host, capacity) => {
  */
 const redisJoinSession = async (sessionId, participant) => {
     let capacity = await redisClient.HGET(`sessions:${sessionId}`, 'capacity');
-    let val = await redisClient.SCARD(`sessions:${sessionId}:participants`);
+    let numParticipants = await redisClient.SCARD(`sessions:${sessionId}:participants`);
 
-    if (val < capacity) {
+    if (numParticipants < capacity) {
         return await redisClient.SADD(`sessions:${sessionId}:participants`, participant)
             .then(res => {
                 if (res != 1) {
@@ -166,7 +169,7 @@ const redisEndSession = async (sessionId, host) => {
     await redisClient.SPOP(
         `sessions:${sessionId}:participants`, 
         participantCount
-        ).then((resp) => resp)
+    ).then((resp) => resp)
     .catch((err) => console.log(`Error when trying to remove participants\n${err}`))
 
     // remove all session info
@@ -174,8 +177,7 @@ const redisEndSession = async (sessionId, host) => {
         'HDEL',
         `sessions:${sessionId}`,
         'host',
-        'curr',
-        'next'
+        'curr'
     ]).then((resp) => resp)
     .catch((err) => console.log(`Error when trying to delete session info\n${err}`))
 

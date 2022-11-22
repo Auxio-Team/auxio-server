@@ -69,11 +69,14 @@ These are the steps I took to install PostgreSQL on WSL (a Linux subsystem for W
   - the config file is under `musix-server/src/configs/redis-36379.conf`
 - Run `redis-cli -p 36379` to interact with the Redis server from the CLI
 
-## Useful commands to see data in the Redis-cli
-- `smembers sessions` - list all currently running session ids
-- `smembers hosts` - list all users that are hosts
-- `smembers session:<session id>:participants` - list all participants in the given session
-- `hgetall session:<session id>` - get information about the given session
+## Useful Redis Information
+- Diagram displaying Redis relationships here: https://drive.google.com/file/d/1f8xqUTAgAZyrt_5qp2SkEBfgWaCWjwNA/view?usp=sharing
+- Useful commands to see the data using Redis-cli:
+  - `smembers hosts` - list all users that are hosts (List of Hosts table in diagram)
+  - `smembers sessions` - list all currently running session ids (List of Session IDs table in diagram)
+  - `hgetall sessions:<session id>` - get information about the given session (Session Info table in diagram)
+  - `smembers sessions:<session id>:participants` - list all participants in the given session (List of Participants table in diagram)
+  - `zrevrange sessions:<session id>:queue 0 -1` - list all songs in order in the queue of the given session (Queue of Songs table in diagram) (add `WITHSCORES` to the end of the command to see the priorities of the songs as well)
 - all redis commands listed here: https://redis.io/commands/
 - description of redis node package: https://www.npmjs.com/package/redis
 
@@ -99,5 +102,3 @@ The song queue is a redis sorted set.  A sorted set has elements sorted by their
 ## TODO items with Redis
 - TODO implement redis server start automatically with server
 - TODO implement redis security
-- TODO update redis config file
-- TODO look at redis EVENT NOTIFICATION section of config file for event notifying (i'm thinking we use this for notifying client uis when queue order is updated)
