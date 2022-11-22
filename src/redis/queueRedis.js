@@ -60,7 +60,7 @@ const redisVerifySongInQueue = async (sessionId, songId) => {
  */
 const redisAddSongToSession = async (sessionId, songId) => {
     // calculate song priority for new song
-    // note: new songs always start with an upvote count of 1
+    // note: new songs always start with an upvote count of 0
     const prio = await redisCalculateScoreForSongEntry(sessionId, 0)
 
     // add new song to queue
