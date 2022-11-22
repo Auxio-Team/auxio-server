@@ -26,6 +26,11 @@ const {
     FAILURE,
 } = require('../models/queueModels')
 
+/*
+ *	TODO: make sure user is in session before executing
+ *	any of the queue requests
+ */ 
+
 module.exports = function (app) {
 	/*
 	 * Add song to a session queue.

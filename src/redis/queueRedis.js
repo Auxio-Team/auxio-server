@@ -61,7 +61,7 @@ const redisVerifySongInQueue = async (sessionId, songId) => {
 const redisAddSongToSession = async (sessionId, songId) => {
     // calculate song priority for new song
     // note: new songs always start with an upvote count of 1
-    const prio = await redisCalculateScoreForSongEntry(sessionId, 1)
+    const prio = await redisCalculateScoreForSongEntry(sessionId, 0)
 
     // add new song to queue
     const resp = await redisClient.sendCommand([
@@ -80,7 +80,7 @@ const redisAddSongToSession = async (sessionId, songId) => {
             `sessions:${sessionId}`,
             'queueUpdated'
         ])
-        console.log("published")
+        console.log("published song enqueued")
     }
 
     return resp
@@ -114,13 +114,12 @@ const redisDequeueSongFromSession = async (sessionId) => {
     .catch((err) => console.log(`Error when updating next song\n${err}`))
 
     // publish to subscribers
-    console.log("publishing next updated")
     await redisClient.sendCommand([
         'PUBLISH',
         `sessions:${sessionId}`,
         'nextUpdated'
     ])
-    console.log("published")
+    console.log("published next updated")
 
     return true
 }
@@ -158,22 +157,20 @@ const redisSetCurrentSongForSession = async (sessionId) => {
     .catch((err) => console.log(`Error when removing up next\n${err}`))
 
     // publish current song
-    console.log("publishing curr updated")
     await redisClient.sendCommand([
         'PUBLISH',
         `sessions:${sessionId}`,
         'currentUpdated'
     ])
-    console.log("published")
+    console.log("published curr updated")
 
     // publish next up song
-    console.log("publishing next updated")
     await redisClient.sendCommand([
         'PUBLISH',
         `sessions:${sessionId}`,
         'nextUpdated'
     ])
-    console.log("published")
+    console.log("published next updated")
 
     return true
 }
@@ -223,6 +220,14 @@ const redisAddUpvote = async (sessionId, songId) => {
     const maxScore = currPrio
     redisShiftSongs(sessionId, minScore, maxScore)
 
+    // publish upvote
+    await redisClient.sendCommand([
+        'PUBLISH',
+        `sessions:${sessionId}`,
+        'upvoteAdded'
+    ])
+    console.log("published upvote added")
+
     return resp
 }
 
@@ -265,6 +270,14 @@ const redisRemoveUpvote = async (sessionId, songId) => {
     minScore = currNumUpvotes * 100000
     maxScore = currPrio
     redisShiftSongs(sessionId, minScore, maxScore)
+
+    // publish upvote removed
+    await redisClient.sendCommand([
+        'PUBLISH',
+        `sessions:${sessionId}`,
+        'upvoteRemoved'
+    ])
+    console.log("published upvote removed")
 
     return resp
 }
