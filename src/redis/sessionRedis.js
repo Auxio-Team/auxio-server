@@ -177,7 +177,8 @@ const redisEndSession = async (sessionId, host) => {
         'HDEL',
         `sessions:${sessionId}`,
         'host',
-        'curr'
+        'curr',
+        'capacity'
     ]).then((resp) => resp)
     .catch((err) => console.log(`Error when trying to delete session info\n${err}`))
 
