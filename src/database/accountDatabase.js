@@ -171,32 +171,6 @@ const dbUpdatePreferredPlatform = async (accountId, value) => {
 }
 
 /*
- * Get the prefered platform for the account with id=accountId.
- * @return the preferred streaming platform if it is found, otherwise null.
- */
-const dbGetPreferredPlatform = async (accountId) => {
-	const query = {
-		text: "SELECT preferred_streaming_platform "
-		    + "FROM account "
-				+ "WHERE id = $1",
-		values: [accountId],
-	}
-
-	const client = createClient("musixdb")
-	await client.connect()
-	const response = await client.query(query)
-	.then(res => {
-		return res.rows[0]
-	})
-	.catch(err => {
-		console.error(err.stack)
-		return null
-	})
-	await client.end()
-	return response	
-}
-
-/*
  * Get the id (primary key) of the account with username=username.
  * @return -> the account id, otherwise null.
  */
@@ -258,7 +232,6 @@ module.exports = {
 	dbPhoneNumberExistsForUser,
 	dbResetPassword,
 	dbUpdatePreferredPlatform,
-	dbGetPreferredPlatform,
 	dbGetAccount,
 	dbGetAccountId,
 	dbUpdateUsername

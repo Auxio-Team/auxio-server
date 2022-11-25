@@ -22,7 +22,7 @@ const {
 
 // import database functions
 const {
-	dbGetPreferredPlatform
+	dbGetAccount
 } = require('../database/accountDatabase')
 
 const {
@@ -66,7 +66,7 @@ module.exports = function (app) {
 		try {
 			const sessionInfo = await getSessionInfoController(
 				redisGetSessionInfo,
-				dbGetPreferredPlatform,
+				dbGetAccount,
 				req.params.id
 			)
 

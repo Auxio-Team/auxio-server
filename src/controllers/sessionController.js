@@ -50,7 +50,7 @@ const createSessionController =
 /*
  * Get session information.
  */
-const getSessionInfoController = async (redisGetSessionInfoCb, dbGetPreferredPlatform, sessionId) => {
+const getSessionInfoController = async (redisGetSessionInfoCb, dbGetAccount, sessionId) => {
     const sessionInfo = await redisGetSessionInfoCb(sessionId);
     console.log("Session Info:", sessionInfo)
     if (sessionInfo.host == null) {
@@ -58,12 +58,13 @@ const getSessionInfoController = async (redisGetSessionInfoCb, dbGetPreferredPla
     }
     // get preferred streaming platform of host
     console.log("Host:", sessionInfo.host)
-    const response = await dbGetPreferredPlatform(sessionInfo.host)
-    if (response == null || response.preferred_streaming_platform == null) {
+    const response = await dbGetAccount(sessionInfo.host)
+    if (response == null || response.username == null ||
+        response.preferred_streaming_platform == null) {
         return null
     }
 
-    return { host: sessionInfo.host, platform: response.preferred_streaming_platform }
+    return { host: response.username, platform: response.preferred_streaming_platform }
 }
 
 /*
