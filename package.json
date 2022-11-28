@@ -4,7 +4,11 @@
   "description": "",
   "main": "server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "npm-run-all --parallel start-redis start-server start-auth-server",
+    "start-server": "node server.js",
+    "start-auth-server": "node authServer.js",
+    "start-redis": "redis-server src/configs/redis-36379.conf"
   },
   "repository": {
     "type": "git",
@@ -29,5 +33,8 @@
     "random-string-alphanumeric-generator": "^0.12.2",
     "redis": "^4.3.1",
     "twilio": "^3.82.2"
+  },
+  "devDependencies": {
+    "npm-run-all": "^4.1.5"
   }
 }
