@@ -12,7 +12,7 @@ CREATE TABLE refresh_token (
 	token varchar(320) NOT NULL
 );
 
-CREATE TYPE friendship_status AS ENUM ('friends', 'requested')
+CREATE TYPE friendship_status AS ENUM ('friends', 'requested');
 
 CREATE TABLE friendship (
 	id bigserial NOT NULL PRIMARY KEY,

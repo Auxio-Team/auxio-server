@@ -15,25 +15,25 @@ const {
     dbRemoveFriend
 } = require('../database/friendDatabase')
 
-
+// Update to use id's instead of usernames
 
 module.exports = function (app) {
+
     /*
      * Create a friend request from account_1 (current user) to account_2
      */
     app.post('/friend/request', async (req, res) => {
         try {
             const request = await createFriendRequestController(
-                dbCreateFriendRequest, req.account.username, req.body.username)
+                dbCreateFriendRequest, req.account.id, req.body.account_id)
             
             if (request) {
-
+                console.log("Sent friend request to: " + req.body.account_id)
+				res.status(200).send()
             }
             else {
-
+                res.status(400).send({ 'message': 'Unable to send friend request' })
             }
-
-
         }
         catch (err) {
             console.log(err)
@@ -48,13 +48,14 @@ module.exports = function (app) {
     app.post('/friend/accept', async (req, res) => {
         try {
             const accept = await acceptFriendRequestController(
-                dbAcceptFriendRequest, req.account.username, req.body.username)
+                dbAcceptFriendRequest, req.account.id, req.body.account_id)
 
-            if (accept) {
-
+            if (accept === 1) {
+                console.log("Accepted friend request from: " + req.body.account_id)
+				res.status(200).send()
             }
             else {
-
+                res.status(400).send({ 'message': 'Unable to accept friend request' })
             }
         }
         catch (err) {
@@ -70,13 +71,14 @@ module.exports = function (app) {
     app.post('/friend/decline', async (req, res) => {
         try {
             const decline = await declineFriendRequestController(
-                dbDeclineFriendRequest, req.account.username, req.body,username)
+                dbDeclineFriendRequest, req.account.id, req.body.account_id)
             
-            if (decline) {
-
+            if (decline === 1) {
+                console.log("Declined friend request from: " + req.body.account_id)
+				res.status(200).send()
             }
             else {
-
+                res.status(400).send({ 'message': 'Unable to decline friend request' })
             }
         }
         catch (err) {
@@ -92,13 +94,14 @@ module.exports = function (app) {
     app.post('/friend/remove', async (req, res) => {
         try {
             const remove = await removeFriendController(
-                dbRemoveFriend, req.account.username, req.body.username)
+                dbRemoveFriend, req.account.id, req.body.account_id)
             
-            if (remove) {
-
+            if (remove === 1) {
+                console.log("Removed friend: " + req.body.account_id)
+				res.status(200).send()
             }
             else {
-
+                res.status(400).send({ 'message': 'Unable to remove friend' })
             }
         }
         catch (err) {
