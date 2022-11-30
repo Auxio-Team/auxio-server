@@ -27,9 +27,13 @@ const { createMusixDatabase } = require('./src/database/createDatabase')
 const express = require('express')
 const app = express()
 const port = 3000
+const cors = require('cors');
 
 /* middleware handlers */
 app.use(express.json())
+app.use(cors({
+	origin: '*'
+}))
 
 
 /*
@@ -77,6 +81,7 @@ app.use((req, res, next) => {
 			return res.status(403).send()
 		}
 		req.account = account
+		console.log("account id:", req.account.accountId)
 		next()
 	})
 })
