@@ -24,11 +24,13 @@ module.exports = function (app) {
      */
     app.post('/friend/request', async (req, res) => {
         try {
+            console.log("ID: " + req.account.accountId)
+
             const request = await createFriendRequestController(
-                dbCreateFriendRequest, req.account.id, req.body.account_id)
+                dbCreateFriendRequest, req.account.accountId, req.body.accountId)
             
             if (request) {
-                console.log("Sent friend request to: " + req.body.account_id)
+                console.log("Sent friend request to: " + req.body.accountId)
 				res.status(200).send()
             }
             else {
@@ -48,10 +50,10 @@ module.exports = function (app) {
     app.post('/friend/accept', async (req, res) => {
         try {
             const accept = await acceptFriendRequestController(
-                dbAcceptFriendRequest, req.account.id, req.body.account_id)
+                dbAcceptFriendRequest, req.account.accountId, req.body.accountId)
 
             if (accept === 1) {
-                console.log("Accepted friend request from: " + req.body.account_id)
+                console.log("Accepted friend request from: " + req.body.accountId)
 				res.status(200).send()
             }
             else {
@@ -71,10 +73,10 @@ module.exports = function (app) {
     app.post('/friend/decline', async (req, res) => {
         try {
             const decline = await declineFriendRequestController(
-                dbDeclineFriendRequest, req.account.id, req.body.account_id)
+                dbDeclineFriendRequest, req.account.accountId, req.body.accountId)
             
             if (decline === 1) {
-                console.log("Declined friend request from: " + req.body.account_id)
+                console.log("Declined friend request from: " + req.body.accountId)
 				res.status(200).send()
             }
             else {
@@ -94,10 +96,10 @@ module.exports = function (app) {
     app.post('/friend/remove', async (req, res) => {
         try {
             const remove = await removeFriendController(
-                dbRemoveFriend, req.account.id, req.body.account_id)
+                dbRemoveFriend, req.account.accountId, req.body.accountId)
             
             if (remove === 1) {
-                console.log("Removed friend: " + req.body.account_id)
+                console.log("Removed friend: " + req.body.accountId)
 				res.status(200).send()
             }
             else {

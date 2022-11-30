@@ -70,8 +70,8 @@ const dbAcceptFriendRequest = async (recipient_id, requester_id) => {
 	// possible errors: request not in table, already friends
 
 	const query = {
-		text: "UPDATE friendship"
-				+ "SET current_status = $1"
+		text: "UPDATE friendship "
+				+ "SET current_status = $1 "
 				+ "WHERE requester_id = $2 AND recipient_id = $3 AND current_status = $4;",
 		values: ['friends', requester_id, recipient_id, 'requested'],
 	}
@@ -88,6 +88,8 @@ const dbAcceptFriendRequest = async (recipient_id, requester_id) => {
 	})
 	await client.end()
 
+	console.log("RESPONSE: " + response)
+
 	return response["rowCount"]
 }
 
@@ -102,7 +104,7 @@ const dbDeclineFriendRequest = async (recipient_id, requester_id) => {
 	// possible errors: request doesn't exist, already friends
 
 	const query = {
-		text: "DELETE FROM friendship"
+		text: "DELETE FROM friendship "
 				+ "WHERE requester_id = $1 AND recipient_id = $2 AND current_status = $3;",
 		values: [requester_id, recipient_id, 'requested'],
 	}
@@ -119,6 +121,8 @@ const dbDeclineFriendRequest = async (recipient_id, requester_id) => {
 	})
 	await client.end()
 
+	console.log("RESPONSE: " + response)
+
 	return response["rowCount"]
 }
 
@@ -133,8 +137,8 @@ const dbRemoveFriend = async (user_id, removed_user_id) => {
 	// possible errors: current status is requested, no relationship in the table
 
 	const query = {
-		text: "DELETE FROM friendship"
-				+ "WHERE requester_id = $1 AND recipient_id = $2 AND current_status = $3"
+		text: "DELETE FROM friendship "
+				+ "WHERE requester_id = $1 AND recipient_id = $2 AND current_status = $3 "
 				+ "OR requester_id = $2 AND recipient_id = $1 AND current_status = $3;",
 		values: [user_id, removed_user_id, 'friends'],
 	}
@@ -150,6 +154,8 @@ const dbRemoveFriend = async (user_id, removed_user_id) => {
 		return null
 	})
 	await client.end()
+
+	console.log("RESPONSE: " + response)
 
 	return response["rowCount"]
 }
