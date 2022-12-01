@@ -30,7 +30,7 @@ const dbGetFriendList = async (user_id) => {
 	await client.connect()
 	const friends_list = await client.query(query)
 	.then(res => {
-		return res
+		return res.rows
 	})
 	.catch(e => {
 		console.error(e.stack)
@@ -65,7 +65,7 @@ const dbGetFriendRequestList = async (recipient_id) => {
 	await client.connect()
 	const request_list = await client.query(query)
 	.then(res => {
-		return res
+		return res.rows
 	})
 	.catch(e => {
 		console.error(e.stack)
