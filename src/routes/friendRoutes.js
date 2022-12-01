@@ -4,7 +4,9 @@ const {
     createFriendRequestController,
     acceptFriendRequestController,
     declineFriendRequestController,
-    removeFriendController
+    removeFriendController,
+    getFriendListController,
+    getFriendRequestListController
 } = require('../controllers/friendController')
 
 // import database functions
@@ -12,7 +14,9 @@ const {
     dbCreateFriendRequest,
     dbAcceptFriendRequest,
     dbDeclineFriendRequest,
-    dbRemoveFriend
+    dbRemoveFriend,
+    dbGetFriendList,
+    dbGetFriendRequestList
 } = require('../database/friendDatabase')
 
 // Update to use id's instead of usernames
@@ -20,12 +24,60 @@ const {
 module.exports = function (app) {
 
     /*
+     * Get list of friends
+     */
+    app.get('/friend/friendlist', async (req, res) => {
+        try {
+            console.log("ID: " + req.account.accountId)
+
+            const friend_list = await getFriendListController(
+                dbGetFriendList, req.account.accountId)
+            
+            if (friend_list) {
+                console.log("Got friend list for: " + req.account.accountId)
+				res.status(200).send(friend_list)
+            }
+            else {
+                res.status(400).send({ 'message': 'Unable to get friend list' })
+            }
+        }
+        catch (err) {
+            console.log(err)
+            res.status(500).send("Internal Server Error")
+        }
+    })
+
+
+    /*
+     * Get list of friend requests
+     */
+    app.get('/friend/requestlist', async (req, res) => {
+        try {
+            console.log("ID: " + req.account.accountId)
+
+            const request_list = await getFriendRequestListController(
+                dbGetFriendRequestList, req.account.accountId)
+            
+            if (request_list) {
+                console.log("Got friend request list for: " + req.account.accountId)
+				res.status(200).send(request_list)
+            }
+            else {
+                res.status(400).send({ 'message': 'Unable to get friend request list' })
+            }
+        }
+        catch (err) {
+            console.log(err)
+            res.status(500).send("Internal Server Error")
+        }
+    })
+
+
+    /*
      * Create a friend request from account_1 (current user) to account_2
      */
     app.post('/friend/request', async (req, res) => {
         try {
-            console.log("ID: " + req.account.accountId)
-
             const request = await createFriendRequestController(
                 dbCreateFriendRequest, req.account.accountId, req.body.accountId)
             
