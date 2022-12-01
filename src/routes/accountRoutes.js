@@ -8,6 +8,7 @@ const {
 	createAccountController,
 	getAccountsController,
 	getAccountController,
+	getHistoryController,
 	updatePreferredPlatformController,
 	updateUsernameController,
 	logoutController,
@@ -25,6 +26,10 @@ const {
 const {
 	dbDeleteRefreshToken
 } = require('../database/authDatabase')
+
+const {
+	dbGetSessionHistory
+} = require('../database/historyDatabase')
 
 const {
 	USERNAME_TAKEN,
@@ -87,6 +92,25 @@ module.exports = function (app) {
 			}
 			else {
 				res.status(400).send("Couldn't find account")
+			}
+		}
+		catch (err) {
+			console.log(err)
+			res.status(500).send("Internal Server Error")
+		}
+	})
+
+	/*
+	 * Get session history for account that is making this request
+	 */
+	app.get('/history', async (req, res) => {
+		try {
+			const history = await getHistoryController(dbGetSessionHistory, req.account.accountId)
+			if (account) {
+				res.status(200).send(history)
+			}
+			else {
+				res.status(400).send("Couldn't find history")
 			}
 		}
 		catch (err) {
