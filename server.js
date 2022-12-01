@@ -60,7 +60,7 @@ app.get('/', async (req, res) => {
 app.use((req, res, next) => {
 	// guest user bypass authorization
 	if (req.path.split('/')[1] == 'guest' ||
-			(req.path.split('/')[1] == 'account' && req.method == 'POST')) {
+			(req.path.split('/')[1] == 'account' && req.path.split('/').length == 2 && req.method == 'POST')) {
 		return next();
 	}
 
@@ -91,6 +91,7 @@ require('./src/routes/accountRoutes')(app)
 require('./src/routes/guestRoutes')(app)
 require('./src/routes/sessionRoutes')(app)
 require('./src/routes/queueRoutes')(app)
+require('./src/routes/friendRoutes')(app)
 
 /* listen on server */
 app.listen(port, () => {
