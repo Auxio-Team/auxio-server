@@ -26,7 +26,7 @@ module.exports = function (app) {
     /*
      * Get list of friends
      */
-    app.get('/friend/friend_list', async (req, res) => {
+    app.get('/friend/friendlist', async (req, res) => {
         try {
             console.log("ID: " + req.account.accountId)
 
@@ -51,7 +51,7 @@ module.exports = function (app) {
     /*
      * Get list of friend requests
      */
-    app.get('/friend/request_list', async (req, res) => {
+    app.get('/friend/requestlist', async (req, res) => {
         try {
             console.log("ID: " + req.account.accountId)
 

@@ -40,7 +40,7 @@ const dbGetFriendList = async (user_id) => {
 
 	console.log("FRIENDS LIST: " + JSON.stringify(friends_list))
 
-	return friends_list ? friends_list : null
+	return friends_list
 }
 
 /*
@@ -75,7 +75,7 @@ const dbGetFriendRequestList = async (recipient_id) => {
 
 	console.log("REQUEST LIST: " + JSON.stringify(request_list))
 
-	return request_list ? request_list : null
+	return request_list
 
 }
 
