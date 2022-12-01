@@ -9,7 +9,6 @@ const { dbGetFriendList } = require("../database/friendDatabase")
 const getFriendListController = async (dbGetFriendList, user_id) => {
     const friend_list = await dbGetFriendList(user_id)
 
-    // TODO: return the list of account data for our friends
     return friend_list
 }
 
@@ -19,7 +18,6 @@ const getFriendListController = async (dbGetFriendList, user_id) => {
 const getFriendRequestListController = async (dbGetFriendRequestList, user_id) => {
     const request_list = await dbGetFriendRequestList(user_id)
 
-    // TODO: return the list of account data for incoming friend requests
     return request_list
 }
 

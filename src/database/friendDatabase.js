@@ -2,7 +2,6 @@ const { Client, Pool } = require('pg')
 const { createClient, createPool } = require('./createClientPool')
 
 
-// Get number of rows updated/deleted (should be 1, if not then error)
 
 
 /*
@@ -11,6 +10,37 @@ const { createClient, createPool } = require('./createClientPool')
  */
 const dbGetFriendList = async (user_id) => {
     // select
+	// return the account id, username (TODO status, session_code)
+
+	const query = {
+		text: "SELECT id, username "
+				+ "FROM account "
+				+ "WHERE id IN "
+				+ "(SELECT recipient_id "
+				+ "FROM friendship "
+				+ "WHERE current_status = $1 AND requester_id = $2 "
+				+ "UNION "
+				+ "SELECT requester_id "
+				+ "FROM friendship "
+				+ "WHERE current_status = $1 AND recipient_id = $2);",
+		values: ['friends', user_id],
+	}
+
+	const client = createClient("musixdb")
+	await client.connect()
+	const friends_list = await client.query(query)
+	.then(res => {
+		return res
+	})
+	.catch(e => {
+		console.error(e.stack)
+		return null
+	})
+	await client.end()
+
+	console.log("FRIENDS LIST: " + JSON.stringify(friends_list))
+
+	return friends_list ? friends_list : null
 }
 
 /*
@@ -19,6 +49,34 @@ const dbGetFriendList = async (user_id) => {
  */
 const dbGetFriendRequestList = async (recipient_id) => {
     // select
+	// return the account id and username
+
+	const query = {
+		text: "SELECT id, username "
+				+ "FROM account "
+				+ "WHERE id IN "
+				+ "(SELECT requester_id "
+				+ "FROM friendship "
+				+ "WHERE current_status = $1 AND recipient_id = $2); ",
+		values: ['requested', recipient_id],
+	}
+
+	const client = createClient("musixdb")
+	await client.connect()
+	const request_list = await client.query(query)
+	.then(res => {
+		return res
+	})
+	.catch(e => {
+		console.error(e.stack)
+		return null
+	})
+	await client.end()
+
+	console.log("REQUEST LIST: " + JSON.stringify(request_list))
+
+	return request_list ? request_list : null
+
 }
 
 /*
