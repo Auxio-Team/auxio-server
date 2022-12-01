@@ -26,6 +26,12 @@ const {
 } = require('../database/accountDatabase')
 
 const {
+	dbCreateSession,
+	dbUpdateSession,
+	dbAddSessionParticipant
+} = require('../database/historyDatabase')
+
+const {
 	FAILURE,
 } = require('../models/sessionModels')
 
@@ -39,6 +45,7 @@ module.exports = function (app) {
 				redisCreateSession,
 				redisVerifyProspectHost,
 				redisVerifySessionIdExists,
+				dbCreateSession,
 				req.account.accountId,
 				req.body.id,
 				req.body.capacity
@@ -92,6 +99,7 @@ module.exports = function (app) {
 			const joinSession = await joinSessionController(
 				redisVerifySessionIdExists,
 				redisJoinSession,
+				dbAddSessionParticipant,
 				req.params.id,
 				req.account.accountId
 			)
@@ -147,8 +155,12 @@ module.exports = function (app) {
 				redisVerifySessionIdExists,
 				redisVerifyHostExists,
 				redisEndSession,
+				dbUpdateSession,
 				req.params.id,
-				req.account.accountId
+				req.account.accountId,
+				req.body.session.name,
+				req.body.session.platform,
+				req.body.session.trackIds
 			)
 
 			if (endSession.status === FAILURE) {
