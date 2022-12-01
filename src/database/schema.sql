@@ -14,18 +14,17 @@ CREATE TABLE refresh_token (
 CREATE TYPE platform_type AS ENUM ('Apple Music', 'Spotify');
 
 CREATE TABLE musix_session (
-  id varchar(6) PRIMARY KEY,
+  id bigserial PRIMARY KEY,
   name varchar(25) NOT NULL,
   host_id bigint REFERENCES account(id),
   date varchar(10) NOT NULL,
   platform platform_type NOT NULL,
   track_ids text[],
-  completed boolean NOT NULL
 );
 
 CREATE TABLE musix_session_user (
   account_id bigint REFERENCES account(id),
-  musix_session_id varchar(6) REFERENCES musix_session(id),
+  musix_session_id bigint REFERENCES musix_session(id),
   PRIMARY KEY(account_id, musix_session_id)
 );
 
