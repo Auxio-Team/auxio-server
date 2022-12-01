@@ -91,6 +91,7 @@ require('./src/routes/accountRoutes')(app)
 require('./src/routes/guestRoutes')(app)
 require('./src/routes/sessionRoutes')(app)
 require('./src/routes/queueRoutes')(app)
+require('./src/routes/friendRoutes')(app)
 
 /* listen on server */
 app.listen(port, () => {
