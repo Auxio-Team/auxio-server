@@ -48,6 +48,10 @@ const getHistoryController = async (dbGetSessionHistory, accountId) => {
 	return await dbGetSessionHistory(accountId)
 }
 
+const getAccountByUsernameController = async (dbGetAccountByUsername, username) => {
+	return await dbGetAccountByUsername(username)
+}
+
 /*
  * Set the preferred streaming platform of a user to a new value
  * @return -> true if it was updated, otherwise null.
@@ -85,6 +89,7 @@ module.exports = {
 	getAccountsController,
 	getAccountController,
 	getHistoryController,
+	getAccountByUsernameController,
 	updatePreferredPlatformController,
 	updateUsernameController,
 	logoutController,

@@ -9,6 +9,7 @@ const {
 	getAccountsController,
 	getAccountController,
 	getHistoryController,
+	getAccountByUsernameController,
 	updatePreferredPlatformController,
 	updateUsernameController,
 	logoutController,
@@ -20,7 +21,8 @@ const {
 	dbGetAccounts,
 	dbUpdatePreferredPlatform,
 	dbUpdateUsername,
-	dbGetAccount
+	dbGetAccount,
+	dbGetAccountByUsername,
 } = require('../database/accountDatabase')
 
 const {
@@ -111,6 +113,25 @@ module.exports = function (app) {
 			}
 			else {
 				res.status(400).send("Couldn't find history")
+			}
+		}
+		catch (err) {
+			console.log(err)
+			res.status(500).send("Internal Server Error")
+		}
+	})
+	
+	/*
+	 * Get acount by username
+	 */
+	app.get('/accountbyusername', async (req, res) => {
+		try {
+			const account = await getAccountByUsernameController(dbGetAccountByUsername, req.body.username)
+			if (account) {
+				res.status(200).send(account)
+			}
+			else {
+				res.status(400).send("Couldn't find account")
 			}
 		}
 		catch (err) {
