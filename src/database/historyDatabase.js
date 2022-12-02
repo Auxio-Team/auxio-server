@@ -7,14 +7,13 @@ const { createClient, createPool } = require('./createClientPool')
  * @return -> the id if the session is created successfully, otherwise false
  */
 const dbCreateSession = async (session, accountId) => {
-    const date = new Date().toJSON().slice(0,10).replace(/-/g,'/');
 	const query = {
 		text: "INSERT INTO musix_session "
 				+ "(name, host_id, date, platform, track_ids) "
 				+ "VALUES "
 				+ "($1, $2, $3, $4, $5) "
                 + "RETURNING id;",
-		values: [session.name, accountId, date, session.platform, session.tracks],
+		values: [session.name, accountId, session.date, session.platform, session.tracks],
 	}
 
 	const client = createClient("musixdb")

@@ -158,6 +158,7 @@ module.exports = function (app) {
 				req.params.id,
 				req.account.accountId,
 				req.body.session.name,
+				req.body.session.date,
 				req.body.session.platform,
 				req.body.session.trackIds,
 				req.body.users

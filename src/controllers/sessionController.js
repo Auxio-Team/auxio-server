@@ -115,7 +115,7 @@ const leaveSessionController = async (redisVerifySessionIdExistsCb, redisVerifyP
  * End a session.
  */
 const endSessionController =
-    async (redisVerifySessionIdExistsCb, redisVerifyHostExistsCb, redisEndSessionCb, dbCreateSessionCb, dbAddSessionParticipantCb, sessionId, accountId, sessionName, sessionPlatform, sessionTrackIds, users) => {
+    async (redisVerifySessionIdExistsCb, redisVerifyHostExistsCb, redisEndSessionCb, dbCreateSessionCb, dbAddSessionParticipantCb, sessionId, accountId, sessionName, sessionDate, sessionPlatform, sessionTrackIds, users) => {
     if (!await redisVerifySessionIdExistsCb(sessionId)) {
         console.log('Error ending session: Session ID not valid')
         return sessionError(INVALID_ID);
@@ -124,7 +124,7 @@ const endSessionController =
         return sessionError(INVALID_NAME)
     }
 
-    const session = { name: sessionName, platform: sessionPlatform, tracks: sessionTrackIds, host: accountId };
+    const session = { name: sessionName, date: sessionDate, platform: sessionPlatform, tracks: sessionTrackIds, host: accountId };
     const res = await dbCreateSessionCb(session, accountId);
     if (!res) {
         return sessionError(SESSION_HISTORY);
