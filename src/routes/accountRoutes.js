@@ -106,7 +106,7 @@ module.exports = function (app) {
 	app.get('/history', async (req, res) => {
 		try {
 			const history = await getHistoryController(dbGetSessionHistory, req.account.accountId)
-			if (account) {
+			if (history) {
 				res.status(200).send(history)
 			}
 			else {
