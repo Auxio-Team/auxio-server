@@ -130,11 +130,16 @@ const endSessionController =
         return sessionError(SESSION_HISTORY);
     }
     
+    let failedUsers = [];
     for (const user of users) {
         let val = await dbAddSessionParticipantCb(user, res);
         if (!val) {
-            return sessionError(SESSION_PARTICIPANT);
+            failedUsers.push(user);
         }
+    }
+
+    if (failedUsers.length != 0) {
+        return sessionError(failedUsers);
     }
 
     return await redisEndSessionCb(sessionId, accountId)
