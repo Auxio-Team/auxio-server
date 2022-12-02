@@ -41,6 +41,14 @@ const getAccountController = async (dbGetAccount, accountId) => {
 }
 
 /*
+ * Get account info for user with username=username.
+ * @return -> the account data in a json.
+ */
+const getAccountByUsernameController = async (dbGetAccountByUsername, username) => {
+	return await dbGetAccountByUsername(username)
+}
+
+/*
  * Set the preferred streaming platform of a user to a new value
  * @return -> true if it was updated, otherwise null.
  */
@@ -76,6 +84,7 @@ module.exports = {
 	createAccountController,
 	getAccountsController,
 	getAccountController,
+	getAccountByUsernameController,
 	updatePreferredPlatformController,
 	updateUsernameController,
 	logoutController,
