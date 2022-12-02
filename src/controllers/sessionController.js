@@ -6,11 +6,14 @@ const {
     INVALID_ID,
     INVALID_NAME,
     MAX_CAPACITY,
+    SESSION_HISTORY,
+    SESSION_PARTICIPANT,
     FAILURE,
     CODE_LENGTH,
     sessionSuccess,
     sessionError,
-} = require('../models/sessionModels')
+} = require('../models/sessionModels');
+const { dbAddSessionParticipant } = require('../database/historyDatabase');
 
 /*
  * Create a new session and save it in Redis.
@@ -75,6 +78,7 @@ const joinSessionController = async (redisVerifySessionIdExistsCb, redisJoinSess
         console.log('Error joining session: Session ID not valid')
         return sessionError(INVALID_ID);
     }
+
     return await redisJoinSessionCb(sessionId, accountId)
         .then((res) => {
             if (res == MAX_CAPACITY) {
@@ -108,9 +112,10 @@ const leaveSessionController = async (redisVerifySessionIdExistsCb, redisVerifyP
 }
 
 /*
- * Leave a session.
+ * End a session.
  */
-const endSessionController = async (redisVerifySessionIdExistsCb, redisVerifyHostExistsCb, redisEndSessionCb, sessionId, accountId) => {
+const endSessionController =
+    async (redisVerifySessionIdExistsCb, redisVerifyHostExistsCb, redisEndSessionCb, dbCreateSessionCb, dbAddSessionParticipantCb, sessionId, accountId, sessionName, sessionDate, sessionPlatform, sessionTrackIds, users) => {
     if (!await redisVerifySessionIdExistsCb(sessionId)) {
         console.log('Error ending session: Session ID not valid')
         return sessionError(INVALID_ID);
@@ -118,6 +123,25 @@ const endSessionController = async (redisVerifySessionIdExistsCb, redisVerifyHos
         console.log('Error ending session: Invalid host')
         return sessionError(INVALID_NAME)
     }
+
+    const session = { name: sessionName, date: sessionDate, platform: sessionPlatform, tracks: sessionTrackIds, host: accountId };
+    const res = await dbCreateSessionCb(session, accountId);
+    if (!res) {
+        return sessionError(SESSION_HISTORY);
+    }
+    
+    let failedUsers = [];
+    for (const user of users) {
+        let val = await dbAddSessionParticipantCb(user, res);
+        if (!val) {
+            failedUsers.push(user);
+        }
+    }
+
+    if (failedUsers.length != 0) {
+        return sessionError(failedUsers);
+    }
+
     return await redisEndSessionCb(sessionId, accountId)
         .then((res) => {
             if (res) {

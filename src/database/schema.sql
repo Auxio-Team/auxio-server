@@ -11,6 +11,25 @@ CREATE TABLE refresh_token (
 	token varchar(320) NOT NULL
 );
 
+CREATE TYPE platform_type AS ENUM ('Apple Music', 'Spotify');
+
+CREATE TABLE musix_session (
+  id bigserial PRIMARY KEY,
+  name varchar(25) NOT NULL,
+  host_id bigint REFERENCES account(id),
+  date varchar(10) NOT NULL,
+  platform platform_type NOT NULL,
+  track_ids text[]
+);
+
+CREATE TABLE musix_session_user (
+  account_id bigint REFERENCES account(id),
+  musix_session_id bigint REFERENCES musix_session(id),
+  download_spotify boolean DEFAULT false,
+  download_apple boolean DEFAULT false,
+  PRIMARY KEY(account_id, musix_session_id)
+);
+
 CREATE TYPE friendship_status AS ENUM ('friends', 'requested');
 
 CREATE TABLE friendship (

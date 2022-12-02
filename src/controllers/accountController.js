@@ -44,6 +44,10 @@ const getAccountController = async (dbGetAccount, accountId) => {
  * Get account info for user with username=username.
  * @return -> the account data in a json.
  */
+const getHistoryController = async (dbGetSessionHistory, accountId) => {
+	return await dbGetSessionHistory(accountId)
+}
+
 const getAccountByUsernameController = async (dbGetAccountByUsername, username) => {
 	return await dbGetAccountByUsername(username)
 }
@@ -84,6 +88,7 @@ module.exports = {
 	createAccountController,
 	getAccountsController,
 	getAccountController,
+	getHistoryController,
 	getAccountByUsernameController,
 	updatePreferredPlatformController,
 	updateUsernameController,
