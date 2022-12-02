@@ -19,12 +19,14 @@ CREATE TABLE musix_session (
   host_id bigint REFERENCES account(id),
   date varchar(10) NOT NULL,
   platform platform_type NOT NULL,
-  track_ids text[],
+  track_ids text[]
 );
 
 CREATE TABLE musix_session_user (
   account_id bigint REFERENCES account(id),
   musix_session_id bigint REFERENCES musix_session(id),
+  download_spotify boolean DEFAULT false,
+  download_apple boolean DEFAULT false,
   PRIMARY KEY(account_id, musix_session_id)
 );
 
