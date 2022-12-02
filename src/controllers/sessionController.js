@@ -6,6 +6,8 @@ const {
     INVALID_ID,
     INVALID_NAME,
     MAX_CAPACITY,
+    SESSION_HISTORY,
+    SESSION_PARTICIPANT,
     FAILURE,
     CODE_LENGTH,
     sessionSuccess,
@@ -17,7 +19,7 @@ const { dbAddSessionParticipant } = require('../database/historyDatabase');
  * Create a new session and save it in Redis.
  */
 const createSessionController = 
-        async ( redisCreateSessionCb, redisVerifyProspectHostCb, redisVerifySessionIdExistsCb, dbCreateSessionCb, accountId, id, capacity ) => {
+        async ( redisCreateSessionCb, redisVerifyProspectHostCb, redisVerifySessionIdExistsCb, accountId, id, capacity ) => {
 	// verify user as valid host
     if (!await redisVerifyProspectHostCb(accountId)) {
         console.log('Error creating session: User cannot be a host');
@@ -37,16 +39,6 @@ const createSessionController =
 	    // generate session id
         sessionId = await generateSessionId(redisVerifySessionIdExistsCb);
     }
-
-    //add session to session table here
-    if (!await dbCreateSessionCb(accountId, sessionId)) {
-        console.log('Error creating session: Session could not be created in Postgres')
-        return null;
-    }
-
-    console.log("joining")
-    await dbAddSessionParticipant(accountId, sessionId);
-    console.log('joined')
 
 	// save the new session to server
 	if (await redisCreateSessionCb(sessionId, accountId, capacity)) {
@@ -87,10 +79,6 @@ const joinSessionController = async (redisVerifySessionIdExistsCb, redisJoinSess
         return sessionError(INVALID_ID);
     }
 
-    console.log("joining")
-    await dbAddSessionParticipant(accountId, sessionId);
-    console.log('joined')
-
     return await redisJoinSessionCb(sessionId, accountId)
         .then((res) => {
             if (res == MAX_CAPACITY) {
@@ -127,7 +115,7 @@ const leaveSessionController = async (redisVerifySessionIdExistsCb, redisVerifyP
  * End a session.
  */
 const endSessionController =
-    async (redisVerifySessionIdExistsCb, redisVerifyHostExistsCb, redisEndSessionCb, dbUpdateSessionCb, sessionId, accountId, sessionName, sessionPlatform, sessionTrackIds) => {
+    async (redisVerifySessionIdExistsCb, redisVerifyHostExistsCb, redisEndSessionCb, dbCreateSessionCb, dbAddSessionParticipantCb, sessionId, accountId, sessionName, sessionPlatform, sessionTrackIds, users) => {
     if (!await redisVerifySessionIdExistsCb(sessionId)) {
         console.log('Error ending session: Session ID not valid')
         return sessionError(INVALID_ID);
@@ -137,7 +125,17 @@ const endSessionController =
     }
 
     const session = { name: sessionName, platform: sessionPlatform, tracks: sessionTrackIds, host: accountId };
-    await dbUpdateSessionCb(session);
+    const res = await dbCreateSessionCb(session, accountId);
+    if (!res) {
+        return sessionError(SESSION_HISTORY);
+    }
+    
+    for (const user of users) {
+        let val = await dbAddSessionParticipantCb(user, res);
+        if (!val) {
+            return sessionError(SESSION_PARTICIPANT);
+        }
+    }
 
     return await redisEndSessionCb(sessionId, accountId)
         .then((res) => {

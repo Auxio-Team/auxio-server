@@ -27,7 +27,6 @@ const {
 
 const {
 	dbCreateSession,
-	dbUpdateSession,
 	dbAddSessionParticipant
 } = require('../database/historyDatabase')
 
@@ -45,7 +44,6 @@ module.exports = function (app) {
 				redisCreateSession,
 				redisVerifyProspectHost,
 				redisVerifySessionIdExists,
-				dbCreateSession,
 				req.account.accountId,
 				req.body.id,
 				req.body.capacity
@@ -155,12 +153,14 @@ module.exports = function (app) {
 				redisVerifySessionIdExists,
 				redisVerifyHostExists,
 				redisEndSession,
-				dbUpdateSession,
+				dbCreateSession,
+				dbAddSessionParticipant,
 				req.params.id,
 				req.account.accountId,
 				req.body.session.name,
 				req.body.session.platform,
-				req.body.session.trackIds
+				req.body.session.trackIds,
+				req.body.users
 			)
 
 			if (endSession.status === FAILURE) {
