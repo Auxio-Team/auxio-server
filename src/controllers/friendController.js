@@ -1,7 +1,4 @@
 
-// Update to use id's instead of usernames
-
-const { dbGetFriendList } = require("../database/friendDatabase")
 
 /*
  * Get list of friends
@@ -77,6 +74,18 @@ const removeFriendController = async (dbRemoveFriend, user_id, removed_user_id) 
 }
 
 
+/*
+ * Get the friendship status by getting the row in the friendship table
+ */
+const getFriendshipStatusController = async (dbGetFriendshipStatus, user_id, other_user_id) => {
+    if (user_id === other_user_id) {
+        return null
+    }
+
+    const friendship_status = await dbGetFriendshipStatus(user_id, other_user_id)
+
+    return friendship_status
+}
 
 module.exports = {
     getFriendListController,
@@ -84,5 +93,6 @@ module.exports = {
     createFriendRequestController,
     acceptFriendRequestController,
     declineFriendRequestController,
-    removeFriendController
+    removeFriendController,
+    getFriendshipStatusController
 }

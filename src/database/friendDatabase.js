@@ -1,7 +1,12 @@
 const { Client, Pool } = require('pg')
 const { createClient, createPool } = require('./createClientPool')
 
-
+const {
+	NOT_FRIENDS,
+	SENT_REQUEST,
+    RECIEVED_REQUEST,
+    FRIENDS
+} = require('../models/friendModels')
 
 
 /*
@@ -219,11 +224,61 @@ const dbRemoveFriend = async (user_id, removed_user_id) => {
 }
 
 
+/*
+ * Get friendship status
+ * Get friendship status between the current user (user_id) and another user (other_user_id)
+ * 
+ * Returns 'not friends', 'sent request', 'recieved request', or 'friends'
+ */
+const dbGetFriendshipStatus = async (user_id, other_user_id) => {
+	const query = {
+		text: "SELECT requester_id, current_status "
+				+ "FROM friendship "
+				+ "WHERE requester_id = $1 AND recipient_id = $2 "
+				+ "OR requester_id = $2 AND recipient_id = $1;",
+		values: [user_id, other_user_id],
+	}
+
+	const client = createClient("musixdb")
+	await client.connect()
+	const response = await client.query(query)
+	.then(res => {
+		return res
+	})
+	.catch(e => {
+		console.error(e.stack)
+		return null
+	})
+	await client.end()
+
+	console.log("RESPONSE: " + JSON.stringify(response))
+
+	if (response["rowCount"] === 0) {
+		return NOT_FRIENDS
+	}
+	else if (response["rowCount"] === 1) {
+		if (response.rows[0].current_status == "friends") {
+			return FRIENDS
+		}
+		else if (response.rows[0].requester_id == user_id){
+			return SENT_REQUEST
+		}
+		else {
+			return RECIEVED_REQUEST
+		}
+	}
+	else {
+		return null
+	}
+}
+
+
 module.exports = {
     dbGetFriendList,
     dbGetFriendRequestList,
     dbCreateFriendRequest,
     dbAcceptFriendRequest,
     dbDeclineFriendRequest,
-    dbRemoveFriend
+    dbRemoveFriend,
+	dbGetFriendshipStatus
 }

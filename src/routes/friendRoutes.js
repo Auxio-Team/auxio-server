@@ -6,7 +6,8 @@ const {
     declineFriendRequestController,
     removeFriendController,
     getFriendListController,
-    getFriendRequestListController
+    getFriendRequestListController,
+    getFriendshipStatusController
 } = require('../controllers/friendController')
 
 // import database functions
@@ -16,7 +17,8 @@ const {
     dbDeclineFriendRequest,
     dbRemoveFriend,
     dbGetFriendList,
-    dbGetFriendRequestList
+    dbGetFriendRequestList,
+    dbGetFriendshipStatus
 } = require('../database/friendDatabase')
 
 // Update to use id's instead of usernames
@@ -156,6 +158,30 @@ module.exports = function (app) {
             }
             else {
                 res.status(400).send({ 'message': 'Unable to remove friend' })
+            }
+        }
+        catch (err) {
+            console.log(err)
+            res.status(500).send("Internal Server Error")
+        }
+    })
+
+
+    /*
+     * Get friendship status
+     */
+    app.get('/friend/status', async (req, res) => {
+        try {
+            const friendship_status = await getFriendshipStatusController(
+                dbGetFriendshipStatus, req.account.accountId, req.body.accountId)
+
+            if (friendship_status) {
+                console.log("Friendship status between " + req.account.accountId + " and "
+                    + req.body.accountId + ": " + friendship_status)
+                res.status(200).send(friendship_status)
+            }
+            else {
+                res.status(400).send({ 'message': 'Unable to get friendship status' })
             }
         }
         catch (err) {
