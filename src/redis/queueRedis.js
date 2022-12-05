@@ -56,7 +56,7 @@ const redisVerifySongInQueue = async (sessionId, songId) => {
  * Add song to queue for given session.
  * @param sessionId -> the 6-digit alphanumeric session id associated with the session.
  * @param songId -> the song id associated with the song for playback.
- * @return -> true if the session is created successfully
+ * @return -> true if the song was added to the session successfully
  */
 const redisAddSongToSession = async (sessionId, songId) => {
     // calculate song priority for new song
@@ -78,9 +78,50 @@ const redisAddSongToSession = async (sessionId, songId) => {
         await redisClient.sendCommand([
             'PUBLISH',
             `sessions:${sessionId}`,
-            'queueUpdated'
+            'songAdded'
         ])
         console.log("published song enqueued")
+    }
+
+    return resp
+}
+
+/*
+ * Remove song from queue for given session.
+ * @param sessionId -> the 6-digit alphanumeric session id associated with the session.
+ * @param songId -> the song id associated with the song for playback.
+ * @return -> true if the song was removed successfully
+ */
+const redisRemoveSong = async (sessionId, songId) => {
+    // get priority of song being removed
+    const prio = await redisClient.sendCommand([
+        'ZSCORE',
+        `sessions:${sessionId}:queue`,
+        `${songId}`
+    ]).then((resp) => resp)
+    .catch((err) => console.log(`Error when trying to get priority of song\n${err}`))
+
+    // remove song from queue
+    const resp = await redisClient.sendCommand([
+        'ZREM',
+        `sessions:${sessionId}:queue`,
+        `${songId}`
+    ]).then((resp) => resp == 1)
+    .catch((err) => console.log(`Error when trying to remove song from queue\n${err}`))
+
+    // shift the priorities of the other songs
+    const minScore = Math.trunc(prio / 100000) * 100000
+    const maxScore = prio
+    redisShiftSongs(sessionId, minScore, maxScore)
+
+    // notify subscribers that a song was removed
+    if (resp) {
+        await redisClient.sendCommand([
+            'PUBLISH',
+            `sessions:${sessionId}`,
+            'songRemoved'
+        ])
+        console.log("published song removed")
     }
 
     return resp
@@ -237,5 +278,6 @@ module.exports = {
     redisDequeueSongFromSession,
     redisGetSessionQueue,
     redisAddUpvote,
-    redisRemoveUpvote
+    redisRemoveUpvote,
+    redisRemoveSong
 }
