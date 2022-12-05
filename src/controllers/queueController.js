@@ -29,6 +29,28 @@ const addSongController = async ( redisVerifySessionIdExistsCb, redisAddSongToSe
 }
 
 /*
+ * Remove song from the queue.
+ */
+const removeSongController = async ( redisVerifySessionIdExistsCb, redisVerifySongInQueueCb, redisRemoveSongCb, sessionId, songId ) => {
+    if (!await redisVerifySessionIdExistsCb(sessionId)) {
+        console.log('Error removing song: Session ID not valid')
+        return queueError(INVALID_ID);
+    }
+    if (!await redisVerifySongInQueueCb(sessionId, songId)) {
+        console.log('Error removing song: Song ID not valid')
+        return queueError(INVALID_SONG);
+    }
+
+    return await redisRemoveSongCb(sessionId, songId)
+        .then((res) => {
+            if (res) {
+                return queueSuccess();
+            }
+            return queueError(FAILURE);
+        });
+}
+
+/*
  * Pop the next song from the queue and 
  * set it to the current song.
  */
@@ -113,5 +135,6 @@ module.exports = {
     dequeueSongController,
     getSessionQueueController,
     addUpvoteController,
-    removeUpvoteController
+    removeUpvoteController,
+    removeSongController
 }
