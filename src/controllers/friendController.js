@@ -87,6 +87,16 @@ const getFriendshipStatusController = async (dbGetFriendshipStatus, user_id, oth
     return friendship_status
 }
 
+
+/*
+ * Get the friendship status by getting the row in the friendship table
+ */
+const getFriendCountController = async (dbGetFriendCount, user_id) => {
+    const friend_count = await dbGetFriendCount(user_id)
+
+    return friend_count
+}
+
 module.exports = {
     getFriendListController,
     getFriendRequestListController,
@@ -94,5 +104,6 @@ module.exports = {
     acceptFriendRequestController,
     declineFriendRequestController,
     removeFriendController,
-    getFriendshipStatusController
+    getFriendshipStatusController,
+    getFriendCountController
 }
