@@ -21,17 +21,22 @@
   },
   "homepage": "https://github.com/CS-407-Group/musix-server#readme",
   "dependencies": {
+    "@socket.io/redis-adapter": "^7.2.0",
     "bcrypt": "^5.0.1",
+    "cjs": "^0.0.11",
     "cors": "^2.8.5",
     "crypto": "^1.0.1",
     "dotenv": "^16.0.3",
-    "express": "^4.18.1",
+    "express": "^4.18.2",
+    "finalhandler": "^1.2.0",
     "jsonwebtoken": "^8.5.1",
     "node-redis": "^0.1.7",
     "notenv": "^2.0.3",
     "pg": "^8.8.0",
     "random-string-alphanumeric-generator": "^0.12.2",
     "redis": "^4.3.1",
+    "socket-io": "^1.0.0",
+    "socket.io": "^4.5.4",
     "twilio": "^3.82.2"
   },
   "devDependencies": {

@@ -1,0 +1,75 @@
+// http://localhost:5000
+const { redisGetSessionQueue } = require('./src/redis/queueRedis.js');
+const fs = require('fs')
+const crypto = require('crypto')
+const { redisClient } = require('./src/redis/initRedis');
+if (!fs.existsSync('./.env')) {
+	const accessTokenSecret = crypto.randomBytes(64).toString('hex')
+	const refreshTokenSecret = crypto.randomBytes(64).toString('hex')
+	const codeTokenSecret = crypto.randomBytes(64).toString('hex')
+	const passwordTokenSecret = crypto.randomBytes(64).toString('hex')
+	const twilioAccountSid = "ACd8f103d7ea7aaa411ac76e7929c4836c";
+	const twilioAuthToken = "f29bf59961befe551857738091b4d7fe";
+	const envContent = "ACCESS_TOKEN_SECRET=" + accessTokenSecret
+		+ "\nREFRESH_TOKEN_SECRET=" + refreshTokenSecret
+		+ "\nCODE_TOKEN_SECRET=" + codeTokenSecret 
+		+ "\nPASSWORD_TOKEN_SECRET=" + passwordTokenSecret
+		+ "\nTWILIO_ACCOUNT_SID=" + twilioAccountSid
+		+ "\nTWILIO_AUTH_TOKEN=" + twilioAuthToken
+	console.log(envContent)
+	fs.writeFileSync('.env', envContent)
+}
+
+require('dotenv').config()
+//const process = require('process')
+
+/* run app on port 5000 */
+const express = require('express')
+const app = express()
+const port = 5000
+const cors = require('cors');
+
+/* middleware handlers */
+app.use(express.json())
+app.use(cors({
+	origin: '*',
+    methods: 'POST'
+}))
+
+/* socket server */
+const { Server } = require('socket.io');
+const { createAdapter } = require('@socket.io/redis-adapter');
+const io = new Server();
+
+const subClient = redisClient.duplicate();
+//io.adapter(createAdapter(subClient));
+//io.listen(3000);
+/*
+io.on("connection", (socket) => {
+    const { QUEUE_UPDATE } = 'queueUpdated';
+    console.log("io connection")
+    socket.on(QUEUE_UPDATE, (data) => {
+        console.log("queue updated");
+        redisGetSessionQueue(data.sessionId);
+        console.log(redisGetSessionQueue(data.sessionId));
+    })
+})
+*/
+
+(async () => {
+    await subClient.subscribe(`sessions`, (message) => {
+        console.log(message);
+        redisGetSessionQueue(message);
+        console.log(redisGetSessionQueue(sessionId))
+    })
+})();
+
+
+/* import routes */
+require('./src/routes/sessionRoutes')(app)
+require('./src/routes/queueRoutes')(app)
+
+/* listen on server */
+app.listen(port, () => {
+  console.log(`Server listening on port ${port}`)
+})

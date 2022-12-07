@@ -47,6 +47,16 @@ const redisJoinSession = async (sessionId, participant) => {
     if (numParticipants < capacity) {
         return await redisClient.SADD(`sessions:${sessionId}:participants`, participant)
             .then(res => {
+                // notify subscribers that a session was joined
+                (async () => {
+                    await redisClient.sendCommand([
+                        'PUBLISH',
+                        'sessions',
+                        `${sessionId}`
+                    ]);
+                    console.log("session joined")
+                })();
+
                 if (res != 1) {
                     console.log('invalid name\n');
                     return INVALID_NAME;
@@ -56,6 +66,7 @@ const redisJoinSession = async (sessionId, participant) => {
         console.log('hit max capacity\n');
         return MAX_CAPACITY;
     }
+
 }
 
 /*
