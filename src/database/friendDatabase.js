@@ -1,12 +1,7 @@
 const { Client, Pool } = require('pg')
 const { createClient, createPool } = require('./createClientPool')
 
-const {
-	NOT_FRIENDS,
-	SENT_REQUEST,
-    RECIEVED_REQUEST,
-    FRIENDS
-} = require('../models/friendModels')
+
 
 
 /*
@@ -18,7 +13,7 @@ const dbGetFriendList = async (user_id) => {
 	// return the account id, username (TODO status, session_code)
 
 	const query = {
-		text: "SELECT id, username "
+		text: "SELECT id, username, current_status "
 				+ "FROM account "
 				+ "WHERE id IN "
 				+ "(SELECT recipient_id "
@@ -57,7 +52,7 @@ const dbGetFriendRequestList = async (recipient_id) => {
 	// return the account id and username
 
 	const query = {
-		text: "SELECT id, username "
+		text: "SELECT id, username, current_status "
 				+ "FROM account "
 				+ "WHERE id IN "
 				+ "(SELECT requester_id "
@@ -253,23 +248,7 @@ const dbGetFriendshipStatus = async (user_id, other_user_id) => {
 
 	console.log("RESPONSE: " + JSON.stringify(response))
 
-	if (response["rowCount"] === 0) {
-		return NOT_FRIENDS
-	}
-	else if (response["rowCount"] === 1) {
-		if (response.rows[0].current_status == "friends") {
-			return FRIENDS
-		}
-		else if (response.rows[0].requester_id == user_id){
-			return SENT_REQUEST
-		}
-		else {
-			return RECIEVED_REQUEST
-		}
-	}
-	else {
-		return null
-	}
+	return response
 }
 
 

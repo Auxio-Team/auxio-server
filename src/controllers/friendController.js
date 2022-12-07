@@ -1,4 +1,10 @@
-
+const {
+	NOT_FRIENDS,
+	SENT_REQUEST,
+    RECIEVED_REQUEST,
+    FRIENDS,
+	ME
+} = require('../models/friendModels')
 
 /*
  * Get list of friends
@@ -79,12 +85,28 @@ const removeFriendController = async (dbRemoveFriend, user_id, removed_user_id) 
  */
 const getFriendshipStatusController = async (dbGetFriendshipStatus, user_id, other_user_id) => {
     if (user_id === other_user_id) {
-        return null
+        return ME
     }
+    
+    const response = await dbGetFriendshipStatus(user_id, other_user_id)
 
-    const friendship_status = await dbGetFriendshipStatus(user_id, other_user_id)
-
-    return friendship_status
+    if (response["rowCount"] === 0) {
+		return NOT_FRIENDS
+	}
+	else if (response["rowCount"] === 1) {
+		if (response.rows[0].current_status == "friends") {
+			return FRIENDS
+		}
+		else if (response.rows[0].requester_id == user_id){
+			return SENT_REQUEST
+		}
+		else {
+			return RECIEVED_REQUEST
+		}
+	}
+	else {
+		return null
+	}
 }
 
 

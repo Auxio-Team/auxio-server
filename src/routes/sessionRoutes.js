@@ -20,9 +20,11 @@ const {
 	endSessionController
 } = require('../controllers/sessionController')
 
+
 // import database functions
 const {
-	dbGetAccount
+	dbGetAccount,
+	dbUpdateStatusAndSessionCode
 } = require('../database/accountDatabase')
 
 const {
@@ -39,6 +41,7 @@ module.exports = function (app) {
 				redisCreateSession,
 				redisVerifyProspectHost,
 				redisVerifySessionIdExists,
+				dbUpdateStatusAndSessionCode,
 				req.account.accountId,
 				req.body.id,
 				req.body.capacity
@@ -92,6 +95,7 @@ module.exports = function (app) {
 			const joinSession = await joinSessionController(
 				redisVerifySessionIdExists,
 				redisJoinSession,
+				dbUpdateStatusAndSessionCode,
 				req.params.id,
 				req.account.accountId
 			)
@@ -119,6 +123,7 @@ module.exports = function (app) {
 				redisVerifySessionIdExists,
 				redisVerifyParticipantExists,
 				redisLeaveSession,
+				dbUpdateStatusAndSessionCode,
 				req.params.id,
 				req.account.accountId
 			)
@@ -147,6 +152,7 @@ module.exports = function (app) {
 				redisVerifySessionIdExists,
 				redisVerifyHostExists,
 				redisEndSession,
+				dbUpdateStatusAndSessionCode,
 				req.params.id,
 				req.account.accountId
 			)
