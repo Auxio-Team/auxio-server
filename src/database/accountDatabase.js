@@ -18,10 +18,10 @@ const {
 const dbCreateAccount = async (account) => {
 	const query = {
 		text: "INSERT INTO account "
-				+ "(username, pass, phone_number, preferred_streaming_platform) "
+				+ "(username, pass, phone_number, preferred_streaming_platform, current_status, session_code) "
 				+ "VALUES "
-				+ "($1, $2, $3, $4);",
-		values: [account.username, account.password, account.phoneNumber, "Apple Music"],
+				+ "($1, $2, $3, $4, $5, $6);",
+		values: [account.username, account.password, account.phoneNumber, "Apple Music", "online", null],
 	}
 
 	const client = createClient("musixdb")
@@ -75,7 +75,7 @@ const dbGetAccounts = async () => {
  */
 const dbGetAccount = async (accountId) => {
 	const query = {
-		text: "SELECT username, preferred_streaming_platform "
+		text: "SELECT id, username, preferred_streaming_platform, current_status, session_code "
 		    + "FROM account "
 				+ "WHERE id = $1",
 		values: [accountId],
@@ -100,15 +100,15 @@ const dbGetAccount = async (accountId) => {
  */
 const dbGetAccountByUsername = async (username) => {
 	const query = {
-		text: "SELECT id, username "
-		    + "FROM account "
+		text: "SELECT id, username, current_status, session_code "
+		    	+ "FROM account "
 				+ "WHERE username = $1",
 		values: [username],
 	}
 
 	const client = createClient("musixdb")
 	await client.connect()
-	const account = await client.query(query)
+	const response = await client.query(query)
 	.then(res => {
 		return res.rows[0]
 	})
@@ -117,7 +117,9 @@ const dbGetAccountByUsername = async (username) => {
 		return null
 	})
 	await client.end()
-	return account
+
+	console.log("RESPONSE: " + JSON.stringify(response))
+	return response
 }
 
 /*
@@ -251,6 +253,35 @@ const dbUpdateUsername = async (accountId, value) => {
 	return response	
 }
 
+
+/*
+ * Update the status and the session code of the user
+ * Return the number of rows updated or null
+ */
+const dbUpdateStatusAndSessionCode = async (accountId, newStatus, newSessionCode) => {
+	const query = {
+		text: "UPDATE account "
+		    + "SET current_status = $1, session_code = $2 "
+				+ "WHERE id = $3;",
+		values: [newStatus, newSessionCode, accountId],
+	}
+
+	const client = createClient("musixdb")
+	await client.connect()
+	const response = await client.query(query)
+	.then(res => {
+		return res
+	})
+	.catch(err => {
+		console.error(e.stack)
+		return null
+	})
+	await client.end()
+
+	return response["rowCount"]
+}
+
+
 module.exports = {
 	dbCreateAccount,
 	dbGetAccounts,
@@ -260,5 +291,6 @@ module.exports = {
 	dbGetAccount,
 	dbGetAccountByUsername,
 	dbGetAccountId,
-	dbUpdateUsername
+	dbUpdateUsername,
+	dbUpdateStatusAndSessionCode
 }
