@@ -185,7 +185,7 @@ const dbUpdatePreferredPlatform = async (accountId, value) => {
 	await client.connect()
 	const response = await client.query(query)
 	.then(res => {
-		return true
+		return res["rowCount"] > 0
 	})
 	.catch(err => {
 		console.error(err.stack)
@@ -236,7 +236,7 @@ const dbUpdateUsername = async (accountId, value) => {
 	await client.connect()
 	const response = await client.query(query)
 	.then(res => {
-		return true
+		return res["rowCount"] > 0
 	})
 	.catch(err => {
 		console.error(err.stack)
@@ -267,7 +267,7 @@ const dbUpdateProfilePicture = async (accountId, value) => {
 	await client.connect()
 	const response = await client.query(query)
 	.then(res => {
-		return true
+		return res["rowCount"] > 0
 	})
 	.catch(err => {
 		console.error(err.stack)
