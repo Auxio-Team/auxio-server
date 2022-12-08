@@ -3,7 +3,8 @@ CREATE TABLE account (
 	username varchar(25) NOT NULL UNIQUE,
 	pass varchar(320) NOT NULL,
 	phone_number varchar(20) NOT NULL UNIQUE,
-	preferred_streaming_platform varchar(20) NOT NULL
+	preferred_streaming_platform varchar(20) NOT NULL,
+	profile_pic_path varchar(320)
 );
 
 CREATE TABLE refresh_token (

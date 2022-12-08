@@ -35,6 +35,18 @@ app.use(cors({
 	origin: '*'
 }))
 
+/* multer setup for image storing */
+const multer = require('multer');
+
+const upload = multer({storage: multer.diskStorage({
+    destination: function (req, file, cb) {
+        cb(null, './pictures');
+      },
+    filename: function (req, file, cb) {
+        cb(null, file.originalname);
+    }
+})});
+
 
 /*
  * Test creating a new postgres database and connecting to it.
@@ -87,7 +99,7 @@ app.use((req, res, next) => {
 })
 
 /* import routes */
-require('./src/routes/accountRoutes')(app)
+require('./src/routes/accountRoutes')(app, upload)
 require('./src/routes/guestRoutes')(app)
 require('./src/routes/sessionRoutes')(app)
 require('./src/routes/queueRoutes')(app)

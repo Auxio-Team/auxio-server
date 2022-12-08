@@ -70,6 +70,14 @@ const updateUsernameController = async (dbUpdateUsername, accountId, value) => {
 }
 
 /*
+ * Set the profile picture of a user to a new value
+ * @return -> true if it was updated, otherwise null.
+ */
+const updateProfilePictureController = async (dbUpdateProfilePicture, accountId, value) => {
+	return await dbUpdateProfilePicture(accountId, value)
+}
+
+/*
  * Log the user out by deleting the refresh token
  * @return -> the number of rows deleted, or null on failure.
  */
@@ -92,5 +100,6 @@ module.exports = {
 	getAccountByUsernameController,
 	updatePreferredPlatformController,
 	updateUsernameController,
+	updateProfilePictureController,
 	logoutController,
 }
