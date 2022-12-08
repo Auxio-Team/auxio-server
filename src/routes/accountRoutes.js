@@ -195,7 +195,7 @@ module.exports = function (app, upload) {
 				res.status(200).send()
 			}
 			else {
-				res.status(400).send({ message: "Could not update username" })
+				res.status(400).send({ message: "Could not update profile picture" })
 			}
 		}
 		catch (err) {
@@ -220,7 +220,7 @@ module.exports = function (app, upload) {
 						}
 					});
 				} else {
-					res.status(200).send('No profile picture');
+					res.status(200).send({ message: 'No profile picture' });
 				}
 			}
 			else {

@@ -75,7 +75,7 @@ const dbGetAccounts = async () => {
  */
 const dbGetAccount = async (accountId) => {
 	const query = {
-		text: "SELECT username, preferred_streaming_platform, profile_path "
+		text: "SELECT username, preferred_streaming_platform, profile_pic_path "
 		    + "FROM account "
 				+ "WHERE id = $1",
 		values: [accountId],
@@ -258,7 +258,7 @@ const dbUpdateUsername = async (accountId, value) => {
 const dbUpdateProfilePicture = async (accountId, value) => {
 	const query = {
 		text: "UPDATE account "
-		    + "SET profile_path = $1 "
+		    + "SET profile_pic_path = $1 "
 				+ "WHERE id = $2",
 		values: [value, accountId],
 	}
@@ -271,12 +271,7 @@ const dbUpdateProfilePicture = async (accountId, value) => {
 	})
 	.catch(err => {
 		console.error(err.stack)
-		if (err.code == CONSTRAINT_VIOLATION_CODE) {
-			return USERNAME_TAKEN 
-		}
-		else {
-			return false
-		}
+		return false
 	})
 	await client.end()
 	return response	
