@@ -32,69 +32,39 @@ const cors = require('cors');
 /* middleware handlers */
 app.use(express.json())
 app.use(cors({
-	origin: '*',
-    methods: 'POST'
+	origin: 'http://localhost:5000',
+    allowedHeaders: ['musix'],
+    credentials: true,
 }))
 
 /* socket server */
-const { http } = require('http').Server(app);
-const io = require('socket.io')(http);
-const { createAdapter } = require('@socket.io/redis-adapter');
-//const io = new Server();
+const http = require('http')
+const server = http.createServer(app)
+const io = require('socket.io')(server)
 
-const subClient = redisClient.duplicate();
-//io.adapter(createAdapter(subClient));
-//io.listen(3000);
+/* listen on port */
+io.listen(port, () => {
+    console.log(`Socket server listening on port ${port}`)
+})
 
-/*io.on('connection', (socket) => {
-    const { QUEUE_UPDATE } = 'queueUpdated';
-    console.log("io connection")
-    socket.on(QUEUE_UPDATE, (data) => {
-        console.log("queue updated");
-        redisGetSessionQueue(data.sessionId);
-        console.log(redisGetSessionQueue(data.sessionId));
-    })
-})*/
+//redis subscription
+const adapter = require('socket.io-redis');
+//io.adapter(adapter({subClient: redisClient}))
 
 // Listen for incoming WebSocket connections from clients
-io.on('connection', (socket) => {
-    // Subscribe to messages published to the 'my_channel' Redis channel
-    client.subscribe('sessions')
-    console.log("client subscribed");
-  
-    // When a message is received from the Redis channel, send it to the
-    // connected WebSocket client
-    client.on('message', (channel, message) => {
-        console.log(message)
-      socket.send(message)
-    })
-  
-    // When a message is received from the WebSocket client, publish it to
-    // the 'my_channel' Redis channel
-    socket.on('message', (message) => {
-      client.publish('ws_channel', message)
-    })
+io.on('connect', (socket) => {
+    socket.emit('message', 'Client sucessfully connected to serer');
+    console.log("A client has connected");
+
+    (async () => {
+        const subClient = redisClient.duplicate();
+      
+        await subClient.connect();
+      
+        await subClient.subscribe('sessions', (sessionId) => {
+          console.log(`A session has been joined: ${sessionId}`); // 'message'
+          socket.emit('session', sessionId)
+        });
+      
+      })();
   })
-
-/*
-(async () => {
-    await subClient.subscribe(`sessions`, (message) => {
-        console.log(message);
-        redisGetSessionQueue(message);
-        console.log(redisGetSessionQueue(sessionId))
-    })
-})();
-*/
-
-// `sessions:${sessionId}` gets queue updates, need to get the sessionId somehow
-
-
-
-/* import routes */
-require('./src/routes/sessionRoutes')(app)
-require('./src/routes/queueRoutes')(app)
-
-/* listen on server */
-app.listen(port, () => {
-  console.log(`Server listening on port ${port}`)
-})
