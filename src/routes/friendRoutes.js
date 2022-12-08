@@ -5,6 +5,7 @@ const {
     acceptFriendRequestController,
     declineFriendRequestController,
     removeFriendController,
+    cancelFriendRequestController,
     getFriendListController,
     getFriendRequestListController,
     getFriendshipStatusController,
@@ -17,6 +18,7 @@ const {
     dbAcceptFriendRequest,
     dbDeclineFriendRequest,
     dbRemoveFriend,
+    dbCancelFriendRequest,
     dbGetFriendList,
     dbGetFriendRequestList,
     dbGetFriendshipStatus,
@@ -156,6 +158,29 @@ module.exports = function (app) {
             
             if (remove === 1) {
                 console.log("Removed friend: " + req.body.accountId)
+				res.status(200).send()
+            }
+            else {
+                res.status(400).send({ 'message': 'Unable to remove friend' })
+            }
+        }
+        catch (err) {
+            console.log(err)
+            res.status(500).send("Internal Server Error")
+        }
+    })
+
+
+    /*
+     * Cancel a friend request sent to another user
+     */
+    app.post('/friend/cancelrequest', async (req, res) => {
+        try {
+            const canceled = await cancelFriendRequestController(
+                dbCancelFriendRequest, req.account.accountId, req.body.accountId)
+            
+            if (canceled === 1) {
+                console.log("Friend request to " + req.body.accountId + " cancelled")
 				res.status(200).send()
             }
             else {

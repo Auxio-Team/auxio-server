@@ -220,6 +220,39 @@ const dbRemoveFriend = async (user_id, removed_user_id) => {
 
 
 /*
+ * Cancel friend request
+ * The current user (user_id) is cancelling a friend request sent to another user
+ * 
+ * Returns the number of rows deleted, which should be 1 on success
+ */
+const dbCancelFriendRequest = async (user_id, other_user_id) => {
+	// possible errors: current status is requested, no relationship in the table
+
+	const query = {
+		text: "DELETE FROM friendship "
+				+ "WHERE requester_id = $1 AND recipient_id = $2 AND current_status = $3;",
+		values: [user_id, other_user_id, 'requested'],
+	}
+
+	const client = createClient("musixdb")
+	await client.connect()
+	const response = await client.query(query)
+	.then(res => {
+		return res
+	})
+	.catch(e => {
+		console.error(e.stack)
+		return null
+	})
+	await client.end()
+
+	console.log("RESPONSE: " + response)
+
+	return response["rowCount"]
+}
+
+
+/*
  * Get friendship status
  * Get friendship status between the current user (user_id) and another user (other_user_id)
  * 
@@ -290,6 +323,7 @@ module.exports = {
     dbAcceptFriendRequest,
     dbDeclineFriendRequest,
     dbRemoveFriend,
+	dbCancelFriendRequest,
 	dbGetFriendshipStatus,
 	dbGetFriendCount
 }

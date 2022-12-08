@@ -81,6 +81,20 @@ const removeFriendController = async (dbRemoveFriend, user_id, removed_user_id) 
 
 
 /*
+ * Remove a friend request by deleting a row in the friendship table
+ */
+const cancelFriendRequestController = async (dbCancelFriendRequest, user_id, other_user_id) => {
+    if (user_id === other_user_id) {
+        return null
+    }
+    
+    const rows_deleted = await dbCancelFriendRequest(user_id, other_user_id)
+
+    return rows_deleted
+}
+
+
+/*
  * Get the friendship status by getting the row in the friendship table
  */
 const getFriendshipStatusController = async (dbGetFriendshipStatus, user_id, other_user_id) => {
@@ -126,6 +140,7 @@ module.exports = {
     acceptFriendRequestController,
     declineFriendRequestController,
     removeFriendController,
+    cancelFriendRequestController,
     getFriendshipStatusController,
     getFriendCountController
 }
