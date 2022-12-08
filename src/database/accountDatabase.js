@@ -71,11 +71,11 @@ const dbGetAccounts = async () => {
 }
 
 /*
- * Set the dark mode of the account with username=username to value.
+ * Get an account based on the account id.
  */
 const dbGetAccount = async (accountId) => {
 	const query = {
-		text: "SELECT username, preferred_streaming_platform "
+		text: "SELECT username, preferred_streaming_platform, profile_pic_path "
 		    + "FROM account "
 				+ "WHERE id = $1",
 		values: [accountId],
@@ -93,6 +93,31 @@ const dbGetAccount = async (accountId) => {
 	})
 	await client.end()
 	return account ? account : null
+}
+
+/*
+ * Get an account based on the account username.
+ */
+const dbGetAccountByUsername = async (username) => {
+	const query = {
+		text: "SELECT id, username "
+		    + "FROM account "
+				+ "WHERE username = $1",
+		values: [username],
+	}
+
+	const client = createClient("musixdb")
+	await client.connect()
+	const account = await client.query(query)
+	.then(res => {
+		return res.rows[0]
+	})
+	.catch(err => {
+		console.error(err.stack)
+		return null
+	})
+	await client.end()
+	return account
 }
 
 /*
@@ -160,7 +185,7 @@ const dbUpdatePreferredPlatform = async (accountId, value) => {
 	await client.connect()
 	const response = await client.query(query)
 	.then(res => {
-		return true
+		return res["rowCount"] > 0
 	})
 	.catch(err => {
 		console.error(err.stack)
@@ -211,7 +236,7 @@ const dbUpdateUsername = async (accountId, value) => {
 	await client.connect()
 	const response = await client.query(query)
 	.then(res => {
-		return true
+		return res["rowCount"] > 0
 	})
 	.catch(err => {
 		console.error(err.stack)
@@ -226,6 +251,32 @@ const dbUpdateUsername = async (accountId, value) => {
 	return response	
 }
 
+/*
+ * Set the profile picture for the account with id=accountId
+ * to value.
+ */
+const dbUpdateProfilePicture = async (accountId, value) => {
+	const query = {
+		text: "UPDATE account "
+		    + "SET profile_pic_path = $1 "
+				+ "WHERE id = $2",
+		values: [value, accountId],
+	}
+
+	const client = createClient("musixdb")
+	await client.connect()
+	const response = await client.query(query)
+	.then(res => {
+		return res["rowCount"] > 0
+	})
+	.catch(err => {
+		console.error(err.stack)
+		return false
+	})
+	await client.end()
+	return response	
+}
+
 module.exports = {
 	dbCreateAccount,
 	dbGetAccounts,
@@ -233,6 +284,8 @@ module.exports = {
 	dbResetPassword,
 	dbUpdatePreferredPlatform,
 	dbGetAccount,
+	dbGetAccountByUsername,
 	dbGetAccountId,
-	dbUpdateUsername
+	dbUpdateUsername,
+	dbUpdateProfilePicture
 }

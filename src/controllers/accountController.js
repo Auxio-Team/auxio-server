@@ -41,6 +41,18 @@ const getAccountController = async (dbGetAccount, accountId) => {
 }
 
 /*
+ * Get account info for user with username=username.
+ * @return -> the account data in a json.
+ */
+const getHistoryController = async (dbGetSessionHistory, accountId) => {
+	return await dbGetSessionHistory(accountId)
+}
+
+const getAccountByUsernameController = async (dbGetAccountByUsername, username) => {
+	return await dbGetAccountByUsername(username)
+}
+
+/*
  * Set the preferred streaming platform of a user to a new value
  * @return -> true if it was updated, otherwise null.
  */
@@ -55,6 +67,14 @@ const updatePreferredPlatformController = async (dbUpdatePreferredPlatform, acco
  */
 const updateUsernameController = async (dbUpdateUsername, accountId, value) => {
 	return await dbUpdateUsername(accountId, value)
+}
+
+/*
+ * Set the profile picture of a user to a new value
+ * @return -> true if it was updated, otherwise null.
+ */
+const updateProfilePictureController = async (dbUpdateProfilePicture, accountId, value) => {
+	return await dbUpdateProfilePicture(accountId, value)
 }
 
 /*
@@ -76,7 +96,10 @@ module.exports = {
 	createAccountController,
 	getAccountsController,
 	getAccountController,
+	getHistoryController,
+	getAccountByUsernameController,
 	updatePreferredPlatformController,
 	updateUsernameController,
+	updateProfilePictureController,
 	logoutController,
 }
