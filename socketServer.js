@@ -50,10 +50,8 @@ io.listen(port, () => {
 // Listen for incoming WebSocket connections from clients
 io.on('connect', (socket) => {
     socket.emit('message', 'Client sucessfully connected to serer');
-    //console.log("A client has connected");
 
     socket.on('sessionId', (sessionId) => {
-        //console.log(`Subscribing to session ${sessionId}`);
         (async () => {
             const subClient = redisClient.duplicate();
           
@@ -62,7 +60,6 @@ io.on('connect', (socket) => {
             //io.adapter(adapter({subClient: redisClient}))
 
             await subClient.subscribe(`sessions:${sessionId}`, queueUpdated => {
-                //console.log("queue updated");
                 socket.emit('queueUpdate', "queue updated")
             })
         })();
