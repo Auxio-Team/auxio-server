@@ -53,13 +53,13 @@ io.on('connect', (socket) => {
     //console.log("A client has connected");
 
     socket.on('sessionId', (sessionId) => {
-        console.log(`Subscribing to session ${sessionId}`);
+        //console.log(`Subscribing to session ${sessionId}`);
         (async () => {
             const subClient = redisClient.duplicate();
           
             await subClient.connect();
             //const adapter = require('socket.io-redis');
-            io.adapter(adapter({subClient: redisClient}))
+            //io.adapter(adapter({subClient: redisClient}))
 
             await subClient.subscribe(`sessions:${sessionId}`, queueUpdated => {
                 //console.log("queue updated");
