@@ -5,9 +5,10 @@
   "main": "server.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "npm-run-all --parallel start-redis start-server start-auth-server",
+    "dev": "npm-run-all --parallel start-redis start-server start-auth-server start-socket-server",
     "start-server": "node server.js",
     "start-auth-server": "node authServer.js",
+    "start-socket-server": "node socketServer.js",
     "start-redis": "redis-server src/configs/redis-36379.conf"
   },
   "repository": {
