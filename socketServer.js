@@ -47,24 +47,26 @@ io.listen(port, () => {
     console.log(`Socket server listening on port ${port}`)
 })
 
-//redis subscription
-const adapter = require('socket.io-redis');
-//io.adapter(adapter({subClient: redisClient}))
-
 // Listen for incoming WebSocket connections from clients
 io.on('connect', (socket) => {
     socket.emit('message', 'Client sucessfully connected to serer');
-    console.log("A client has connected");
+    //console.log("A client has connected");
 
-    (async () => {
-        const subClient = redisClient.duplicate();
-      
-        await subClient.connect();
-      
-        await subClient.subscribe('sessions', (sessionId) => {
-          console.log(`A session has been joined: ${sessionId}`); // 'message'
-          socket.emit('session', sessionId)
-        });
-      
-      })();
+    socket.on('sessionId', (sessionId) => {
+        console.log(`Subscribing to session ${sessionId}`);
+        (async () => {
+            const subClient = redisClient.duplicate();
+          
+            await subClient.connect();
+            //const adapter = require('socket.io-redis');
+            io.adapter(adapter({subClient: redisClient}))
+
+            await subClient.subscribe(`sessions:${sessionId}`, queueUpdated => {
+                //console.log("queue updated");
+                socket.emit('queueUpdate', "queue updated")
+            })
+        })();
+    })
+
+    
   })
