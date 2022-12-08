@@ -148,6 +148,7 @@ module.exports = function (app) {
 	 */
 	app.post('/sessions/:id/end', async (req, res) => {
 		try {
+			// TODO: verify fields in req.body.session
 			const endSession = await endSessionController(
 				redisVerifySessionIdExists,
 				redisVerifyHostExists,
@@ -156,10 +157,7 @@ module.exports = function (app) {
 				dbAddSessionParticipant,
 				req.params.id,
 				req.account.accountId,
-				req.body.session.name,
-				req.body.session.date,
-				req.body.session.platform,
-				req.body.session.trackIds,
+				req.body.session,
 				req.body.users
 			)
 

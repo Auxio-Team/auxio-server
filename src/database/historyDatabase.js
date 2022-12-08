@@ -13,7 +13,7 @@ const dbCreateSession = async (session, accountId) => {
 				+ "VALUES "
 				+ "($1, $2, $3, $4, $5) "
                 + "RETURNING id;",
-		values: [session.name, accountId, session.date, session.platform, session.tracks],
+		values: [session.name, accountId, session.date, session.platform, session.trackIds],
 	}
 
 	const client = createClient("musixdb")
@@ -68,7 +68,8 @@ const dbGetSessionHistory = async (accountId) => {
 	const query = {
 		text: "SELECT musix_session.name, musix_session.host_id, musix_session.date, musix_session.platform, musix_session.track_ids, musix_session_user.download_spotify, musix_session_user.download_apple "
 		    + "FROM musix_session "
-            + "INNER JOIN musix_session_user ON musix_session.id=musix_session_user.musix_session_id "
+            + "INNER JOIN musix_session_user "
+			+ "ON musix_session.id=musix_session_user.musix_session_id "
             + "WHERE musix_session_user.account_id = $1",
 		values: [accountId],
 	}
