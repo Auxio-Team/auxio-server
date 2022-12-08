@@ -37,15 +37,16 @@ app.use(cors({
 }))
 
 /* socket server */
-const { Server } = require('socket.io');
+const { http } = require('http').Server(app);
+const io = require('socket.io')(http);
 const { createAdapter } = require('@socket.io/redis-adapter');
-const io = new Server();
+//const io = new Server();
 
 const subClient = redisClient.duplicate();
 //io.adapter(createAdapter(subClient));
 //io.listen(3000);
-/*
-io.on("connection", (socket) => {
+
+/*io.on('connection', (socket) => {
     const { QUEUE_UPDATE } = 'queueUpdated';
     console.log("io connection")
     socket.on(QUEUE_UPDATE, (data) => {
@@ -53,9 +54,29 @@ io.on("connection", (socket) => {
         redisGetSessionQueue(data.sessionId);
         console.log(redisGetSessionQueue(data.sessionId));
     })
-})
-*/
+})*/
 
+// Listen for incoming WebSocket connections from clients
+io.on('connection', (socket) => {
+    // Subscribe to messages published to the 'my_channel' Redis channel
+    client.subscribe('sessions')
+    console.log("client subscribed");
+  
+    // When a message is received from the Redis channel, send it to the
+    // connected WebSocket client
+    client.on('message', (channel, message) => {
+        console.log(message)
+      socket.send(message)
+    })
+  
+    // When a message is received from the WebSocket client, publish it to
+    // the 'my_channel' Redis channel
+    socket.on('message', (message) => {
+      client.publish('ws_channel', message)
+    })
+  })
+
+/*
 (async () => {
     await subClient.subscribe(`sessions`, (message) => {
         console.log(message);
@@ -63,6 +84,10 @@ io.on("connection", (socket) => {
         console.log(redisGetSessionQueue(sessionId))
     })
 })();
+*/
+
+// `sessions:${sessionId}` gets queue updates, need to get the sessionId somehow
+
 
 
 /* import routes */
