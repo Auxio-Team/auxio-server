@@ -75,7 +75,7 @@ const dbGetAccounts = async () => {
  */
 const dbGetAccount = async (accountId) => {
 	const query = {
-		text: "SELECT username, preferred_streaming_platform "
+		text: "SELECT username, preferred_streaming_platform, profile_path "
 		    + "FROM account "
 				+ "WHERE id = $1",
 		values: [accountId],
@@ -251,6 +251,37 @@ const dbUpdateUsername = async (accountId, value) => {
 	return response	
 }
 
+/*
+ * Set the profile picture for the account with id=accountId
+ * to value.
+ */
+const dbUpdateProfilePicture = async (accountId, value) => {
+	const query = {
+		text: "UPDATE account "
+		    + "SET profile_path = $1 "
+				+ "WHERE id = $2",
+		values: [value, accountId],
+	}
+
+	const client = createClient("musixdb")
+	await client.connect()
+	const response = await client.query(query)
+	.then(res => {
+		return true
+	})
+	.catch(err => {
+		console.error(err.stack)
+		if (err.code == CONSTRAINT_VIOLATION_CODE) {
+			return USERNAME_TAKEN 
+		}
+		else {
+			return false
+		}
+	})
+	await client.end()
+	return response	
+}
+
 module.exports = {
 	dbCreateAccount,
 	dbGetAccounts,
@@ -260,5 +291,6 @@ module.exports = {
 	dbGetAccount,
 	dbGetAccountByUsername,
 	dbGetAccountId,
-	dbUpdateUsername
+	dbUpdateUsername,
+	dbUpdateProfilePicture
 }
