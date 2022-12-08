@@ -46,8 +46,6 @@ const getAccountController = async (dbGetAccount, accountId) => {
  */
 const getHistoryController = async (dbGetSessionHistoryCb, dbGetAccountCb, accountId) => {
 	var historyList = await dbGetSessionHistoryCb(accountId)
-	console.log("history:")
-	console.log(historyList)
 	// TODO: probably need to optimize getting the host names
 	for (const session of historyList) {
 		const resp = await dbGetAccountCb(session.host_id)
