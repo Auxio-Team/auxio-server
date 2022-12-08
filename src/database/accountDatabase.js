@@ -75,7 +75,7 @@ const dbGetAccounts = async () => {
  */
 const dbGetAccount = async (accountId) => {
 	const query = {
-		text: "SELECT id, username, preferred_streaming_platform, current_status, session_code "
+		text: "SELECT id, username, preferred_streaming_platform, current_status, session_code, profile_pic_path "
 		    + "FROM account "
 				+ "WHERE id = $1",
 		values: [accountId],
@@ -187,7 +187,7 @@ const dbUpdatePreferredPlatform = async (accountId, value) => {
 	await client.connect()
 	const response = await client.query(query)
 	.then(res => {
-		return true
+		return res["rowCount"] > 0
 	})
 	.catch(err => {
 		console.error(err.stack)
@@ -238,7 +238,7 @@ const dbUpdateUsername = async (accountId, value) => {
 	await client.connect()
 	const response = await client.query(query)
 	.then(res => {
-		return true
+		return res["rowCount"] > 0
 	})
 	.catch(err => {
 		console.error(err.stack)
@@ -282,6 +282,34 @@ const dbUpdateStatusAndSessionCode = async (accountId, newStatus, newSessionCode
 }
 
 
+/*
+ * Set the profile picture for the account with id=accountId
+ * to value.
+ */
+const dbUpdateProfilePicture = async (accountId, value) => {
+	const query = {
+		text: "UPDATE account "
+		    + "SET profile_pic_path = $1 "
+				+ "WHERE id = $2",
+		values: [value, accountId],
+	}
+
+	const client = createClient("musixdb")
+	await client.connect()
+	const response = await client.query(query)
+	.then(res => {
+
+		return res["rowCount"] > 0
+	})
+	.catch(err => {
+		console.error(err.stack)
+		return false
+	})
+	await client.end()
+	return response	
+}
+
+
 module.exports = {
 	dbCreateAccount,
 	dbGetAccounts,
@@ -292,5 +320,6 @@ module.exports = {
 	dbGetAccountByUsername,
 	dbGetAccountId,
 	dbUpdateUsername,
-	dbUpdateStatusAndSessionCode
+	dbUpdateStatusAndSessionCode,
+	dbUpdateProfilePicture
 }

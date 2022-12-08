@@ -8,7 +8,8 @@ const {
 	redisDequeueSongFromSession,
 	redisVerifySongInQueue,
 	redisAddUpvote,
-	redisRemoveUpvote
+	redisRemoveUpvote,
+	redisRemoveSong
 } = require('../redis/queueRedis')
 
 // import controller functions
@@ -16,7 +17,8 @@ const {
 	addSongController,
 	dequeueSongController,
 	addUpvoteController,
-	removeUpvoteController
+	removeUpvoteController,
+	removeSongController
 } = require('../controllers/queueController')
 
 // import models 
@@ -52,6 +54,32 @@ module.exports = function (app) {
 			else {
 				res.status(200).send() 
 				console.log(`Successfully added song to queue for session ${req.params.id}`);
+			}
+		}
+		catch (err) {
+			console.log(err)
+			res.status(500).send("Internal Server Error")
+		}
+	})
+
+	/*
+	 * Remove a song from the session queue.
+	 */
+	app.delete('/sessions/:id/songs/:song_id', async (req, res) => {
+		try {
+            const removeSong = await removeSongController(
+                redisVerifySessionIdExists,
+                redisVerifySongInQueue,
+				redisRemoveSong,
+                req.params.id,
+                req.params.song_id
+            )
+			if (removeSong.status === FAILURE) {
+				res.status(400).send({ error: removeSong.error })
+			}
+			else {
+				res.status(200).send() 
+				console.log(`Successfully removed song from queue for session ${req.params.id}`);
 			}
 		}
 		catch (err) {

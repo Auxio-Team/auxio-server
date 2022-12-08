@@ -3,6 +3,8 @@ const FAILURE = 'FAILURE';
 const INVALID_ID = 'INVALID_ID';
 const INVALID_NAME = 'INVALID_NAME';
 const MAX_CAPACITY = 'MAX_CAPACITY';
+const SESSION_HISTORY = 'SESSION_HISTORY';
+const SESSION_PARTICIPANT = 'SESSION_PARTICIPANT';
 
 const CODE_LENGTH = 6
 
@@ -21,6 +23,8 @@ module.exports = {
     INVALID_ID,
     INVALID_NAME,
     MAX_CAPACITY,
+    SESSION_HISTORY,
+    SESSION_PARTICIPANT,
     CODE_LENGTH,
     sessionSuccess,
     sessionError

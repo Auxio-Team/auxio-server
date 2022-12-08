@@ -8,9 +8,11 @@ const {
 	createAccountController,
 	getAccountsController,
 	getAccountController,
+	getHistoryController,
 	getAccountByUsernameController,
 	updatePreferredPlatformController,
 	updateUsernameController,
+	updateProfilePictureController,
 	logoutController,
 	updateStatusAndSessionCodeController,
 } = require('../controllers/accountController')
@@ -24,6 +26,7 @@ const {
 	dbGetAccount,
 	dbGetAccountByUsername,
 	dbUpdateStatusAndSessionCode,
+	dbUpdateProfilePicture
 } = require('../database/accountDatabase')
 
 const {
@@ -35,11 +38,15 @@ const {
 } = require('../database/friendDatabase')
 
 const {
+	dbGetSessionHistory
+} = require('../database/historyDatabase')
+
+const {
 	USERNAME_TAKEN,
 	PHONE_NUMBER_TAKEN
 } = require('../models/accountModels')
 
-module.exports = function (app) {
+module.exports = function (app, upload) {
 	/*
 	 * Create new user.
 	 */
@@ -122,6 +129,26 @@ module.exports = function (app) {
 		}
 	})
 
+
+	/*
+	 * Get session history for account that is making this request
+	 */
+	app.get('/history', async (req, res) => {
+		try {
+			const history = await getHistoryController(dbGetSessionHistory, req.account.accountId)
+			if (history) {
+				res.status(200).send(history)
+			}
+			else {
+				res.status(400).send("Couldn't find history")
+			}
+		}
+		catch (err) {
+			console.log(err)
+			res.status(500).send("Internal Server Error")
+		}
+	})
+
 	/*
 	 * Get account by username
 	 */
@@ -177,6 +204,54 @@ module.exports = function (app) {
 			}
 			else {
 				res.status(400).send({ message: "Could not update username" })
+			}
+		}
+		catch (err) {
+			console.log(err)
+			res.status(500).send("Internal Server Error")
+		}
+	})
+
+	/*
+	 * Update the profile pic of a user with new value
+	 */
+	app.put('/profilepic', upload.single('profilePicture'), async (req, res) => {
+		try {
+			const updated = await updateProfilePictureController(dbUpdateProfilePicture, req.account.accountId, req.file.path);
+			if (updated) {
+				res.status(200).send()
+			}
+			else {
+				res.status(400).send({ message: "Could not update profile picture" })
+			}
+		}
+		catch (err) {
+			console.log(err)
+			res.status(500).send("Internal Server Error")
+		}
+	})
+
+	/*
+	 * Get the profile pic of a user
+	 */
+	app.get('/profilepic', async (req, res) => {
+		try {
+			const account = await getAccountController(dbGetAccount, req.account.accountId)
+			if (account) {
+				if (account.profile_path) {
+					res.status(200).sendFile(account.profile_path, { root : `${__dirname}\\..\\..` }, function (err) {
+						if (err) {
+							res.status(400).send("Couldn't find picture");
+						} else {
+							console.log('Profile picture sent successfully');
+						}
+					});
+				} else {
+					res.status(200).send({ message: 'No profile picture' });
+				}
+			}
+			else {
+				res.status(400).send("Couldn't find account")
 			}
 		}
 		catch (err) {

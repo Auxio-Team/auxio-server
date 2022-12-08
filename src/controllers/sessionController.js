@@ -10,12 +10,17 @@ const {
     INVALID_ID,
     INVALID_NAME,
     MAX_CAPACITY,
+    SESSION_HISTORY,
+    SESSION_PARTICIPANT,
     FAILURE,
     CODE_LENGTH,
     sessionSuccess,
     sessionError,
 } = require('../models/sessionModels');
 
+const { 
+    dbAddSessionParticipant 
+} = require('../database/historyDatabase');
 
 /*
  * Create a new session and save it in Redis.
@@ -141,13 +146,33 @@ const leaveSessionController = async (redisVerifySessionIdExistsCb, redisVerifyP
 /*
  * End a session.
  */
-const endSessionController = async (redisVerifySessionIdExistsCb, redisVerifyHostExistsCb, redisEndSessionCb, dbUpdateStatusAndSessionCode, sessionId, accountId) => {
+const endSessionController = async (redisVerifySessionIdExistsCb, redisVerifyHostExistsCb, redisEndSessionCb, 
+        dbCreateSessionCb, dbAddSessionParticipantCb, dbUpdateStatusAndSessionCode, sessionId, accountId) => {
+
     if (!await redisVerifySessionIdExistsCb(sessionId)) {
         console.log('Error ending session: Session ID not valid')
         return sessionError(INVALID_ID);
     } else if (!await redisVerifyHostExistsCb(sessionId, accountId)) {
         console.log('Error ending session: Invalid host')
         return sessionError(INVALID_NAME)
+    }
+
+    const session = { name: sessionName, date: sessionDate, platform: sessionPlatform, tracks: sessionTrackIds, host: accountId };
+    const res = await dbCreateSessionCb(session, accountId);
+    if (!res) {
+        return sessionError(SESSION_HISTORY);
+    }
+    
+    let failedUsers = [];
+    for (const user of users) {
+        let val = await dbAddSessionParticipantCb(user, res);
+        if (!val) {
+            failedUsers.push(user);
+        }
+    }
+
+    if (failedUsers.length != 0) {
+        return sessionError(failedUsers);
     }
 
     const response = await redisEndSessionCb(sessionId, accountId)

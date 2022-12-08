@@ -56,6 +56,13 @@ const getAccountByUsernameController = async (dbGetAccountByUsername, dbGetFrien
 }
 
 /*
+ * Get session history
+ */
+const getHistoryController = async (dbGetSessionHistory, accountId) => {
+	return await dbGetSessionHistory(accountId)
+}
+
+/*
  * Set the preferred streaming platform of a user to a new value
  * @return -> true if it was updated, otherwise null.
  */
@@ -70,6 +77,14 @@ const updatePreferredPlatformController = async (dbUpdatePreferredPlatform, acco
  */
 const updateUsernameController = async (dbUpdateUsername, accountId, value) => {
 	return await dbUpdateUsername(accountId, value)
+}
+
+/*
+ * Set the profile picture of a user to a new value
+ * @return -> true if it was updated, otherwise null.
+ */
+const updateProfilePictureController = async (dbUpdateProfilePicture, accountId, value) => {
+	return await dbUpdateProfilePicture(accountId, value)
 }
 
 /*
@@ -107,9 +122,11 @@ module.exports = {
 	createAccountController,
 	getAccountsController,
 	getAccountController,
+	getHistoryController,
 	getAccountByUsernameController,
 	updatePreferredPlatformController,
 	updateUsernameController,
+	updateProfilePictureController,
 	logoutController,
 	updateStatusAndSessionCodeController
 }
