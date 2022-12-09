@@ -153,7 +153,7 @@ module.exports = function (app) {
 	/*
 	 * Get current song in a session queue. (we might not need this? depends on how subscribing to redis works)
 	 */
-	app.get('/sessions/:id/songs/current', async (req, res) => {
+	app.get('/guest/sessions/:id/songs/current', async (req, res) => {
 		try {
 			console.log('in route')
             const getCurr = await getCurrentSongController(
