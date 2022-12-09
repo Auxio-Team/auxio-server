@@ -9,6 +9,7 @@ const {
 
 const {
 	redisAddSongToSession,
+	redisGetCurrentSong,
 	redisGetSessionQueue
 } = require('../redis/queueRedis')
 
@@ -21,6 +22,7 @@ const {
 
 const {
 	addSongController,
+	getCurrentSongController,
 	getSessionQueueController
 } = require('../controllers/queueController')
 
@@ -74,6 +76,30 @@ module.exports = function (app) {
 			}
 			else {
 				res.status(200).send() 
+			}
+		}
+		catch (err) {
+			console.log(err)
+			res.status(500).send("Internal Server Error")
+		}
+	})
+
+	/*
+	 * Get current song in a session queue. (we might not need this? depends on how subscribing to redis works)
+	 */
+	app.get('/guest/sessions/:id/songs/current', async (req, res) => {
+		try {
+			const getCurr = await getCurrentSongController(
+				redisVerifySessionIdExists,
+				redisGetCurrentSong,
+				req.params.id
+			)
+			if (getCurr.status === FAILURE) {
+				res.status(400).send({ error: getCurr.error })
+			}
+			else {
+				res.status(200).send({ song: getCurr });
+				console.log(`Successfully got current song for session ${req.params.id}`);
 			}
 		}
 		catch (err) {
