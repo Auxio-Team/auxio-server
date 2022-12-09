@@ -1,4 +1,4 @@
-CREATE TYPE account_status AS ENUM ('offline', 'online', 'hostingSession', 'inSession');
+CREATE TYPE account_status AS ENUM ('Offline', 'Online', 'Hosting Session', 'In Session');
 
 CREATE TABLE account (
 	id bigserial PRIMARY KEY,
