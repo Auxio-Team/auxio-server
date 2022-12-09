@@ -9,11 +9,8 @@ const { createClient, createPool } = require('./createClientPool')
  * 
  */
 const dbGetFriendList = async (user_id) => {
-    // select
-	// return the account id, username (TODO status, session_code)
-
 	const query = {
-		text: "SELECT id, username, current_status "
+		text: "SELECT id, username, current_status, session_code "
 				+ "FROM account "
 				+ "WHERE id IN "
 				+ "(SELECT recipient_id "
@@ -48,9 +45,6 @@ const dbGetFriendList = async (user_id) => {
  * 
  */
 const dbGetFriendRequestList = async (recipient_id) => {
-    // select
-	// return the account id and username
-
 	const query = {
 		text: "SELECT id, username, current_status, session_code "
 				+ "FROM account "
@@ -76,12 +70,6 @@ const dbGetFriendRequestList = async (recipient_id) => {
 	return request_list
 
 }
-
-/*
- * Get friend request list and request list (optional)
- * 
- */
-
 
 /*
  * Create friend request
