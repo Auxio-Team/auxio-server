@@ -60,8 +60,7 @@ io.on('connect', (socket) => {
             //io.adapter(adapter({subClient: redisClient}))
 
             await subClient.subscribe(`sessions:${sessionId}`, (message) => {
-                console.log(message);
-                socket.emit('queueUpdate', message)
+                socket.emit('queueUpdate', message);
             })
         })();
     })
