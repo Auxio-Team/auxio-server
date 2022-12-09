@@ -280,7 +280,7 @@ const dbUpdateStatusAndSessionCode = async (accountId, newStatus, newSessionCode
 	})
 	await client.end()
 
-	return response["rowCount"]
+	return response == null ? response : response["rowCount"]
 }
 
 
