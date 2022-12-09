@@ -14,6 +14,7 @@ const {
 	updateUsernameController,
 	updateProfilePictureController,
 	logoutController,
+	updateStatusAndSessionCodeController,
 } = require('../controllers/accountController')
 
 // import account database functions
@@ -24,12 +25,17 @@ const {
 	dbUpdateUsername,
 	dbGetAccount,
 	dbGetAccountByUsername,
+	dbUpdateStatusAndSessionCode,
 	dbUpdateProfilePicture
 } = require('../database/accountDatabase')
 
 const {
 	dbDeleteRefreshToken
 } = require('../database/authDatabase')
+
+const {
+	dbGetFriendshipStatus
+} = require('../database/friendDatabase')
 
 const {
 	dbGetSessionHistory
@@ -88,7 +94,7 @@ module.exports = function (app, upload) {
 	/*
 	 * Get account info for account that is making this request
 	 */
-	app.get('/account', async (req, res) => {
+	app.get('/myaccount', async (req, res) => {
 		try {
 			const account = await getAccountController(dbGetAccount, req.account.accountId)
 			if (account) {
@@ -103,6 +109,26 @@ module.exports = function (app, upload) {
 			res.status(500).send("Internal Server Error")
 		}
 	})
+
+	/*
+	 * Get account info for account specified in the body
+	 */
+	app.get('/account', async (req, res) => {
+		try {
+			const account = await getAccountController(dbGetAccount, req.body.accountId)
+			if (account) {
+				res.status(200).send(account)
+			}
+			else {
+				res.status(400).send("Couldn't find account")
+			}
+		}
+		catch (err) {
+			console.log(err)
+			res.status(500).send("Internal Server Error")
+		}
+	})
+
 
 	/*
 	 * Get session history for account that is making this request
@@ -126,13 +152,14 @@ module.exports = function (app, upload) {
 			res.status(500).send("Internal Server Error")
 		}
 	})
-	
+
 	/*
-	 * Get acount by username
+	 * Get account by username
 	 */
 	app.get('/accountbyusername', async (req, res) => {
 		try {
-			const account = await getAccountByUsernameController(dbGetAccountByUsername, req.body.username)
+			const account = await getAccountByUsernameController(dbGetAccountByUsername, 
+				dbGetFriendshipStatus, req.account.accountId, req.body.username)
 			if (account) {
 				res.status(200).send(account)
 			}
@@ -215,8 +242,8 @@ module.exports = function (app, upload) {
 		try {
 			const account = await getAccountController(dbGetAccount, req.account.accountId)
 			if (account) {
-				if (account.profile_path) {
-					res.status(200).sendFile(account.profile_path, { root : `${__dirname}\\..\\..` }, function (err) {
+				if (account.profile_pic_path) {
+					res.status(200).sendFile(account.profile_pic_path, { root : `${__dirname}\\..\\..` }, function (err) {
 						if (err) {
 							res.status(400).send("Couldn't find picture");
 						} else {
@@ -258,6 +285,26 @@ module.exports = function (app, upload) {
 		catch (err) {
 			console.log(err)
 			res.status(500).send("Internal Server Error")
+		}
+	})
+
+
+	app.put('/statusandsessioncode', async (req, res) => {
+		try {
+			const updated = await updateStatusAndSessionCodeController(dbUpdateStatusAndSessionCode,
+				req.account.accountId, req.body.status, req.body.sessionCode)
+			
+			if (updated > 0) {
+				console.log("Updated status and session code")
+				res.status(200).send()
+			}
+			else {
+				res.status(400).send()
+			}
+		}
+		catch (err) {
+			console.log(err)
+			res.status(500).send("internal Server Error")
 		}
 	})
 }

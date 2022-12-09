@@ -13,7 +13,7 @@ const dbGetFriendList = async (user_id) => {
 	// return the account id, username (TODO status, session_code)
 
 	const query = {
-		text: "SELECT id, username "
+		text: "SELECT id, username, current_status "
 				+ "FROM account "
 				+ "WHERE id IN "
 				+ "(SELECT recipient_id "
@@ -52,7 +52,7 @@ const dbGetFriendRequestList = async (recipient_id) => {
 	// return the account id and username
 
 	const query = {
-		text: "SELECT id, username "
+		text: "SELECT id, username, current_status "
 				+ "FROM account "
 				+ "WHERE id IN "
 				+ "(SELECT requester_id "
@@ -219,11 +219,109 @@ const dbRemoveFriend = async (user_id, removed_user_id) => {
 }
 
 
+/*
+ * Cancel friend request
+ * The current user (user_id) is cancelling a friend request sent to another user
+ * 
+ * Returns the number of rows deleted, which should be 1 on success
+ */
+const dbCancelFriendRequest = async (user_id, other_user_id) => {
+	// possible errors: current status is requested, no relationship in the table
+
+	const query = {
+		text: "DELETE FROM friendship "
+				+ "WHERE requester_id = $1 AND recipient_id = $2 AND current_status = $3;",
+		values: [user_id, other_user_id, 'requested'],
+	}
+
+	const client = createClient("musixdb")
+	await client.connect()
+	const response = await client.query(query)
+	.then(res => {
+		return res
+	})
+	.catch(e => {
+		console.error(e.stack)
+		return null
+	})
+	await client.end()
+
+	return response["rowCount"]
+}
+
+
+/*
+ * Get friendship status
+ * Get friendship status between the current user (user_id) and another user (other_user_id)
+ * 
+ * Returns 'not friends', 'sent request', 'recieved request', or 'friends'
+ */
+const dbGetFriendshipStatus = async (user_id, other_user_id) => {
+	const query = {
+		text: "SELECT requester_id, current_status "
+				+ "FROM friendship "
+				+ "WHERE requester_id = $1 AND recipient_id = $2 "
+				+ "OR requester_id = $2 AND recipient_id = $1;",
+		values: [user_id, other_user_id],
+	}
+
+	const client = createClient("musixdb")
+	await client.connect()
+	const response = await client.query(query)
+	.then(res => {
+		return res
+	})
+	.catch(e => {
+		console.error(e.stack)
+		return null
+	})
+	await client.end()
+
+	console.log("RESPONSE: " + JSON.stringify(response))
+
+	return response
+}
+
+
+/*
+ * Get friend count
+ * Get friend count of the current user (user_id)
+ * 
+ * Returns the number of friends that the current user has
+ */
+const dbGetFriendCount = async (user_id) => {
+	const query = {
+		text: "SELECT COUNT(id) "
+				+ "FROM friendship "
+				+ "WHERE requester_id = $1 AND current_status = $2 "
+				+ "OR recipient_id = $1 AND current_status = $2;",
+		values: [user_id, 'friends'],
+	}
+
+	const client = createClient("musixdb")
+	await client.connect()
+	const friend_count = await client.query(query)
+	.then(res => {
+		return res.rows[0].count
+	})
+	.catch(e => {
+		console.error(e.stack)
+		return null
+	})
+	await client.end()
+
+	return friend_count
+}
+
+
 module.exports = {
     dbGetFriendList,
     dbGetFriendRequestList,
     dbCreateFriendRequest,
     dbAcceptFriendRequest,
     dbDeclineFriendRequest,
-    dbRemoveFriend
+    dbRemoveFriend,
+	dbCancelFriendRequest,
+	dbGetFriendshipStatus,
+	dbGetFriendCount
 }
