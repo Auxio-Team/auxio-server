@@ -1,9 +1,13 @@
+CREATE TYPE account_status AS ENUM ('offline', 'online', 'hostingSession', 'inSession');
+
 CREATE TABLE account (
 	id bigserial PRIMARY KEY,
 	username varchar(25) NOT NULL UNIQUE,
 	pass varchar(320) NOT NULL,
 	phone_number varchar(20) NOT NULL UNIQUE,
 	preferred_streaming_platform varchar(20) NOT NULL,
+	current_status account_status NOT NULL,
+	session_code varchar(6),
 	profile_pic_path varchar(320)
 );
 

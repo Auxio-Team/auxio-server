@@ -1,3 +1,7 @@
+const { 
+    updateStatusAndSessionCodeController 
+} = require('../controllers/accountController');
+
 const {
 	generateSessionId
 } = require('../services/sessionService')
@@ -13,13 +17,17 @@ const {
     sessionSuccess,
     sessionError,
 } = require('../models/sessionModels');
-const { dbAddSessionParticipant } = require('../database/historyDatabase');
+
+const { 
+    dbAddSessionParticipant 
+} = require('../database/historyDatabase');
 
 /*
  * Create a new session and save it in Redis.
  */
 const createSessionController = 
-        async ( redisCreateSessionCb, redisVerifyProspectHostCb, redisVerifySessionIdExistsCb, accountId, id, capacity ) => {
+        async ( redisCreateSessionCb, redisVerifyProspectHostCb, redisVerifySessionIdExistsCb, 
+            dbUpdateStatusAndSessionCode, accountId, id, capacity ) => {
 	// verify user as valid host
     if (!await redisVerifyProspectHostCb(accountId)) {
         console.log('Error creating session: User cannot be a host');
@@ -42,6 +50,11 @@ const createSessionController =
 
 	// save the new session to server
 	if (await redisCreateSessionCb(sessionId, accountId, capacity)) {
+        // update status and session code in database, if updates fail return null
+        if (!await updateStatusAndSessionCodeController(dbUpdateStatusAndSessionCode, accountId, "hostingSession", sessionId)) {
+            console.log('Error updating account status and session code');
+            return null
+        }
 		return { id: sessionId };
 	}
 	else {
@@ -73,13 +86,14 @@ const getSessionInfoController = async (redisGetSessionInfoCb, dbGetAccount, ses
 /*
  * Join a session.
  */
-const joinSessionController = async (redisVerifySessionIdExistsCb, redisJoinSessionCb, sessionId, accountId) => {
+const joinSessionController = async (redisVerifySessionIdExistsCb, redisJoinSessionCb, 
+        dbUpdateStatusAndSessionCode, sessionId, accountId) => {
     if (!await redisVerifySessionIdExistsCb(sessionId)) {
         console.log('Error joining session: Session ID not valid')
         return sessionError(INVALID_ID);
     }
 
-    return await redisJoinSessionCb(sessionId, accountId)
+    const response =  await redisJoinSessionCb(sessionId, accountId)
         .then((res) => {
             if (res == MAX_CAPACITY) {
                 return sessionError(res);
@@ -89,12 +103,21 @@ const joinSessionController = async (redisVerifySessionIdExistsCb, redisJoinSess
                 return sessionSuccess();
             }
         });
+
+    // update status and session code in database on success, if updates fail return null
+    if (response.status == sessionSuccess().status && !await updateStatusAndSessionCodeController(dbUpdateStatusAndSessionCode, accountId, "inSession", sessionId)) {
+        console.log('Error updating account status and session code');
+        return null
+    }
+
+    return response
 }
 
 /*
  * Leave a session.
  */
-const leaveSessionController = async (redisVerifySessionIdExistsCb, redisVerifyParticipantExistsCb, redisLeaveSessionCb, sessionId, accountId) => {
+const leaveSessionController = async (redisVerifySessionIdExistsCb, redisVerifyParticipantExistsCb, 
+        redisLeaveSessionCb, dbUpdateStatusAndSessionCode, sessionId, accountId) => {
     if (!await redisVerifySessionIdExistsCb(sessionId)) {
         console.log('Error leaving session: Session ID not valid')
         return sessionError(INVALID_ID);
@@ -102,20 +125,30 @@ const leaveSessionController = async (redisVerifySessionIdExistsCb, redisVerifyP
         console.log(`Error leaving session: User not in session ${sessionId}`)
         return sessionError(INVALID_NAME)
     }
-    return await redisLeaveSessionCb(sessionId, accountId)
+
+    const response = await redisLeaveSessionCb(sessionId, accountId)
         .then((res) => {
             if (res) {
                 return sessionSuccess();
             }
             return sessionError(FAILURE);
         });
+    
+    // update status and session code in database on success, if updates fail return null
+    if (response.status == sessionSuccess().status && !await updateStatusAndSessionCodeController(dbUpdateStatusAndSessionCode, accountId, "online", null)) {
+        console.log('Error updating account status and session code');
+        return null
+    }
+
+    return response
 }
 
 /*
  * End a session.
  */
-const endSessionController =
-    async (redisVerifySessionIdExistsCb, redisVerifyHostExistsCb, redisEndSessionCb, dbCreateSessionCb, dbAddSessionParticipantCb, sessionId, accountId, sessionName, sessionDate, sessionPlatform, sessionTrackIds, users) => {
+const endSessionController = async (redisVerifySessionIdExistsCb, redisVerifyHostExistsCb, redisEndSessionCb, 
+        dbCreateSessionCb, dbAddSessionParticipantCb, dbUpdateStatusAndSessionCode, sessionId, accountId) => {
+
     if (!await redisVerifySessionIdExistsCb(sessionId)) {
         console.log('Error ending session: Session ID not valid')
         return sessionError(INVALID_ID);
@@ -142,13 +175,21 @@ const endSessionController =
         return sessionError(failedUsers);
     }
 
-    return await redisEndSessionCb(sessionId, accountId)
+    const response = await redisEndSessionCb(sessionId, accountId)
         .then((res) => {
             if (res) {
                 return sessionSuccess();
             }
             return sessionError(FAILURE);
         });
+    
+    // update status and session code in database on success, if updates fail return null
+    if (response.status == sessionSuccess().status && !await updateStatusAndSessionCodeController(dbUpdateStatusAndSessionCode, accountId, "online", null)) {
+        console.log('Error updating account status and session code');
+        return null
+    }
+
+    return response
 }
 
 module.exports = { 

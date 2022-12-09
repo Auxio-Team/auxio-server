@@ -2,6 +2,7 @@ const {
 	validateCreateAccount,
 	encryptPassword
 } = require('../services/accountService')
+const { getFriendshipStatusController } = require('./friendController')
 
 /*
  * Create a new account and save it in the database.
@@ -42,14 +43,22 @@ const getAccountController = async (dbGetAccount, accountId) => {
 
 /*
  * Get account info for user with username=username.
- * @return -> the account data in a json.
+ * @return -> the account data in a json with the relationship status.
+ */
+const getAccountByUsernameController = async (dbGetAccountByUsername, dbGetFriendshipStatus, myAccountId, username) => {
+	let account = await dbGetAccountByUsername(username)
+	const friendshipStatus = await getFriendshipStatusController(dbGetFriendshipStatus, myAccountId, account.id)
+	account.friendship_status = friendshipStatus
+
+	console.log("ACCOUNT: " + JSON.stringify(account))
+	return account
+}
+
+/*
+ * Get session history
  */
 const getHistoryController = async (dbGetSessionHistory, accountId) => {
 	return await dbGetSessionHistory(accountId)
-}
-
-const getAccountByUsernameController = async (dbGetAccountByUsername, username) => {
-	return await dbGetAccountByUsername(username)
 }
 
 /*
@@ -92,6 +101,22 @@ const logoutController = async (dbDeleteRefreshToken, accountId) => {
 	}
 }
 
+/*
+ * Update the status and session code of the account
+ * @return -> number of rows updated, or null on failure
+ */
+const updateStatusAndSessionCodeController = async (dbUpdateStatusAndSessionCode, 
+		accountId, newStatus, newSessionCode) => {
+	const updated = await dbUpdateStatusAndSessionCode(accountId, newStatus, newSessionCode)
+
+	if (updated > 0) {
+		return updated
+	}
+	else {
+		return null
+	}
+}
+
 module.exports = {
 	createAccountController,
 	getAccountsController,
@@ -102,4 +127,5 @@ module.exports = {
 	updateUsernameController,
 	updateProfilePictureController,
 	logoutController,
+	updateStatusAndSessionCodeController
 }
