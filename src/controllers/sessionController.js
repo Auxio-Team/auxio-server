@@ -140,7 +140,7 @@ const leaveSessionController = async (redisVerifySessionIdExistsCb, redisVerifyP
         });
     
     // update status and session code in database on success, if updates fail return null
-    if (response.status == sessionSuccess().status && !await updateStatusAndSessionCodeController(dbUpdateStatusAndSessionCode, accountId, "Online", null)) {
+    if (dbUpdateStatusAndSessionCode && response.status == sessionSuccess().status && !await updateStatusAndSessionCodeController(dbUpdateStatusAndSessionCode, accountId, "Online", null)) {
         console.log('Error updating account status and session code');
         return null
     }

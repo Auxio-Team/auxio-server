@@ -6,7 +6,6 @@ const {
 const {
 	redisAddSongToSession,
 	redisDequeueSongFromSession,
-	redisGetCurrentSong,
 	redisVerifySongInQueue,
 	redisAddUpvote,
 	redisRemoveUpvote,
@@ -17,7 +16,6 @@ const {
 const {
 	addSongController,
 	dequeueSongController,
-	getCurrentSongController,
 	addUpvoteController,
 	removeUpvoteController,
 	removeSongController
@@ -148,31 +146,6 @@ module.exports = function (app) {
 	app.get('/sessions/:id/songs', async (req, res) => {
 		console.log('endpoint not yet implemented - sorry!')
 		res.status(405).send("endpoint not yet implemented") 
-	})
-
-	/*
-	 * Get current song in a session queue. (we might not need this? depends on how subscribing to redis works)
-	 */
-	app.get('/sessions/:id/songs/current', async (req, res) => {
-		try {
-			console.log('in route')
-            const getCurr = await getCurrentSongController(
-                redisVerifySessionIdExists,
-				redisGetCurrentSong,
-                req.params.id
-            )
-			if (getCurr.status === FAILURE) {
-				res.status(400).send({ error: getCurr.error })
-			}
-			else {
-				res.status(200).send({ song: getCurr });
-				console.log(`Successfully got current song for session ${req.params.id}`);
-			}
-		}
-		catch (err) {
-			console.log(err)
-			res.status(500).send("Internal Server Error")
-		}
 	})
 
 	/*
