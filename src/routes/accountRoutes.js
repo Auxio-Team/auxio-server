@@ -113,9 +113,12 @@ module.exports = function (app, upload) {
 	/*
 	 * Get account info for account specified in the body
 	 */
-	app.get('/account', async (req, res) => {
+	app.get('/accounts/:accountId', async (req, res) => {
 		try {
-			const account = await getAccountController(dbGetAccount, req.body.accountId)
+			const account = await getAccountController(
+				dbGetAccount, 
+				req.params.accountId
+			)
 			if (account) {
 				res.status(200).send(account)
 			}

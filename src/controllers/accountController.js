@@ -62,6 +62,7 @@ const getHistoryController = async (dbGetSessionHistoryCb, dbGetAccountCb, accou
 	return { "history": historyList }
 }  
 
+/*
  * Get account info for user with username=username.
  * @return -> the account data in a json with the relationship status.
  */
@@ -72,13 +73,6 @@ const getAccountByUsernameController = async (dbGetAccountByUsername, dbGetFrien
 
 	console.log("ACCOUNT: " + JSON.stringify(account))
 	return account
-}
-
-/*
- * Get session history
- */
-const getHistoryController = async (dbGetSessionHistory, accountId) => {
-	return await dbGetSessionHistory(accountId)
 }
 
 /*
