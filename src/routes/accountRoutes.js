@@ -238,8 +238,8 @@ module.exports = function (app, upload) {
 		try {
 			const account = await getAccountController(dbGetAccount, req.account.accountId)
 			if (account) {
-				if (account.profile_path) {
-					res.status(200).sendFile(account.profile_path, { root : `${__dirname}\\..\\..` }, function (err) {
+				if (account.profile_pic_path) {
+					res.status(200).sendFile(account.profile_pic_path, { root : `${__dirname}\\..\\..` }, function (err) {
 						if (err) {
 							res.status(400).send("Couldn't find picture");
 						} else {
