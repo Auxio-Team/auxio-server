@@ -47,11 +47,10 @@ const getAccountController = async (dbGetAccount, accountId) => {
  */
 const getAccountByUsernameController = async (dbGetAccountByUsername, dbGetFriendshipStatus, myAccountId, username) => {
 	let account = await dbGetAccountByUsername(username)
-	const friendship_status = await getFriendshipStatusController(dbGetFriendshipStatus, myAccountId, account.id)
-	account.friendship_status = friendship_status
+	const friendshipStatus = await getFriendshipStatusController(dbGetFriendshipStatus, myAccountId, account.id)
+	account.friendship_status = friendshipStatus
 
 	console.log("ACCOUNT: " + JSON.stringify(account))
-
 	return account
 }
 
