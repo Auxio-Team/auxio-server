@@ -60,11 +60,13 @@ module.exports = function (app) {
     app.get('/friend/requestlist', async (req, res) => {
         try {
             const requestList = await getFriendRequestListController(
-                dbGetFriendRequestList, req.account.accountId)
+                dbGetFriendRequestList, 
+                req.account.accountId
+            )
             
             if (requestList) {
                 console.log("Got friend request list for: " + req.account.accountId)
-				res.status(200).send({ "requestlist": requestList })
+				res.status(200).send({ "requestList": requestList })
             }
             else {
                 res.status(400).send({ 'message': 'Unable to get friend request list' })

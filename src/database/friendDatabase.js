@@ -52,7 +52,7 @@ const dbGetFriendRequestList = async (recipient_id) => {
 	// return the account id and username
 
 	const query = {
-		text: "SELECT id, username, current_status "
+		text: "SELECT id, username, current_status, session_code "
 				+ "FROM account "
 				+ "WHERE id IN "
 				+ "(SELECT requester_id "
