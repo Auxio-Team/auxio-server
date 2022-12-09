@@ -105,7 +105,7 @@ const joinSessionController = async (redisVerifySessionIdExistsCb, redisJoinSess
         });
 
     // update status and session code in database on success, if updates fail return null
-    if (response == sessionSuccess() && !await updateStatusAndSessionCodeController(dbUpdateStatusAndSessionCode, accountId, "inSession", sessionId)) {
+    if (response == sessionSuccess().status && !await updateStatusAndSessionCodeController(dbUpdateStatusAndSessionCode, accountId, "inSession", sessionId)) {
         console.log('Error updating account status and session code');
         return null
     }
@@ -135,7 +135,7 @@ const leaveSessionController = async (redisVerifySessionIdExistsCb, redisVerifyP
         });
     
     // update status and session code in database on success, if updates fail return null
-    if (response == sessionSuccess() && !await updateStatusAndSessionCodeController(dbUpdateStatusAndSessionCode, accountId, "online", null)) {
+    if (response == sessionSuccess().status && !await updateStatusAndSessionCodeController(dbUpdateStatusAndSessionCode, accountId, "online", null)) {
         console.log('Error updating account status and session code');
         return null
     }
@@ -184,7 +184,7 @@ const endSessionController = async (redisVerifySessionIdExistsCb, redisVerifyHos
         });
     
     // update status and session code in database on success, if updates fail return null
-    if (response == sessionSuccess() && !await updateStatusAndSessionCodeController(dbUpdateStatusAndSessionCode, accountId, "online", null)) {
+    if (response == sessionSuccess().status && !await updateStatusAndSessionCodeController(dbUpdateStatusAndSessionCode, accountId, "online", null)) {
         console.log('Error updating account status and session code');
         return null
     }
