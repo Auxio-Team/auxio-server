@@ -110,6 +110,9 @@ const dbGetAccountByUsername = async (username) => {
 	await client.connect()
 	const response = await client.query(query)
 	.then(res => {
+		if (res.rows.length == 0) {
+			return null
+		}
 		return res.rows[0]
 	})
 	.catch(err => {

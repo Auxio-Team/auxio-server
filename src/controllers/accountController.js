@@ -68,10 +68,12 @@ const getHistoryController = async (dbGetSessionHistoryCb, dbGetAccountCb, accou
  */
 const getAccountByUsernameController = async (dbGetAccountByUsername, dbGetFriendshipStatus, myAccountId, username) => {
 	let account = await dbGetAccountByUsername(username)
+	if (account === null) {
+		return null
+	}
 	const friendshipStatus = await getFriendshipStatusController(dbGetFriendshipStatus, myAccountId, account.id)
 	account.friendship_status = friendshipStatus
 
-	console.log("ACCOUNT: " + JSON.stringify(account))
 	return account
 }
 

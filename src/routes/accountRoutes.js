@@ -132,6 +132,30 @@ module.exports = function (app, upload) {
 		}
 	})
 
+	/*
+	 * Get account by username
+	 */
+	app.get('/accountbyusername/:username', async (req, res) => {
+		try {
+			const account = await getAccountByUsernameController(
+				dbGetAccountByUsername, 
+				dbGetFriendshipStatus, 
+				req.account.accountId, 
+				req.params.username
+			)
+			if (account) {
+				console.log(`Successfully found account for username=${req.params.username}`)
+				res.status(200).send(account)
+			}
+			else {
+				res.status(400).send("Couldn't find account")
+			}
+		}
+		catch (err) {
+			console.log(err)
+			res.status(500).send("Internal Server Error")
+		}
+	})
 
 	/*
 	 * Get session history for account that is making this request
@@ -148,26 +172,6 @@ module.exports = function (app, upload) {
 			}
 			else {
 				res.status(400).send("Couldn't find history")
-			}
-		}
-		catch (err) {
-			console.log(err)
-			res.status(500).send("Internal Server Error")
-		}
-	})
-
-	/*
-	 * Get account by username
-	 */
-	app.get('/accountbyusername', async (req, res) => {
-		try {
-			const account = await getAccountByUsernameController(dbGetAccountByUsername, 
-				dbGetFriendshipStatus, req.account.accountId, req.body.username)
-			if (account) {
-				res.status(200).send(account)
-			}
-			else {
-				res.status(400).send("Couldn't find account")
 			}
 		}
 		catch (err) {
