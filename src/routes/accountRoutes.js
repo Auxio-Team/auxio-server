@@ -243,13 +243,45 @@ module.exports = function (app, upload) {
 	})
 
 	/*
-	 * Get the profile pic of a user
+	 * Get my profile pic
 	 */
 	app.get('/profilepic', async (req, res) => {
 		try {
 			const account = await getAccountController(
 				dbGetAccount, 
 				req.account.accountId
+			)
+			if (account) {
+				if (account.profile_pic_path) {
+					res.status(200).sendFile(account.profile_pic_path, { root : `${__dirname}/../..` }, function (err) {
+						if (err) {
+							res.status(400).send("Couldn't find picture");
+						} else {
+							console.log('Profile picture sent successfully');
+						}
+					});
+				} else {
+					res.status(404).send({ message: 'No profile picture' });
+				}
+			}
+			else {
+				res.status(400).send("Couldn't find account")
+			}
+		}
+		catch (err) {
+			console.log(err)
+			res.status(500).send("Internal Server Error")
+		}
+	})
+
+	/*
+	 * Get the profile pic of a user
+	 */
+	app.get('/profilepics/:accountId', async (req, res) => {
+		try {
+			const account = await getAccountController(
+				dbGetAccount, 
+				req.params.accountId
 			)
 			if (account) {
 				if (account.profile_pic_path) {
