@@ -90,6 +90,7 @@ module.exports = function (app) {
                 redisVerifySessionIdExists,
 				redisVerifyParticipantExists,
                 redisLeaveSession,
+				null,
 				req.params.id,
                 req.body.name
             )
