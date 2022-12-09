@@ -21,7 +21,7 @@ const dbCreateAccount = async (account) => {
 				+ "(username, pass, phone_number, preferred_streaming_platform, current_status, session_code) "
 				+ "VALUES "
 				+ "($1, $2, $3, $4, $5, $6);",
-		values: [account.username, account.password, account.phoneNumber, "Apple Music", "online", null],
+		values: [account.username, account.password, account.phoneNumber, "Apple Music", "Online", null],
 	}
 
 	const client = createClient("musixdb")

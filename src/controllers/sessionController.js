@@ -51,7 +51,7 @@ const createSessionController =
 	// save the new session to server
 	if (await redisCreateSessionCb(sessionId, accountId, capacity)) {
         // update status and session code in database, if updates fail return null
-        if (!await updateStatusAndSessionCodeController(dbUpdateStatusAndSessionCode, accountId, "hostingSession", sessionId)) {
+        if (!await updateStatusAndSessionCodeController(dbUpdateStatusAndSessionCode, accountId, "Hosting Session", sessionId)) {
             console.log('Error updating account status and session code');
             return null
         }
@@ -110,7 +110,7 @@ const joinSessionController = async (redisVerifySessionIdExistsCb, redisJoinSess
         });
 
     // update status and session code in database on success, if updates fail return null
-    if (response.status == sessionSuccess().status && !await updateStatusAndSessionCodeController(dbUpdateStatusAndSessionCode, accountId, "inSession", sessionId)) {
+    if (response.status == sessionSuccess().status && !await updateStatusAndSessionCodeController(dbUpdateStatusAndSessionCode, accountId, "In Session", sessionId)) {
         console.log('Error updating account status and session code');
         return null
     }
@@ -140,7 +140,7 @@ const leaveSessionController = async (redisVerifySessionIdExistsCb, redisVerifyP
         });
     
     // update status and session code in database on success, if updates fail return null
-    if (response.status == sessionSuccess().status && !await updateStatusAndSessionCodeController(dbUpdateStatusAndSessionCode, accountId, "online", null)) {
+    if (response.status == sessionSuccess().status && !await updateStatusAndSessionCodeController(dbUpdateStatusAndSessionCode, accountId, "Online", null)) {
         console.log('Error updating account status and session code');
         return null
     }
@@ -188,7 +188,7 @@ const endSessionController =
         });
     
     // update status and session code in database on success, if updates fail return null
-    if (response.status == sessionSuccess().status && !await updateStatusAndSessionCodeController(dbUpdateStatusAndSessionCode, accountId, "online", null)) {
+    if (response.status == sessionSuccess().status && !await updateStatusAndSessionCodeController(dbUpdateStatusAndSessionCode, accountId, "Online", null)) {
         console.log('Error updating account status and session code');
         return null
     }
