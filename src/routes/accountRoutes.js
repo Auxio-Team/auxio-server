@@ -113,9 +113,12 @@ module.exports = function (app, upload) {
 	/*
 	 * Get account info for account specified in the body
 	 */
-	app.get('/account', async (req, res) => {
+	app.get('/accounts/:accountId', async (req, res) => {
 		try {
-			const account = await getAccountController(dbGetAccount, req.body.accountId)
+			const account = await getAccountController(
+				dbGetAccount, 
+				req.params.accountId
+			)
 			if (account) {
 				res.status(200).send(account)
 			}
@@ -129,6 +132,30 @@ module.exports = function (app, upload) {
 		}
 	})
 
+	/*
+	 * Get account by username
+	 */
+	app.get('/accountbyusername/:username', async (req, res) => {
+		try {
+			const account = await getAccountByUsernameController(
+				dbGetAccountByUsername, 
+				dbGetFriendshipStatus, 
+				req.account.accountId, 
+				req.params.username
+			)
+			if (account) {
+				console.log(`Successfully found account for username=${req.params.username}`)
+				res.status(200).send(account)
+			}
+			else {
+				res.status(400).send("Couldn't find account")
+			}
+		}
+		catch (err) {
+			console.log(err)
+			res.status(500).send("Internal Server Error")
+		}
+	})
 
 	/*
 	 * Get session history for account that is making this request
@@ -145,26 +172,6 @@ module.exports = function (app, upload) {
 			}
 			else {
 				res.status(400).send("Couldn't find history")
-			}
-		}
-		catch (err) {
-			console.log(err)
-			res.status(500).send("Internal Server Error")
-		}
-	})
-
-	/*
-	 * Get account by username
-	 */
-	app.get('/accountbyusername', async (req, res) => {
-		try {
-			const account = await getAccountByUsernameController(dbGetAccountByUsername, 
-				dbGetFriendshipStatus, req.account.accountId, req.body.username)
-			if (account) {
-				res.status(200).send(account)
-			}
-			else {
-				res.status(400).send("Couldn't find account")
 			}
 		}
 		catch (err) {
@@ -289,10 +296,14 @@ module.exports = function (app, upload) {
 	})
 
 
-	app.put('/statusandsessioncode', async (req, res) => {
+	app.put('/status', async (req, res) => {
 		try {
-			const updated = await updateStatusAndSessionCodeController(dbUpdateStatusAndSessionCode,
-				req.account.accountId, req.body.status, req.body.sessionCode)
+			const updated = await updateStatusAndSessionCodeController(
+				dbUpdateStatusAndSessionCode,
+				req.account.accountId, 
+				req.body.status, 
+				req.body.sessionCode
+			)
 			
 			if (updated > 0) {
 				console.log("Updated status and session code")
@@ -304,7 +315,7 @@ module.exports = function (app, upload) {
 		}
 		catch (err) {
 			console.log(err)
-			res.status(500).send("internal Server Error")
+			res.status(500).send("Internal Server Error")
 		}
 	})
 }

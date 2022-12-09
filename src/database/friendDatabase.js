@@ -73,8 +73,6 @@ const dbGetFriendRequestList = async (recipient_id) => {
 	})
 	await client.end()
 
-	console.log("REQUEST LIST: " + JSON.stringify(request_list))
-
 	return request_list
 
 }
@@ -114,7 +112,7 @@ const dbCreateFriendRequest = async (requester_id, recipient_id) => {
 		return null
 	})
 	await client.end()
-	return response ? true : false
+	return response
 }
 
 
@@ -145,8 +143,6 @@ const dbAcceptFriendRequest = async (recipient_id, requester_id) => {
 		return null
 	})
 	await client.end()
-
-	console.log("RESPONSE: " + response)
 
 	return response["rowCount"]
 }
@@ -179,8 +175,6 @@ const dbDeclineFriendRequest = async (recipient_id, requester_id) => {
 	})
 	await client.end()
 
-	console.log("RESPONSE: " + response)
-
 	return response["rowCount"]
 }
 
@@ -212,8 +206,6 @@ const dbRemoveFriend = async (user_id, removed_user_id) => {
 		return null
 	})
 	await client.end()
-
-	console.log("RESPONSE: " + response)
 
 	return response["rowCount"]
 }
@@ -254,7 +246,7 @@ const dbCancelFriendRequest = async (user_id, other_user_id) => {
  * Get friendship status
  * Get friendship status between the current user (user_id) and another user (other_user_id)
  * 
- * Returns 'not friends', 'sent request', 'recieved request', or 'friends'
+ * Returns 'not friends', 'sent request', 'received request', or 'friends'
  */
 const dbGetFriendshipStatus = async (user_id, other_user_id) => {
 	const query = {
@@ -276,8 +268,6 @@ const dbGetFriendshipStatus = async (user_id, other_user_id) => {
 		return null
 	})
 	await client.end()
-
-	console.log("RESPONSE: " + JSON.stringify(response))
 
 	return response
 }
