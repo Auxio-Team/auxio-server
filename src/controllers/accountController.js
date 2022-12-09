@@ -45,9 +45,9 @@ const getAccountController = async (dbGetAccount, accountId) => {
  * Get account info for user with username=username.
  * @return -> the account data in a json with the relationship status.
  */
-const getAccountByUsernameController = async (dbGetAccountByUsername, dbGetFriendshipStatus, user_id, username) => {
+const getAccountByUsernameController = async (dbGetAccountByUsername, dbGetFriendshipStatus, myAccountId, username) => {
 	let account = await dbGetAccountByUsername(username)
-	const friendship_status = await getFriendshipStatusController(dbGetFriendshipStatus, user_id, account.id)
+	const friendship_status = await getFriendshipStatusController(dbGetFriendshipStatus, myAccountId, account.id)
 	account.friendship_status = friendship_status
 
 	console.log("ACCOUNT: " + JSON.stringify(account))

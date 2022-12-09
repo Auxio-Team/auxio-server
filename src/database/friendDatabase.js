@@ -246,8 +246,6 @@ const dbCancelFriendRequest = async (user_id, other_user_id) => {
 	})
 	await client.end()
 
-	console.log("RESPONSE: " + response)
-
 	return response["rowCount"]
 }
 

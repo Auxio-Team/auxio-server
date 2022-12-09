@@ -118,7 +118,6 @@ const dbGetAccountByUsername = async (username) => {
 	})
 	await client.end()
 
-	console.log("RESPONSE: " + JSON.stringify(response))
 	return response
 }
 
@@ -273,7 +272,7 @@ const dbUpdateStatusAndSessionCode = async (accountId, newStatus, newSessionCode
 		return res
 	})
 	.catch(err => {
-		console.error(e.stack)
+		console.error(err.stack)
 		return null
 	})
 	await client.end()

@@ -9,8 +9,8 @@ const {
 /*
  * Get list of friends
  */
-const getFriendListController = async (dbGetFriendList, user_id) => {
-    const friend_list = await dbGetFriendList(user_id)
+const getFriendListController = async (dbGetFriendList, accountId) => {
+    const friend_list = await dbGetFriendList(accountId)
 
     return friend_list
 }
@@ -18,8 +18,8 @@ const getFriendListController = async (dbGetFriendList, user_id) => {
 /*
  * Get list of incoming friend requests
  */
-const getFriendRequestListController = async (dbGetFriendRequestList, user_id) => {
-    const request_list = await dbGetFriendRequestList(user_id)
+const getFriendRequestListController = async (dbGetFriendRequestList, accountId) => {
+    const request_list = await dbGetFriendRequestList(accountId)
 
     return request_list
 }
@@ -27,12 +27,12 @@ const getFriendRequestListController = async (dbGetFriendRequestList, user_id) =
 /*
  * Create a friend request by creating a row in the friendship table
  */
-const createFriendRequestController = async (dbCreateFriendRequest, user_id, recipient_id) => {
-    if (user_id === recipient_id) {
+const createFriendRequestController = async (dbCreateFriendRequest, accountId, recipientId) => {
+    if (accountId === recipientId) {
         return null
     }
     
-    const requested = await dbCreateFriendRequest(user_id, recipient_id)
+    const requested = await dbCreateFriendRequest(accountId, recipientId)
 
     return requested
 }
@@ -41,12 +41,12 @@ const createFriendRequestController = async (dbCreateFriendRequest, user_id, rec
 /*
  * Accept a friend request by changing the status of the row in the friendship table to friends
  */
-const acceptFriendRequestController = async (dbAcceptFriendRequest, user_id, requester_id) => {
-    if (user_id === requester_id) {
+const acceptFriendRequestController = async (dbAcceptFriendRequest, accountId, requesterId) => {
+    if (accountId === requesterId) {
         return null
     }
     
-    const rows_updated = await dbAcceptFriendRequest(user_id, requester_id)
+    const rows_updated = await dbAcceptFriendRequest(accountId, requesterId)
 
     return rows_updated
 }
@@ -55,12 +55,12 @@ const acceptFriendRequestController = async (dbAcceptFriendRequest, user_id, req
 /*
  * Decline a friend request by deleting a row in the friendship table
  */
-const declineFriendRequestController = async (dbDeclineFriendRequest, user_id, requester_id) => {
-    if (user_id === requester_id) {
+const declineFriendRequestController = async (dbDeclineFriendRequest, accountId, requesterId) => {
+    if (accountId === requesterId) {
         return null
     }
     
-    const rows_deleted = await dbDeclineFriendRequest(user_id, requester_id)
+    const rows_deleted = await dbDeclineFriendRequest(accountId, requesterId)
 
     return rows_deleted
 }
@@ -69,12 +69,12 @@ const declineFriendRequestController = async (dbDeclineFriendRequest, user_id, r
 /*
  * Remove a friend request by deleting a row in the friendship table
  */
-const removeFriendController = async (dbRemoveFriend, user_id, removed_user_id) => {
-    if (user_id === removed_user_id) {
+const removeFriendController = async (dbRemoveFriend, accountId, removedAccountId) => {
+    if (accountId === removedAccountId) {
         return null
     }
     
-    const rows_deleted = await dbRemoveFriend(user_id, removed_user_id)
+    const rows_deleted = await dbRemoveFriend(accountId, removedAccountId)
 
     return rows_deleted
 }
@@ -83,12 +83,12 @@ const removeFriendController = async (dbRemoveFriend, user_id, removed_user_id) 
 /*
  * Remove a friend request by deleting a row in the friendship table
  */
-const cancelFriendRequestController = async (dbCancelFriendRequest, user_id, other_user_id) => {
-    if (user_id === other_user_id) {
+const cancelFriendRequestController = async (dbCancelFriendRequest, accountId, otherAccountId) => {
+    if (accountId === otherAccountId) {
         return null
     }
     
-    const rows_deleted = await dbCancelFriendRequest(user_id, other_user_id)
+    const rows_deleted = await dbCancelFriendRequest(accountId, otherAccountId)
 
     return rows_deleted
 }
@@ -97,12 +97,12 @@ const cancelFriendRequestController = async (dbCancelFriendRequest, user_id, oth
 /*
  * Get the friendship status by getting the row in the friendship table
  */
-const getFriendshipStatusController = async (dbGetFriendshipStatus, user_id, other_user_id) => {
-    if (user_id === other_user_id) {
+const getFriendshipStatusController = async (dbGetFriendshipStatus, accountId, otherAccountId) => {
+    if (accountId === otherAccountId) {
         return ME
     }
     
-    const response = await dbGetFriendshipStatus(user_id, other_user_id)
+    const response = await dbGetFriendshipStatus(accountId, otherAccountId)
 
     if (response["rowCount"] === 0) {
 		return NOT_FRIENDS
@@ -111,7 +111,7 @@ const getFriendshipStatusController = async (dbGetFriendshipStatus, user_id, oth
 		if (response.rows[0].current_status == "friends") {
 			return FRIENDS
 		}
-		else if (response.rows[0].requester_id == user_id){
+		else if (response.rows[0].requesterId == accountId){
 			return SENT_REQUEST
 		}
 		else {
@@ -127,8 +127,8 @@ const getFriendshipStatusController = async (dbGetFriendshipStatus, user_id, oth
 /*
  * Get the friendship status by getting the row in the friendship table
  */
-const getFriendCountController = async (dbGetFriendCount, user_id) => {
-    const friend_count = await dbGetFriendCount(user_id)
+const getFriendCountController = async (dbGetFriendCount, accountId) => {
+    const friend_count = await dbGetFriendCount(accountId)
 
     return friend_count
 }

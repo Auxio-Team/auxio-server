@@ -184,7 +184,7 @@ module.exports = function (app) {
 				res.status(200).send()
             }
             else {
-                res.status(400).send({ 'message': 'Unable to remove friend' })
+                res.status(400).send({ 'message': 'Unable to cancel friend request' })
             }
         }
         catch (err) {

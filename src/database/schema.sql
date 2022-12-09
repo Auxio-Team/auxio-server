@@ -7,7 +7,7 @@ CREATE TABLE account (
 	phone_number varchar(20) NOT NULL UNIQUE,
 	preferred_streaming_platform varchar(20) NOT NULL,
 	current_status account_status NOT NULL,
-	session_code varchar(6)
+	session_code varchar(6),
 	profile_pic_path varchar(320)
 );
 
