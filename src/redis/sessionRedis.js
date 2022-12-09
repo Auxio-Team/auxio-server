@@ -44,29 +44,33 @@ const redisJoinSession = async (sessionId, participant) => {
     let capacity = await redisClient.HGET(`sessions:${sessionId}`, 'capacity');
     let numParticipants = await redisClient.SCARD(`sessions:${sessionId}:participants`);
 
-    if (numParticipants < capacity) {
-        return await redisClient.SADD(`sessions:${sessionId}:participants`, participant)
-            .then(res => {
-                // notify subscribers that a session was joined
-                (async () => {
-                    await redisClient.sendCommand([
-                        'PUBLISH',
-                        'sessions',
-                        `${sessionId}`
-                    ]);
-                    console.log("session joined")
-                })();
-
-                if (res != 1) {
-                    console.log('invalid name\n');
-                    return INVALID_NAME;
-                }
-            })
-    } else {
+    if (numParticipants >= capacity) {
         console.log('hit max capacity\n');
         return MAX_CAPACITY;
     }
 
+    const resp = await redisClient.SADD(
+        `sessions:${sessionId}:participants`, 
+        participant
+    ).then(res => {
+        if (res != 1) {
+            console.log('invalid name\n');
+            return INVALID_NAME;
+        }
+    })
+
+    console.log(`participant ${participant} joined`)
+
+    // publish user joined session
+    if (resp != INVALID_NAME) {
+        await redisClient.sendCommand([
+            'PUBLISH',
+            `sessions:${sessionId}`,
+            `participantJoined:${participant}`
+        ])
+        console.log("published participantJoined")
+    }
+    return resp
 }
 
 /*
@@ -101,9 +105,8 @@ const redisVerifyParticipantExists = async (sessionId, accountId) => {
     return await redisClient.SISMEMBER(
         `sessions:${sessionId}:participants`, 
         accountId
-    )
-        .then((resp) => resp == 1)
-        .catch((err) => 'Error verifying participant\n'+err);
+    ).then((resp) => resp == 1)
+    .catch((err) => 'Error verifying participant\n'+err);
 }
 
 /*

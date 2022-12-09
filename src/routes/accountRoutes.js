@@ -135,7 +135,11 @@ module.exports = function (app, upload) {
 	 */
 	app.get('/history', async (req, res) => {
 		try {
-			const history = await getHistoryController(dbGetSessionHistory, req.account.accountId)
+			const history = await getHistoryController(
+				dbGetSessionHistory, 
+				dbGetAccount,
+				req.account.accountId
+			)
 			if (history) {
 				res.status(200).send(history)
 			}

@@ -93,7 +93,6 @@ app.use((req, res, next) => {
 			return res.status(403).send()
 		}
 		req.account = account
-		console.log("account id:", req.account.accountId)
 		next()
 	})
 })

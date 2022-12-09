@@ -67,11 +67,11 @@ const createSessionController =
  * Get session information.
  */
 const getSessionInfoController = async (redisGetSessionInfoCb, dbGetAccount, sessionId) => {
-    const sessionInfo = await redisGetSessionInfoCb(sessionId);
-    console.log("Session Info:", sessionInfo)
+    var sessionInfo = await redisGetSessionInfoCb(sessionId);
     if (sessionInfo.host == null) {
         return null
     }
+
     // get preferred streaming platform of host
     console.log("Host:", sessionInfo.host)
     const response = await dbGetAccount(sessionInfo.host)
@@ -80,7 +80,12 @@ const getSessionInfoController = async (redisGetSessionInfoCb, dbGetAccount, ses
         return null
     }
 
-    return { host: response.username, platform: response.preferred_streaming_platform }
+    // add host name and preferred platform to response
+    sessionInfo["hostname"] = response.username
+    sessionInfo["platform"] = response.preferred_streaming_platform
+    console.log("Session Info:", sessionInfo)
+
+    return sessionInfo
 }
 
 /*
@@ -146,8 +151,8 @@ const leaveSessionController = async (redisVerifySessionIdExistsCb, redisVerifyP
 /*
  * End a session.
  */
-const endSessionController = async (redisVerifySessionIdExistsCb, redisVerifyHostExistsCb, redisEndSessionCb, 
-        dbCreateSessionCb, dbAddSessionParticipantCb, dbUpdateStatusAndSessionCode, sessionId, accountId) => {
+const endSessionController =
+    async (redisVerifySessionIdExistsCb, redisVerifyHostExistsCb, redisEndSessionCb, dbCreateSessionCb, dbAddSessionParticipantCb, dbUpdateStatusAndSessionCode, sessionId, accountId, session, users) => {
 
     if (!await redisVerifySessionIdExistsCb(sessionId)) {
         console.log('Error ending session: Session ID not valid')
@@ -157,7 +162,6 @@ const endSessionController = async (redisVerifySessionIdExistsCb, redisVerifyHos
         return sessionError(INVALID_NAME)
     }
 
-    const session = { name: sessionName, date: sessionDate, platform: sessionPlatform, tracks: sessionTrackIds, host: accountId };
     const res = await dbCreateSessionCb(session, accountId);
     if (!res) {
         return sessionError(SESSION_HISTORY);

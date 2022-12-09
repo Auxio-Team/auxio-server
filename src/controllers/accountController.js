@@ -8,7 +8,7 @@ const { getFriendshipStatusController } = require('./friendController')
  * Create a new account and save it in the database.
  */
 const createAccountController = async (dbCreateAccount, username, password, phoneNumber) => {
-	// do password strength checking...
+	// TODO: do password strength checking...
 
 	// encrypt the password
 	const encryptedPassword = await encryptPassword(password)
@@ -42,6 +42,26 @@ const getAccountController = async (dbGetAccount, accountId) => {
 }
 
 /*
+ * Get history for user.
+ * @return -> the history as a json.
+ */
+const getHistoryController = async (dbGetSessionHistoryCb, dbGetAccountCb, accountId) => {
+	var historyList = await dbGetSessionHistoryCb(accountId)
+	// TODO: probably need to optimize getting the host names
+	for (const session of historyList) {
+		const resp = await dbGetAccountCb(session.host_id)
+		var hostname = ""
+		if (resp == null || resp.username == null) {
+			print("Error getting host name")
+		} else {
+			hostname = resp.username
+		}
+		// add host name to response
+		session["hostname"] = hostname
+	}
+	return { "history": historyList }
+}  
+
  * Get account info for user with username=username.
  * @return -> the account data in a json with the relationship status.
  */
