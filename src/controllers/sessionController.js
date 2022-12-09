@@ -110,7 +110,7 @@ const joinSessionController = async (redisVerifySessionIdExistsCb, redisJoinSess
         });
 
     // update status and session code in database on success, if updates fail return null
-    if (response.status == sessionSuccess().status && !await updateStatusAndSessionCodeController(dbUpdateStatusAndSessionCode, accountId, "In Session", sessionId)) {
+    if (dbUpdateStatusAndSessionCode && response.status == sessionSuccess().status && !await updateStatusAndSessionCodeController(dbUpdateStatusAndSessionCode, accountId, "In Session", sessionId)) {
         console.log('Error updating account status and session code');
         return null
     }

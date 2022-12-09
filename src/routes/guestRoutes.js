@@ -65,6 +65,7 @@ module.exports = function (app) {
             const joinSession = await joinSessionController(
                 redisVerifySessionIdExists,
                 redisJoinSession,
+				null,
                 req.body.id,
                 req.body.name
             )

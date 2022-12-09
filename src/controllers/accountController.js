@@ -123,9 +123,11 @@ const logoutController = async (dbDeleteRefreshToken, accountId) => {
  */
 const updateStatusAndSessionCodeController = async (dbUpdateStatusAndSessionCode, 
 		accountId, newStatus, newSessionCode) => {
+	console.log("New Status: ", newStatus)
+
 	const updated = await dbUpdateStatusAndSessionCode(accountId, newStatus, newSessionCode)
 
-	if (updated > 0) {
+	if (updated && updated > 0) {
 		return updated
 	}
 	else {
