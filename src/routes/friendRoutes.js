@@ -41,7 +41,7 @@ module.exports = function (app) {
             
             if (friendList) {
                 console.log("Got friend list for: " + req.account.accountId)
-				res.status(200).send({ "friendlist": friendList })
+				res.status(200).send({ "friendList": friendList })
             }
             else {
                 res.status(400).send({ 'message': 'Unable to get friend list' })
