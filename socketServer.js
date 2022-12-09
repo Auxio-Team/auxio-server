@@ -59,8 +59,9 @@ io.on('connect', (socket) => {
             //const adapter = require('socket.io-redis');
             //io.adapter(adapter({subClient: redisClient}))
 
-            await subClient.subscribe(`sessions:${sessionId}`, queueUpdated => {
-                socket.emit('queueUpdate', "queue updated")
+            await subClient.subscribe(`sessions:${sessionId}`, (message) => {
+                console.log(message);
+                socket.emit('queueUpdate', message)
             })
         })();
     })
