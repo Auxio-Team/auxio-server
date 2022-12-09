@@ -247,10 +247,13 @@ module.exports = function (app, upload) {
 	 */
 	app.get('/profilepic', async (req, res) => {
 		try {
-			const account = await getAccountController(dbGetAccount, req.account.accountId)
+			const account = await getAccountController(
+				dbGetAccount, 
+				req.account.accountId
+			)
 			if (account) {
 				if (account.profile_pic_path) {
-					res.status(200).sendFile(account.profile_pic_path, { root : `${__dirname}\\..\\..` }, function (err) {
+					res.status(200).sendFile(account.profile_pic_path, { root : `${__dirname}/../..` }, function (err) {
 						if (err) {
 							res.status(400).send("Couldn't find picture");
 						} else {
@@ -258,7 +261,7 @@ module.exports = function (app, upload) {
 						}
 					});
 				} else {
-					res.status(200).send({ message: 'No profile picture' });
+					res.status(404).send({ message: 'No profile picture' });
 				}
 			}
 			else {
