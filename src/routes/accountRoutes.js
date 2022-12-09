@@ -292,10 +292,14 @@ module.exports = function (app, upload) {
 	})
 
 
-	app.put('/statusandsessioncode', async (req, res) => {
+	app.put('/status', async (req, res) => {
 		try {
-			const updated = await updateStatusAndSessionCodeController(dbUpdateStatusAndSessionCode,
-				req.account.accountId, req.body.status, req.body.sessionCode)
+			const updated = await updateStatusAndSessionCodeController(
+				dbUpdateStatusAndSessionCode,
+				req.account.accountId, 
+				req.body.status, 
+				req.body.sessionCode
+			)
 			
 			if (updated > 0) {
 				console.log("Updated status and session code")
@@ -307,7 +311,7 @@ module.exports = function (app, upload) {
 		}
 		catch (err) {
 			console.log(err)
-			res.status(500).send("internal Server Error")
+			res.status(500).send("Internal Server Error")
 		}
 	})
 }

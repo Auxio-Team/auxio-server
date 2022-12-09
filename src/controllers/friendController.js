@@ -1,7 +1,7 @@
 const {
 	NOT_FRIENDS,
 	SENT_REQUEST,
-    RECIEVED_REQUEST,
+    RECEIVED_REQUEST,
     FRIENDS,
 	ME
 } = require('../models/friendModels')
@@ -99,11 +99,11 @@ const getFriendshipStatusController = async (dbGetFriendshipStatus, accountId, o
 		if (response.rows[0].current_status == "friends") {
 			return FRIENDS
 		}
-		else if (response.rows[0].requesterId == accountId){
+		else if (response.rows[0].requester_id == accountId){
 			return SENT_REQUEST
 		}
 		else {
-			return RECIEVED_REQUEST
+			return RECEIVED_REQUEST
 		}
 	}
 	else {

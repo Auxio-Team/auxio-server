@@ -34,14 +34,14 @@ module.exports = function (app) {
      */
     app.get('/friend/friendlist', async (req, res) => {
         try {
-            console.log("ID: " + req.account.accountId)
-
             const friendList = await getFriendListController(
-                dbGetFriendList, req.account.accountId)
+                dbGetFriendList, 
+                req.account.accountId
+            )
             
             if (friendList) {
                 console.log("Got friend list for: " + req.account.accountId)
-				res.status(200).send(friendList)
+				res.status(200).send({ "friendlist": friendList })
             }
             else {
                 res.status(400).send({ 'message': 'Unable to get friend list' })
@@ -59,14 +59,12 @@ module.exports = function (app) {
      */
     app.get('/friend/requestlist', async (req, res) => {
         try {
-            console.log("ID: " + req.account.accountId)
-
             const requestList = await getFriendRequestListController(
                 dbGetFriendRequestList, req.account.accountId)
             
             if (requestList) {
                 console.log("Got friend request list for: " + req.account.accountId)
-				res.status(200).send(requestList)
+				res.status(200).send({ "requestlist": requestList })
             }
             else {
                 res.status(400).send({ 'message': 'Unable to get friend request list' })
@@ -85,7 +83,10 @@ module.exports = function (app) {
     app.post('/friend/request', async (req, res) => {
         try {
             const request = await createFriendRequestController(
-                dbCreateFriendRequest, req.account.accountId, req.body.accountId)
+                dbCreateFriendRequest, 
+                req.account.accountId, 
+                req.body.accountId
+            )
             
             if (request) {
                 console.log("Sent friend request to: " + req.body.accountId)
@@ -174,7 +175,7 @@ module.exports = function (app) {
     /*
      * Cancel a friend request sent to another user
      */
-    app.post('/friend/cancelrequest', async (req, res) => {
+    app.post('/friend/cancel', async (req, res) => {
         try {
             const canceled = await cancelFriendRequestController(
                 dbCancelFriendRequest, req.account.accountId, req.body.accountId)
@@ -197,15 +198,18 @@ module.exports = function (app) {
     /*
      * Get friendship status
      */
-    app.get('/friend/status', async (req, res) => {
+    app.get('/friend/status/:accountId', async (req, res) => {
         try {
             const friendshipStatus = await getFriendshipStatusController(
-                dbGetFriendshipStatus, req.account.accountId, req.body.accountId)
+                dbGetFriendshipStatus, 
+                req.account.accountId, 
+                req.params.accountId
+            )
 
             if (friendshipStatus) {
                 console.log("Friendship status between " + req.account.accountId + " and "
-                    + req.body.accountId + ": " + friendshipStatus)
-                res.status(200).send(friendshipStatus)
+                    + req.params.accountId + ": " + friendshipStatus)
+                res.status(200).send({ "status": friendshipStatus })
             }
             else {
                 res.status(400).send({ 'message': 'Unable to get friendship status' })
@@ -219,17 +223,16 @@ module.exports = function (app) {
 
 
     /*
-     * TODO: change this to /friend/count/me, we can use getFriendCountController()
      * Get friend count
      */
-    app.get('/friend/count', async (req, res) => {
+    app.get('/friend/count/me', async (req, res) => {
         try {
             const friendCount = await getFriendCountController(
                 dbGetFriendCount, req.account.accountId)
 
             if (friendCount >= 0) {
                 console.log("Friend count for user " + req.account.accountId + ": " + friendCount)
-                res.status(200).send(friendCount)
+                res.status(200).send({ "count": friendCount })
             }
             else {
                 res.status(400).send({ 'message': 'Unable to get friend count' })
@@ -241,6 +244,28 @@ module.exports = function (app) {
         }
     })
 
-    // TODO: add /friend/count endpoint that takes accountId in the body
+    /*
+     * Get friend count for user with accountId specified
+     */
+    app.get('/friend/count/:accountId', async (req, res) => {
+        try {
+            const friendCount = await getFriendCountController(
+                dbGetFriendCount, 
+                req.params.accountId
+            )
+
+            if (friendCount >= 0) {
+                console.log("Friend count for user " + req.params.accountId + ": " + friendCount)
+                res.status(200).send({ "count": friendCount })
+            }
+            else {
+                res.status(400).send({ 'message': 'Unable to get friend count' })
+            }
+        }
+        catch (err) {
+            console.log(err)
+            res.status(500).send("Internal Server Error")
+        }
+    })
 
 }

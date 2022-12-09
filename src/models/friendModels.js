@@ -1,13 +1,13 @@
 const NOT_FRIENDS = 'notFriends'
 const SENT_REQUEST = 'sentFriendRequest'
-const RECIEVED_REQUEST = 'recievedFriendRequest'
+const RECEIVED_REQUEST = 'receivedFriendRequest'
 const FRIENDS = 'friends'
 const ME = 'me'
 
 module.exports = {
 	NOT_FRIENDS,
 	SENT_REQUEST,
-    RECIEVED_REQUEST,
+    RECEIVED_REQUEST,
     FRIENDS,
     ME
 }
