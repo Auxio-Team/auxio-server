@@ -165,6 +165,14 @@ const redisDequeueSongFromSession = async (sessionId) => {
     return true
 }
 
+const redisGetCurrentSong = async (sessionId) => {
+    return await redisClient.HGET(`sessions:${sessionId}`, 'curr')
+        .then((resp) => {
+            return resp
+        })
+        .catch((err) => console.log(`Error when getting current song\n${err}`))
+}
+
 const redisGetSessionQueue = async (sessionId) => {
     // get queue
     return await redisClient.sendCommand([
@@ -276,6 +284,7 @@ module.exports = {
     redisAddSongToSession,
     redisVerifySongInQueue,
     redisDequeueSongFromSession,
+    redisGetCurrentSong,
     redisGetSessionQueue,
     redisAddUpvote,
     redisRemoveUpvote,

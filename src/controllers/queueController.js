@@ -69,6 +69,21 @@ const dequeueSongController = async ( redisVerifySessionIdExistsCb, redisDequeue
         });
 }
 
+const getCurrentSongController = async( redisVerifySessionIdExistsCb, redisGetCurrentSongCb, sessionId) => {
+    if (!await redisVerifySessionIdExistsCb(sessionId)) {
+        console.log('Error getting current song: Session ID not valid')
+        return queueError(INVALID_ID);
+    }
+
+    return await redisGetCurrentSongCb(sessionId)
+        .then((res) => {
+            if (res) {
+                return res;
+            }
+            return queueError(FAILURE);
+        });
+}
+
 /*
  * Get the queue.
  */
@@ -133,6 +148,7 @@ const removeUpvoteController = async ( redisVerifySessionIdExistsCb, redisVerify
 module.exports = { 
     addSongController,
     dequeueSongController,
+    getCurrentSongController,
     getSessionQueueController,
     addUpvoteController,
     removeUpvoteController,
