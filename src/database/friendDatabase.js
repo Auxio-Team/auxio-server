@@ -23,7 +23,7 @@ const dbGetFriendList = async (user_id) => {
 		values: ['friends', user_id],
 	}
 
-	const client = createClient("musixdb")
+	const client = createClient("auxiodb")
 	await client.connect()
 	const friends_list = await client.query(query)
 	.then(res => {
@@ -55,7 +55,7 @@ const dbGetFriendRequestList = async (recipient_id) => {
 		values: ['requested', recipient_id],
 	}
 
-	const client = createClient("musixdb")
+	const client = createClient("auxiodb")
 	await client.connect()
 	const request_list = await client.query(query)
 	.then(res => {
@@ -89,7 +89,7 @@ const dbCreateFriendRequest = async (requester_id, recipient_id) => {
 		values: [requester_id, recipient_id, 'requested'],
 	}
 
-	const client = createClient("musixdb")
+	const client = createClient("auxiodb")
 	await client.connect()
 	const response = await client.query(query)
 	.then(res => {
@@ -120,7 +120,7 @@ const dbAcceptFriendRequest = async (recipient_id, requester_id) => {
 		values: ['friends', requester_id, recipient_id, 'requested'],
 	}
 
-	const client = createClient("musixdb")
+	const client = createClient("auxiodb")
 	await client.connect()
 	const response = await client.query(query)
 	.then(res => {
@@ -151,7 +151,7 @@ const dbDeclineFriendRequest = async (recipient_id, requester_id) => {
 		values: [requester_id, recipient_id, 'requested'],
 	}
 
-	const client = createClient("musixdb")
+	const client = createClient("auxiodb")
 	await client.connect()
 	const response = await client.query(query)
 	.then(res => {
@@ -183,7 +183,7 @@ const dbRemoveFriend = async (user_id, removed_user_id) => {
 		values: [user_id, removed_user_id, 'friends'],
 	}
 
-	const client = createClient("musixdb")
+	const client = createClient("auxiodb")
 	await client.connect()
 	const response = await client.query(query)
 	.then(res => {
@@ -214,7 +214,7 @@ const dbCancelFriendRequest = async (user_id, other_user_id) => {
 		values: [user_id, other_user_id, 'requested'],
 	}
 
-	const client = createClient("musixdb")
+	const client = createClient("auxiodb")
 	await client.connect()
 	const response = await client.query(query)
 	.then(res => {
@@ -245,7 +245,7 @@ const dbGetFriendshipStatus = async (user_id, other_user_id) => {
 		values: [user_id, other_user_id],
 	}
 
-	const client = createClient("musixdb")
+	const client = createClient("auxiodb")
 	await client.connect()
 	const response = await client.query(query)
 	.then(res => {
@@ -276,7 +276,7 @@ const dbGetFriendCount = async (user_id) => {
 		values: [user_id, 'friends'],
 	}
 
-	const client = createClient("musixdb")
+	const client = createClient("auxiodb")
 	await client.connect()
 	const friend_count = await client.query(query)
 	.then(res => {

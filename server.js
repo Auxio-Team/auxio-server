@@ -21,7 +21,7 @@ if (!fs.existsSync('./.env')) {
 require('dotenv').config()
 const process = require('process')
 const jwt = require('jsonwebtoken')
-const { createMusixDatabase } = require('./src/database/createDatabase')
+const { createAuxioDatabase } = require('./src/database/createDatabase')
 
 /* run app on port 3000 */
 const express = require('express')
@@ -54,7 +54,7 @@ const upload = multer({storage: multer.diskStorage({
  */
 app.get('/', async (req, res) => {
 	try {
-		await createMusixDatabase()
+		await createAuxioDatabase()
 		res.status(200).send()
 	}
 	catch (err) {

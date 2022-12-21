@@ -18,7 +18,7 @@ CREATE TABLE refresh_token (
 
 CREATE TYPE platform_type AS ENUM ('Apple Music', 'Spotify');
 
-CREATE TABLE musix_session (
+CREATE TABLE auxio_session (
   id bigserial PRIMARY KEY,
   name varchar(25) NOT NULL,
   host_id bigint REFERENCES account(id),
@@ -27,12 +27,12 @@ CREATE TABLE musix_session (
   track_ids text[]
 );
 
-CREATE TABLE musix_session_user (
+CREATE TABLE auxio_session_user (
   account_id bigint REFERENCES account(id),
-  musix_session_id bigint REFERENCES musix_session(id),
+  auxio_session_id bigint REFERENCES auxio_session(id),
   download_spotify boolean DEFAULT false,
   download_apple boolean DEFAULT false,
-  PRIMARY KEY(account_id, musix_session_id)
+  PRIMARY KEY(account_id, auxio_session_id)
 );
 
 CREATE TYPE friendship_status AS ENUM ('friends', 'requested');

@@ -24,7 +24,7 @@ const dbCreateAccount = async (account) => {
 		values: [account.username, account.password, account.phoneNumber, "Apple Music", "Online", null],
 	}
 
-	const client = createClient("musixdb")
+	const client = createClient("auxiodb")
 	await client.connect()
 	const response = await client.query(query)
 	.then(res => {
@@ -56,7 +56,7 @@ const dbGetAccounts = async () => {
 		values: []
 	}
 
-	const client = createClient("musixdb")
+	const client = createClient("auxiodb")
 	await client.connect()
 	const response = await client.query(query)
 	.then(res => {
@@ -81,7 +81,7 @@ const dbGetAccount = async (accountId) => {
 		values: [accountId],
 	}
 
-	const client = createClient("musixdb")
+	const client = createClient("auxiodb")
 	await client.connect()
 	const account = await client.query(query)
 	.then(res => {
@@ -106,7 +106,7 @@ const dbGetAccountByUsername = async (username) => {
 		values: [username],
 	}
 
-	const client = createClient("musixdb")
+	const client = createClient("auxiodb")
 	await client.connect()
 	const response = await client.query(query)
 	.then(res => {
@@ -134,7 +134,7 @@ const dbPhoneNumberExistsForUser = async (username, phoneNumber) => {
 		values: [username],
 	}
 
-	const client = createClient("musixdb")
+	const client = createClient("auxiodb")
 	await client.connect()
 	const response = await client.query(query)
 	.then(res => {
@@ -158,7 +158,7 @@ const dbResetPassword = async (username, newpass) => {
 		values: [newpass, username],
 	}
 
-	const client = createClient("musixdb")
+	const client = createClient("auxiodb")
 	await client.connect()
 	const response = await client.query(query)
 	.then(res => {
@@ -185,7 +185,7 @@ const dbUpdatePreferredPlatform = async (accountId, value) => {
 		values: [value, accountId],
 	}
 
-	const client = createClient("musixdb")
+	const client = createClient("auxiodb")
 	await client.connect()
 	const response = await client.query(query)
 	.then(res => {
@@ -210,7 +210,7 @@ const dbGetAccountId = async (username) => {
 		values: [username],
 	}
 
-	const client = createClient("musixdb")
+	const client = createClient("auxiodb")
 	await client.connect()
 	const response = await client.query(query)
 	.then(res => {
@@ -236,7 +236,7 @@ const dbUpdateUsername = async (accountId, value) => {
 		values: [value, accountId],
 	}
 
-	const client = createClient("musixdb")
+	const client = createClient("auxiodb")
 	await client.connect()
 	const response = await client.query(query)
 	.then(res => {
@@ -268,7 +268,7 @@ const dbUpdateStatusAndSessionCode = async (accountId, newStatus, newSessionCode
 		values: [newStatus, newSessionCode, accountId],
 	}
 
-	const client = createClient("musixdb")
+	const client = createClient("auxiodb")
 	await client.connect()
 	const response = await client.query(query)
 	.then(res => {
@@ -296,7 +296,7 @@ const dbUpdateProfilePicture = async (accountId, value) => {
 		values: [value, accountId],
 	}
 
-	const client = createClient("musixdb")
+	const client = createClient("auxiodb")
 	await client.connect()
 	const response = await client.query(query)
 	.then(res => {

@@ -1,5 +1,5 @@
 {
-  "name": "musix-server",
+  "name": "auxio-server",
   "version": "1.0.0",
   "description": "",
   "main": "server.js",
@@ -13,14 +13,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/CS-407-Group/musix-server.git"
+    "url": "git+https://github.com/Auxio-Team/auxio-server.git"
   },
   "author": "",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/CS-407-Group/musix-server/issues"
+    "url": "https://github.com/Auxio-Team/auxio-server/issues"
   },
-  "homepage": "https://github.com/CS-407-Group/musix-server#readme",
+  "homepage": "https://github.com/Auxio-Team/auxio-server#readme",
   "dependencies": {
     "@socket.io/redis-adapter": "^7.2.0",
     "bcrypt": "^5.0.1",

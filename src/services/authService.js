@@ -154,7 +154,7 @@ const textCode = async (code, phoneNumber) => {
 	twilioClient.messages.create({
   		to: '+1'+phoneNumber,
   		from: twilioPhoneNumber,
-  		body: 'Musix code: ' + code
+  		body: 'Auxio code: ' + code
 	});
 }
 
