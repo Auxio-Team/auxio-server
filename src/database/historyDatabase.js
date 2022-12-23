@@ -8,7 +8,7 @@ const { createClient, createPool } = require('./createClientPool')
  */
 const dbCreateSession = async (session, accountId) => {
 	const query = {
-		text: "INSERT INTO musix_session "
+		text: "INSERT INTO auxio_session "
 				+ "(name, host_id, date, platform, track_ids) "
 				+ "VALUES "
 				+ "($1, $2, $3, $4, $5) "
@@ -16,7 +16,7 @@ const dbCreateSession = async (session, accountId) => {
 		values: [session.name, accountId, session.date, session.platform, session.trackIds],
 	}
 
-	const client = createClient("musixdb")
+	const client = createClient("auxiodb")
 	await client.connect()
 	const response = await client.query(query)
 	.then(res => {
@@ -38,14 +38,14 @@ const dbCreateSession = async (session, accountId) => {
  */
 const dbAddSessionParticipant = async (accountId, sessionId) => {
 	const query = {
-		text: "INSERT INTO musix_session_user "
-				+ "(account_id, musix_session_id) "
+		text: "INSERT INTO auxio_session_user "
+				+ "(account_id, auxio_session_id) "
 				+ "VALUES "
 				+ "($1, $2);",
 		values: [accountId, sessionId],
 	}
 
-	const client = createClient("musixdb")
+	const client = createClient("auxiodb")
 	await client.connect()
 	const response = await client.query(query)
 	.then(res => {
@@ -66,15 +66,15 @@ const dbAddSessionParticipant = async (accountId, sessionId) => {
  */
 const dbGetSessionHistory = async (accountId) => {
 	const query = {
-		text: "SELECT musix_session.name, musix_session.host_id, musix_session.date, musix_session.platform, musix_session.track_ids, musix_session_user.download_spotify, musix_session_user.download_apple "
-		    + "FROM musix_session "
-            + "INNER JOIN musix_session_user "
-			+ "ON musix_session.id=musix_session_user.musix_session_id "
-            + "WHERE musix_session_user.account_id = $1",
+		text: "SELECT auxio_session.name, auxio_session.host_id, auxio_session.date, auxio_session.platform, auxio_session.track_ids, auxio_session_user.download_spotify, auxio_session_user.download_apple "
+		    + "FROM auxio_session "
+            + "INNER JOIN auxio_session_user "
+			+ "ON auxio_session.id=auxio_session_user.auxio_session_id "
+            + "WHERE auxio_session_user.account_id = $1",
 		values: [accountId],
 	}
 
-	const client = createClient("musixdb")
+	const client = createClient("auxiodb")
 	await client.connect()
 	const history = await client.query(query)
 	.then(res => {

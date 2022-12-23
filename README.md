@@ -66,7 +66,7 @@ These are the steps I took to install PostgreSQL on WSL (a Linux subsystem for W
 - Use these instructions to install Redis on your machine: https://redis.io/docs/getting-started/
   - the redis docs are actually very useful and easy to read:) 
 - Run `redis-server <path/to/conf>` to start the server
-  - the config file is under `musix-server/src/configs/redis-36379.conf`
+  - the config file is under `auxio-server/src/configs/redis-36379.conf`
 - Run `redis-cli -p 36379` to interact with the Redis server from the CLI
 
 ## Useful Redis Information

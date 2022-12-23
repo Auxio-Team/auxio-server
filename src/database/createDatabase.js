@@ -9,58 +9,58 @@ const fs = require("fs");
  * we have to connect to an existing database in order to run psql commands.
  * This includes commands to delete and create databases, so we will connect to
  * the database called "postgres", which has been created by default, in order
- * to create "musixdb".
+ * to create "auxiodb".
  */
 
-const createMusixDatabase = async () => {
+const createAuxioDatabase = async () => {
 	const client = createClient('postgres')
 	await client.connect()
 	.then(() => console.log("Connected successfully to postgres"))
 	.catch( err => console.log(err))
 
-	// attempt to delete "musixdb" database.
+	// attempt to delete "auxiodb" database.
 	try {
-		await client.query('DROP DATABASE musixdb')
+		await client.query('DROP DATABASE auxiodb')
 	}
 	catch (err) {
 		console.log("Error while dropping: " + err)
-	} // musixdb database doesn't exist
+	} // auxiodb database doesn't exist
 
-	// create "musixdb" database.
+	// create "auxiodb" database.
 	try {
-		await client.query('CREATE DATABASE musixdb WITH OWNER=' + process.env.USER)
-		console.log("Succesfully created database \"musixdb\"")
+		await client.query('CREATE DATABASE auxiodb WITH OWNER=' + process.env.USER)
+		console.log("Succesfully created database \"auxiodb\"")
 	}
 	catch (err) {
-		console.log("Error: could not create database \"musixdb\"")
+		console.log("Error: could not create database \"auxiodb\"")
 		console.log(err)
 	}
 
 	// disconnect from "postgres" database.
 	await client.end()
 
-  // create schema in "musixdb" database.
+  // create schema in "auxiodb" database.
 	try {
-		await createMusixSchema()
+		await createAuxioSchema()
 		console.log("CREATED SCHEMA")
 	}
 	catch (err) {
-		console.log("Couldn't create musixdb schema")
+		console.log("Couldn't create auxiodb schema")
 	}
 }
 
 /*
- * Create schema in "musixdb" database.
+ * Create schema in "auxiodb" database.
  * @param pool -> 
  */
-const createMusixSchema = async () => {
+const createAuxioSchema = async () => {
 	const sqlText = fs.readFileSync("src/database/schema.sql").toString()
 	console.log(sqlText)
 
-	const pool = createPool('musixdb')
+	const pool = createPool('auxiodb')
 	pool.connect()
 	.then(client => {
-		console.log("Connected successfuly to musixdb")
+		console.log("Connected successfuly to auxiodb")
     return client
       .query(sqlText)
       .then(res => {
@@ -75,8 +75,8 @@ const createMusixSchema = async () => {
 		console.log("Error creating schema: " + err)
 	})
 
-	// close connection to "musixdb" database
+	// close connection to "auxiodb" database
 	await pool.end()
 }
 
-module.exports = { createMusixDatabase }
+module.exports = { createAuxioDatabase }

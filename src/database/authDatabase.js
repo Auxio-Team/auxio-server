@@ -13,7 +13,7 @@ const dbGetPassword = async (username) => {
 		values: [username]
 	}
 
-	const client = createClient("musixdb")
+	const client = createClient("auxiodb")
 	await client.connect()
 	const response = await client.query(query)
 	.then(res => {
@@ -41,7 +41,7 @@ const dbStoreRefreshToken = async (accountId, token) => {
 		values: [accountId, token],
 	}
 
-	const client = createClient("musixdb")
+	const client = createClient("auxiodb")
 	await client.connect()
 	const response = await client.query(query)
 	.then(res => {
@@ -65,7 +65,7 @@ const dbGetRefreshToken = async (accountId) => {
 		values: [accountId],
 	}
 
-	const client = createClient("musixdb")
+	const client = createClient("auxiodb")
 	await client.connect()
 	const response = await client.query(query)
 	.then(res => {
@@ -90,7 +90,7 @@ const dbDeleteRefreshToken = async (accountId) => {
 		values: [accountId],
 	}
 
-	const client = createClient("musixdb")
+	const client = createClient("auxiodb")
 	await client.connect()
 	const response = await client.query(query)
 	.then(res => {
