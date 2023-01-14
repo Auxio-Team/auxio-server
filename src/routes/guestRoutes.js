@@ -40,6 +40,8 @@ const {
     FAILURE,
 } = require('../models/sessionModels')
 
+// TODO: all of these should be authenticated
+
 module.exports = function (app) {
 	/*
 	 * Get session information.

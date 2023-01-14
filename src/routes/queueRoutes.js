@@ -1,6 +1,6 @@
 // import redis functions
 const {
-    redisVerifySessionIdExists
+	redisVerifyHostExists
 } = require('../redis/sessionRedis')
 
 const {
@@ -18,7 +18,8 @@ const {
 	dequeueSongController,
 	addUpvoteController,
 	removeUpvoteController,
-	removeSongController
+	removeSongController,
+	validateSongReqController
 } = require('../controllers/queueController')
 
 // import models 
@@ -26,26 +27,37 @@ const {
     FAILURE,
 } = require('../models/queueModels')
 
-/*
- *	TODO: make sure user is in session before executing
- *	any of the queue requests
- */ 
-
 module.exports = function (app) {
 	/*
-	 * Add song to a session queue.
-	 * 
-	 * body format:
-	 * {
-	 *    song: <str_song_id>
-	 * }
+	 * Check song id exists in current queue
 	 */
-	app.post('/sessions/:id/song', async (req, res) => {
+	app.param('songId', async (req, res, next, id) => {
+		try {
+			const validSongReq = await validateSongReqController(
+				redisVerifySongInQueue,
+				req.params.sessionId,
+				id
+			)
+			if (validSongReq.status === FAILURE) {
+				res.status(400).send({ error: validSongReq.error })
+			} else {
+				next()
+			}
+		}
+		catch (err) {
+			console.log(err)
+			res.status(500).send("Internal Server Error")
+		}
+	})
+
+	/*
+	 * Add song to a session queue.
+	 */
+	app.post('/sessions/:sessionId/song', async (req, res) => {
 		try {
             const addSong = await addSongController(
-                redisVerifySessionIdExists,
 				redisAddSongToSession,
-                req.params.id,
+                req.params.sessionId,
                 req.body.song
             )
 			if (addSong.status === FAILURE) {
@@ -53,7 +65,7 @@ module.exports = function (app) {
 			}
 			else {
 				res.status(200).send() 
-				console.log(`Successfully added song to queue for session ${req.params.id}`);
+				console.log(`Successfully added song to queue for session ${req.params.sessionId}`);
 			}
 		}
 		catch (err) {
@@ -65,21 +77,19 @@ module.exports = function (app) {
 	/*
 	 * Remove a song from the session queue.
 	 */
-	app.delete('/sessions/:id/songs/:song_id', async (req, res) => {
+	app.delete('/sessions/:sessionId/songs/:songId', async (req, res) => {
 		try {
             const removeSong = await removeSongController(
-                redisVerifySessionIdExists,
-                redisVerifySongInQueue,
 				redisRemoveSong,
-                req.params.id,
-                req.params.song_id
+                req.params.sessionId,
+                req.params.songId
             )
 			if (removeSong.status === FAILURE) {
 				res.status(400).send({ error: removeSong.error })
 			}
 			else {
 				res.status(200).send() 
-				console.log(`Successfully removed song from queue for session ${req.params.id}`);
+				console.log(`Successfully removed song from queue for session ${req.params.sessionId}`);
 			}
 		}
 		catch (err) {
@@ -90,22 +100,21 @@ module.exports = function (app) {
 
 	/*
 	 * Add an upvote (increment priority) to a song in a session queue.
+	 * NOTE: the backend route allows the same user to upvote as many times as they want (should this be checked?)
 	 */
-	app.post('/sessions/:id/songs/:song_id/upvote', async (req, res) => {
+	app.post('/sessions/:sessionId/songs/:songId/upvote', async (req, res) => {
 		try {
             const addUpvote = await addUpvoteController(
-                redisVerifySessionIdExists,
-                redisVerifySongInQueue,
 				redisAddUpvote,
-                req.params.id,
-                req.params.song_id
+                req.params.sessionId,
+                req.params.songId
             )
 			if (addUpvote.status === FAILURE) {
 				res.status(400).send({ error: addUpvote.error })
 			}
 			else {
 				res.status(200).send() 
-				console.log(`Successfully added upvote to song ${req.params.song_id} in session ${req.params.id}`);
+				console.log(`Successfully added upvote to song ${req.params.songId} in session ${req.params.sessionId}`);
 			}
 		}
 		catch (err) {
@@ -116,22 +125,21 @@ module.exports = function (app) {
 
 	/*
 	 * Remove an upvote (decrement priority) from a song in a session queue.
+	 * NOTE: the backend route allows the same user to remove an upvote as many times as they want as long as the number of upvotes stays above 0 (should this be checked?)
 	 */
-	app.delete('/sessions/:id/songs/:song_id/upvote', async (req, res) => {
+	app.delete('/sessions/:sessionId/songs/:songId/upvote', async (req, res) => {
 		try {
             const removeUpvote = await removeUpvoteController(
-                redisVerifySessionIdExists,
-                redisVerifySongInQueue,
 				redisRemoveUpvote,
-                req.params.id,
-                req.params.song_id
+                req.params.sessionId,
+                req.params.songId
             )
 			if (removeUpvote.status === FAILURE) {
 				res.status(400).send({ error: removeUpvote.error })
 			}
 			else {
 				res.status(200).send() 
-				console.log(`Successfully removed upvote from song ${req.params.song_id} in session ${req.params.id}`);
+				console.log(`Successfully removed upvote from song ${req.params.songId} in session ${req.params.sessionId}`);
 			}
 		}
 		catch (err) {
@@ -143,28 +151,29 @@ module.exports = function (app) {
 	/*
 	 * Get all songs from a session queue. (we might not need this? depends on how subscribing to redis works)
 	 */
-	app.get('/sessions/:id/songs', async (req, res) => {
+	app.get('/sessions/:sessionId/songs', async (req, res) => {
 		console.log('endpoint not yet implemented - sorry!')
 		res.status(405).send("endpoint not yet implemented") 
 	})
 
 	/*
 	 * Set the current song in a session queue.
-	 * (only the host should be able to make this call)
+	 * The user must be the host of the given session.
 	 */
-	app.post('/sessions/:id/songs/current', async (req, res) => {
+	app.post('/sessions/:sessionId/songs/current', async (req, res) => {
 		try {
             const setCurr = await dequeueSongController(
-                redisVerifySessionIdExists,
+				redisVerifyHostExists,
 				redisDequeueSongFromSession,
-                req.params.id
+                req.params.sessionId,
+				req.account.accountId
             )
 			if (setCurr.status === FAILURE) {
 				res.status(400).send({ error: setCurr.error })
 			}
 			else {
 				res.status(200).send() 
-				console.log(`Successfully added song to queue for session ${req.params.id}`);
+				console.log(`Successfully added song to queue for session ${req.params.sessionId}`);
 			}
 		}
 		catch (err) {

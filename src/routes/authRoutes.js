@@ -1,5 +1,3 @@
-const jwt = require('jsonwebtoken')
-
 /* import controllers */
 const {
 	loginController,
@@ -13,8 +11,7 @@ const {
 const {
 	dbGetPassword,
 	dbStoreRefreshToken,
-	dbGetRefreshToken,
-	dbDeleteRefreshToken,
+	dbGetRefreshToken
 } = require("../database/authDatabase")
 
 const { 

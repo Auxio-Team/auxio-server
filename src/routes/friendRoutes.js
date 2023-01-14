@@ -1,4 +1,3 @@
-
 // import controllers
 const {
     createFriendRequestController,
@@ -25,12 +24,10 @@ const {
     dbGetFriendCount
 } = require('../database/friendDatabase')
 
-// Update to use id's instead of usernames
-
 module.exports = function (app) {
 
     /*
-     * Get list of friends
+     * Get list of friends of user making the request
      */
     app.get('/friend/friendlist', async (req, res) => {
         try {
@@ -53,9 +50,8 @@ module.exports = function (app) {
         }
     })
 
-
     /*
-     * Get list of friend requests
+     * Get list of friend requests of user making request
      */
     app.get('/friend/requestlist', async (req, res) => {
         try {
@@ -77,7 +73,6 @@ module.exports = function (app) {
             res.status(500).send("Internal Server Error")
         }
     })
-
 
     /*
      * Create a friend request from account_1 (current user) to account_2
@@ -104,14 +99,16 @@ module.exports = function (app) {
         }
     })
 
-
     /*
      * Accept a friend request from account_1 as account_2 (current user)
      */
     app.post('/friend/accept', async (req, res) => {
         try {
             const accept = await acceptFriendRequestController(
-                dbAcceptFriendRequest, req.account.accountId, req.body.accountId)
+                dbAcceptFriendRequest,
+                req.account.accountId,
+                req.body.accountId
+            )
 
             if (accept === 1) {
                 console.log("Accepted friend request from: " + req.body.accountId)
@@ -127,14 +124,16 @@ module.exports = function (app) {
         }
     })
 
-
     /*
      * Decline a friend request from account_1 as account_2 (current user)
      */
     app.post('/friend/decline', async (req, res) => {
         try {
             const decline = await declineFriendRequestController(
-                dbDeclineFriendRequest, req.account.accountId, req.body.accountId)
+                dbDeclineFriendRequest,
+                req.account.accountId,
+                req.body.accountId
+            )
             
             if (decline === 1) {
                 console.log("Declined friend request from: " + req.body.accountId)
@@ -150,14 +149,16 @@ module.exports = function (app) {
         }
     })
 
-
     /*
      * Remove a friend account_1/account_2 as account_2/account_1 (current user)
      */
     app.post('/friend/remove', async (req, res) => {
         try {
             const remove = await removeFriendController(
-                dbRemoveFriend, req.account.accountId, req.body.accountId)
+                dbRemoveFriend,
+                req.account.accountId,
+                req.body.accountId
+            )
             
             if (remove === 1) {
                 console.log("Removed friend: " + req.body.accountId)
@@ -173,14 +174,16 @@ module.exports = function (app) {
         }
     })
 
-
     /*
      * Cancel a friend request sent to another user
      */
     app.post('/friend/cancel', async (req, res) => {
         try {
             const canceled = await cancelFriendRequestController(
-                dbCancelFriendRequest, req.account.accountId, req.body.accountId)
+                dbCancelFriendRequest, 
+                req.account.accountId, 
+                req.body.accountId
+            )
             
             if (canceled === 1) {
                 console.log("Friend request to " + req.body.accountId + " canceled")
@@ -195,7 +198,6 @@ module.exports = function (app) {
             res.status(500).send("Internal Server Error")
         }
     })
-
 
     /*
      * Get friendship status
@@ -223,9 +225,8 @@ module.exports = function (app) {
         }
     })
 
-
     /*
-     * Get friend count
+     * Get friend count of user making request
      */
     app.get('/friend/count/me', async (req, res) => {
         try {

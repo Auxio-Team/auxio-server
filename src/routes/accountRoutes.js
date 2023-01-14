@@ -1,8 +1,3 @@
-const {
-	encryptPassword,
-	validateCreateAccount,
-} = require('../services/accountService')
-
 // import controllers
 const {
 	createAccountController,
@@ -56,7 +51,8 @@ module.exports = function (app, upload) {
 				dbCreateAccount,
 				req.body.username,
 				req.body.password,
-				req.body.phoneNumber)
+				req.body.phoneNumber
+			)
 
 			if (newAccount == USERNAME_TAKEN) {
 				res.status(400).send({ 'message': 'Invalid Username' })
@@ -79,6 +75,7 @@ module.exports = function (app, upload) {
 
 	/*
 	 * Get all accounts (used for testing).
+	 * TODO: this should only be used in dev mode
 	 */
 	app.get('/accounts', async (req, res) => {
 		try {
@@ -206,7 +203,10 @@ module.exports = function (app, upload) {
 	app.put('/username', async (req, res) => {
 		try {
 			const updated = await updateUsernameController(
-				dbUpdateUsername, req.account.accountId, req.body.username)
+				dbUpdateUsername, 
+				req.account.accountId, 
+				req.body.username
+			)
 			if (updated == USERNAME_TAKEN) {
 				res.status(400).send({ message: "Username is already taken" })
 			}
@@ -228,7 +228,11 @@ module.exports = function (app, upload) {
 	 */
 	app.put('/profilepic', upload.single('profilePicture'), async (req, res) => {
 		try {
-			const updated = await updateProfilePictureController(dbUpdateProfilePicture, req.account.accountId, req.file.path);
+			const updated = await updateProfilePictureController(
+				dbUpdateProfilePicture, 
+				req.account.accountId, 
+				req.file.path
+			)
 			if (updated) {
 				res.status(200).send()
 			}
@@ -330,7 +334,9 @@ module.exports = function (app, upload) {
 		}
 	})
 
-
+	/*
+	 * Update the status of the user.
+	 */
 	app.put('/status', async (req, res) => {
 		try {
 			const updated = await updateStatusAndSessionCodeController(
