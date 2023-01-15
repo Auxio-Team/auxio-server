@@ -267,7 +267,7 @@ module.exports = function (app, upload) {
 					}
 				});
 			} else {
-				res.status(404).send({ 'message': 'No profile picture' });
+				res.status(204).send();
 			}
 		}
 		catch (err) {
@@ -294,7 +294,7 @@ module.exports = function (app, upload) {
 					}
 				});
 			} else {
-				res.status(404).send({ 'message': 'No profile picture' });
+				res.status(204).send();
 			}
 		}
 		catch (err) {
