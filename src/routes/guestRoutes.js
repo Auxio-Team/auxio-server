@@ -41,6 +41,7 @@ const {
 } = require('../models/sessionModels')
 
 // TODO: all of these should be authenticated
+// and all functionality should be checked
 
 module.exports = function (app) {
 	/*

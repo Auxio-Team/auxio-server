@@ -75,14 +75,9 @@ const tokenController = async (dbGetRefreshToken, refreshToken) => {
  * Start reset password by validating username and phone number.
  */
 const initResetPasswordController = async (dbUsernameExists, dbPhoneNumberExistsForUser, username, phoneNumber) => {
-	// TODO: these 2 if-statements can be refactored to be the same call
-	// validate username
-	if (!await dbUsernameExists(username)) {
-		return null;
-	}
-
-	// validate phone number is associated with username
-	if (!await dbPhoneNumberExistsForUser(username, phoneNumber)) {
+	// validate username and phone number associated with username
+	if (!await dbUsernameExists(username) ||
+		!await dbPhoneNumberExistsForUser(username, phoneNumber)) {
 		return null;
 	}
 

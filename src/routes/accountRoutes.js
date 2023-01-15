@@ -55,10 +55,10 @@ module.exports = function (app, upload) {
 			)
 
 			if (newAccount == USERNAME_TAKEN) {
-				res.status(400).send({ 'message': 'Invalid Username' })
+				res.status(403).send({ 'message': 'Invalid Username' })
 			}
 			else if (newAccount == PHONE_NUMBER_TAKEN) {
-				res.status(400).send({ 'message': 'Invalid Phone Number' })
+				res.status(403).send({ 'message': 'Invalid Phone Number' })
 			}
 			else if (newAccount) { 
 				res.status(201).send(newAccount)
@@ -98,7 +98,7 @@ module.exports = function (app, upload) {
 				res.status(200).send(account)
 			}
 			else {
-				res.status(400).send("Couldn't find account")
+				res.status(404).send({"message": "Couldn't find account"})
 			}
 		}
 		catch (err) {
@@ -120,7 +120,7 @@ module.exports = function (app, upload) {
 				res.status(200).send(account)
 			}
 			else {
-				res.status(400).send("Couldn't find account")
+				res.status(404).send({"message": "Couldn't find account"})
 			}
 		}
 		catch (err) {
@@ -145,7 +145,7 @@ module.exports = function (app, upload) {
 				res.status(200).send(account)
 			}
 			else {
-				res.status(400).send("Couldn't find account")
+				res.status(404).send({"message": "Couldn't find account"})
 			}
 		}
 		catch (err) {
@@ -168,7 +168,7 @@ module.exports = function (app, upload) {
 				res.status(200).send(history)
 			}
 			else {
-				res.status(400).send("Couldn't find history")
+				res.status(404).send({"message": "Couldn't find history"})
 			}
 		}
 		catch (err) {
@@ -183,12 +183,15 @@ module.exports = function (app, upload) {
 	app.put('/platform', async (req, res) => {
 		try {
 			const updated = await updatePreferredPlatformController(
-				dbUpdatePreferredPlatform, req.account.accountId, req.body.preferredPlatform)
+				dbUpdatePreferredPlatform, 
+				req.account.accountId, 
+				req.body.preferredPlatform
+			)
 			if (updated) {
-				res.status(200).send()
+				res.status(204).send()
 			}
 			else {
-				res.status(400).send()
+				res.status(400).send({"message": "Could not update preferred platform"})
 			}
 		}
 		catch (err) {
@@ -208,13 +211,13 @@ module.exports = function (app, upload) {
 				req.body.username
 			)
 			if (updated == USERNAME_TAKEN) {
-				res.status(400).send({ message: "Username is already taken" })
+				res.status(403).send({ 'message': "Username is already taken" })
 			}
 			else if (updated) {
-				res.status(200).send()
+				res.status(204).send()
 			}
 			else {
-				res.status(400).send({ message: "Could not update username" })
+				res.status(400).send({ 'message': "Could not update username" })
 			}
 		}
 		catch (err) {
@@ -234,10 +237,10 @@ module.exports = function (app, upload) {
 				req.file.path
 			)
 			if (updated) {
-				res.status(200).send()
+				res.status(204).send()
 			}
 			else {
-				res.status(400).send({ message: "Could not update profile picture" })
+				res.status(400).send({ 'message': "Could not update profile picture" })
 			}
 		}
 		catch (err) {
@@ -255,21 +258,16 @@ module.exports = function (app, upload) {
 				dbGetAccount, 
 				req.account.accountId
 			)
-			if (account) {
-				if (account.profile_pic_path) {
-					res.status(200).sendFile(account.profile_pic_path, { root : `${__dirname}/../..` }, function (err) {
-						if (err) {
-							res.status(400).send("Couldn't find picture");
-						} else {
-							console.log('Profile picture sent successfully');
-						}
-					});
-				} else {
-					res.status(404).send({ message: 'No profile picture' });
-				}
-			}
-			else {
-				res.status(400).send("Couldn't find account")
+			if (account.profile_pic_path) {
+				res.status(200).sendFile(account.profile_pic_path, { root : `${__dirname}/../..` }, function (err) {
+					if (err) {
+						res.status(404).send({'message': "Could not find picture"});
+					} else {
+						console.log('Profile picture sent successfully');
+					}
+				});
+			} else {
+				res.status(404).send({ 'message': 'No profile picture' });
 			}
 		}
 		catch (err) {
@@ -287,21 +285,16 @@ module.exports = function (app, upload) {
 				dbGetAccount, 
 				req.params.accountId
 			)
-			if (account) {
-				if (account.profile_pic_path) {
-					res.status(200).sendFile(account.profile_pic_path, { root : `${__dirname}/../..` }, function (err) {
-						if (err) {
-							res.status(400).send("Couldn't find picture");
-						} else {
-							console.log('Profile picture sent successfully');
-						}
-					});
-				} else {
-					res.status(404).send({ message: 'No profile picture' });
-				}
-			}
-			else {
-				res.status(400).send("Couldn't find account")
+			if (account.profile_pic_path) {
+				res.status(200).sendFile(account.profile_pic_path, { root : `${__dirname}/../..` }, function (err) {
+					if (err) {
+						res.status(404).send({'message': "Could not find picture"});
+					} else {
+						console.log('Profile picture sent successfully');
+					}
+				});
+			} else {
+				res.status(404).send({ 'message': 'No profile picture' });
 			}
 		}
 		catch (err) {
@@ -318,14 +311,14 @@ module.exports = function (app, upload) {
 			const deleted = await logoutController(dbDeleteRefreshToken, req.account.accountId)
 			if (deleted > 0) {
 				console.log("Logged out user: " + req.account.accountId)
-				res.status(200).send()
+				res.status(204).send()
 			}
 			else if (deleted == 0) {
 				// tried to logout, but no rows were deleted
-				res.status(404).send()
+				res.status(404).send({'message': 'Refresh token not found'})
 			}
 			else {
-				res.status(400).send()
+				res.status(400).send({'message': 'Unable to logout'})
 			}
 		}
 		catch (err) {
@@ -348,10 +341,10 @@ module.exports = function (app, upload) {
 			
 			if (updated > 0) {
 				console.log("Updated status and session code")
-				res.status(200).send()
+				res.status(204).send()
 			}
 			else {
-				res.status(400).send()
+				res.status(400).send({'message': 'Unable to update status'})
 			}
 		}
 		catch (err) {

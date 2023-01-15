@@ -77,7 +77,7 @@ module.exports = function (app) {
 			)
 
 			if (newSession.status === FAILURE) {
-				res.status(400).send()
+				res.status(403).send({ error: newSession.error })
 			}
 			else {
 				res.status(201).send({ id: newSession.id }) 
@@ -102,7 +102,7 @@ module.exports = function (app) {
 			)
 
 			if (sessionInfo == null) {
-				res.status(400).send()
+				res.status(400).send({'message': 'Unable to get session information'}) 
 			}
 			else {
 				res.status(200).send(sessionInfo) 
@@ -130,10 +130,10 @@ module.exports = function (app) {
 			)
 
 			if (joinSession.status === FAILURE) {
-				res.status(400).send({ error: joinSession.error })
+				res.status(403).send({ error: joinSession.error })
 			}
 			else {
-				res.status(200).send() 
+				res.status(204).send() 
 				console.log(`Successfully joined session ${req.params.newSessionId} as user ${req.account.accountId}`);
 			}
 		}
@@ -158,10 +158,10 @@ module.exports = function (app) {
 			)
 
 			if (leaveSession.status === FAILURE) {
-				res.status(400).send({ error: leaveSession.error })
+				res.status(403).send({ error: leaveSession.error })
 			}
 			else {
-				res.status(200).send() 
+				res.status(204).send() 
 				console.log(`Successfully left session ${req.params.sessionId} as user ${req.account.accountId}`);
 			}
 		}
@@ -191,10 +191,10 @@ module.exports = function (app) {
 			)
 
 			if (endSession.status === FAILURE) {
-				res.status(400).send({ error: endSession.error })
+				res.status(403).send({ error: endSession.error })
 			}
 			else {
-				res.status(200).send() 
+				res.status(204).send() 
 				console.log(`Successfully ended session ${req.params.sessionId} as host ${req.account.accountId}`);
 			}
 		}

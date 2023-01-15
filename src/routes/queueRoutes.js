@@ -61,10 +61,10 @@ module.exports = function (app) {
                 req.body.song
             )
 			if (addSong.status === FAILURE) {
-				res.status(400).send({ error: addSong.error })
+				res.status(403).send({ error: addSong.error })
 			}
 			else {
-				res.status(200).send() 
+				res.status(204).send() 
 				console.log(`Successfully added song to queue for session ${req.params.sessionId}`);
 			}
 		}
@@ -85,10 +85,10 @@ module.exports = function (app) {
                 req.params.songId
             )
 			if (removeSong.status === FAILURE) {
-				res.status(400).send({ error: removeSong.error })
+				res.status(403).send({ error: removeSong.error })
 			}
 			else {
-				res.status(200).send() 
+				res.status(204).send() 
 				console.log(`Successfully removed song from queue for session ${req.params.sessionId}`);
 			}
 		}
@@ -110,10 +110,10 @@ module.exports = function (app) {
                 req.params.songId
             )
 			if (addUpvote.status === FAILURE) {
-				res.status(400).send({ error: addUpvote.error })
+				res.status(403).send({ error: addUpvote.error })
 			}
 			else {
-				res.status(200).send() 
+				res.status(204).send() 
 				console.log(`Successfully added upvote to song ${req.params.songId} in session ${req.params.sessionId}`);
 			}
 		}
@@ -135,10 +135,10 @@ module.exports = function (app) {
                 req.params.songId
             )
 			if (removeUpvote.status === FAILURE) {
-				res.status(400).send({ error: removeUpvote.error })
+				res.status(403).send({ error: removeUpvote.error })
 			}
 			else {
-				res.status(200).send() 
+				res.status(204).send() 
 				console.log(`Successfully removed upvote from song ${req.params.songId} in session ${req.params.sessionId}`);
 			}
 		}
@@ -169,10 +169,10 @@ module.exports = function (app) {
 				req.account.accountId
             )
 			if (setCurr.status === FAILURE) {
-				res.status(400).send({ error: setCurr.error })
+				res.status(403).send({ error: setCurr.error })
 			}
 			else {
-				res.status(200).send() 
+				res.status(204).send() 
 				console.log(`Successfully added song to queue for session ${req.params.sessionId}`);
 			}
 		}

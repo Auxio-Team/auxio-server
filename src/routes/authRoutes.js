@@ -36,7 +36,8 @@ module.exports = function (app) {
 				dbGetAccountId,
 				dbStoreRefreshToken,
 				req.body.username,
-				req.body.password)
+				req.body.password
+			)
 
 			if (loggedIn) {
 				console.log("Logged in as:",  req.body.username)
@@ -63,13 +64,14 @@ module.exports = function (app) {
 		try {
 			const accessToken = await tokenController(
 				dbGetRefreshToken,
-				refreshToken)
+				refreshToken
+			)
 
 			if (accessToken) {
 				res.status(200).send({ accessToken: accessToken })
 			}
 			else {
-				res.status(403).send("Could not generate access token. Permission denied.")
+				res.status(403).send({'message': "Could not generate access token. Permission denied."})
 			}
 		}
 		catch (err) {
@@ -80,6 +82,7 @@ module.exports = function (app) {
 
 	/*
 	 * Start reseting password by entering username and phone number.
+	 * TODO: fix this method (dbUsernameExists isn't a method?)
 	 */
 	app.post('/reset', async (req, res) => {
 		try {
@@ -87,10 +90,11 @@ module.exports = function (app) {
 				dbUsernameExists,
 				dbPhoneNumberExistsForUser,
 				req.body.username,
-				req.body.phoneNumber)
+				req.body.phoneNumber
+			)
 
 			if (resetAccount == null) {
-				res.status(400).send()
+				res.status(403).send({'message': 'Username or phone number incorrect'})
 			}
 			else {
 				res.status(201).send(resetAccount) 
@@ -108,7 +112,7 @@ module.exports = function (app) {
 	app.post('/reset/verify', async (req, res) => {
 		try {
 			if (!req.headers['authorization'] || !req.headers['authorization'].split(' ')) {
-				res.status(401).send()
+				res.status(401).send('Unauthorized')
 				return
 			}
 			const verifiedCode = await verifyCodeController(
@@ -117,7 +121,7 @@ module.exports = function (app) {
 			)
 
 			if (verifiedCode == null) {
-				res.status(400).send()
+				res.status(403).send({'message': 'Incorrect verification code'})
 			}
 			else {
 				res.status(201).send(verifiedCode)
@@ -145,10 +149,10 @@ module.exports = function (app) {
 			)
 
 			if (!passReset) {
-				res.status(400).send()
+				res.status(400).send({'message': 'Unable to reset password'})
 			}
 			else {
-				res.status(201).send()
+				res.status(204).send()
 			}
 		}
 		catch (err) {

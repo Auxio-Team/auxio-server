@@ -87,7 +87,7 @@ module.exports = function (app) {
             
             if (request) {
                 console.log("Sent friend request to: " + req.body.accountId)
-				res.status(200).send()
+				res.status(201).send({'message': 'Friend request created'})
             }
             else {
                 res.status(400).send({ 'message': 'Unable to send friend request' })
@@ -112,7 +112,7 @@ module.exports = function (app) {
 
             if (accept === 1) {
                 console.log("Accepted friend request from: " + req.body.accountId)
-				res.status(200).send()
+				res.status(204).send()
             }
             else {
                 res.status(400).send({ 'message': 'Unable to accept friend request' })
@@ -137,7 +137,7 @@ module.exports = function (app) {
             
             if (decline === 1) {
                 console.log("Declined friend request from: " + req.body.accountId)
-				res.status(200).send()
+				res.status(204).send()
             }
             else {
                 res.status(400).send({ 'message': 'Unable to decline friend request' })
@@ -162,7 +162,7 @@ module.exports = function (app) {
             
             if (remove === 1) {
                 console.log("Removed friend: " + req.body.accountId)
-				res.status(200).send()
+				res.status(204).send()
             }
             else {
                 res.status(400).send({ 'message': 'Unable to remove friend' })
@@ -187,7 +187,7 @@ module.exports = function (app) {
             
             if (canceled === 1) {
                 console.log("Friend request to " + req.body.accountId + " canceled")
-				res.status(200).send()
+				res.status(204).send()
             }
             else {
                 res.status(400).send({ 'message': 'Unable to cancel friend request' })
