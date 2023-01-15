@@ -90,7 +90,7 @@ app.use((req, res, next) => {
 	jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, account) => {
 		if (err) {
 			console.log("Forbidden")
-			return res.status(403).send()
+			return res.status(401).send()
 		}
 		req.account = account
 		next()

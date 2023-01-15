@@ -55,10 +55,10 @@ module.exports = function (app, upload) {
 			)
 
 			if (newAccount == USERNAME_TAKEN) {
-				res.status(400).send({ 'message': 'Invalid Username' })
+				res.status(403).send({ 'message': 'Invalid Username' })
 			}
 			else if (newAccount == PHONE_NUMBER_TAKEN) {
-				res.status(400).send({ 'message': 'Invalid Phone Number' })
+				res.status(403).send({ 'message': 'Invalid Phone Number' })
 			}
 			else if (newAccount) { 
 				res.status(201).send(newAccount)

@@ -77,7 +77,7 @@ module.exports = function (app) {
 			)
 
 			if (newSession.status === FAILURE) {
-				res.status(400).send({ error: newSession.error })
+				res.status(403).send({ error: newSession.error })
 			}
 			else {
 				res.status(201).send({ id: newSession.id }) 
@@ -130,7 +130,7 @@ module.exports = function (app) {
 			)
 
 			if (joinSession.status === FAILURE) {
-				res.status(400).send({ error: joinSession.error })
+				res.status(403).send({ error: joinSession.error })
 			}
 			else {
 				res.status(204).send() 
@@ -158,7 +158,7 @@ module.exports = function (app) {
 			)
 
 			if (leaveSession.status === FAILURE) {
-				res.status(400).send({ error: leaveSession.error })
+				res.status(403).send({ error: leaveSession.error })
 			}
 			else {
 				res.status(204).send() 
@@ -191,7 +191,7 @@ module.exports = function (app) {
 			)
 
 			if (endSession.status === FAILURE) {
-				res.status(400).send({ error: endSession.error })
+				res.status(403).send({ error: endSession.error })
 			}
 			else {
 				res.status(204).send() 
