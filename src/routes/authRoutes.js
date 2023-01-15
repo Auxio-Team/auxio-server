@@ -56,7 +56,7 @@ module.exports = function (app) {
 	/*
 	 * User is requesting a new access token using their refresh token.
 	 * 200 -> successfuly generated new access token.
-	 * 403 -> could not generate new access token.
+	 * 401 -> could not generate new access token.
 	 */
 	app.post('/token', async (req, res) => {
 		const authHeader = req.headers['authorization']
@@ -71,7 +71,7 @@ module.exports = function (app) {
 				res.status(200).send({ accessToken: accessToken })
 			}
 			else {
-				res.status(403).send({'message': "Could not generate access token. Permission denied."})
+				res.status(401).send({'message': "Could not generate access token. Permission denied."})
 			}
 		}
 		catch (err) {
