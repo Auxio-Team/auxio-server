@@ -17,6 +17,7 @@ Run the server using command: `node authServer.js`
 Download Postgres app here: https://postgresapp.com/downloads.html. Download "Postgres.app with all currently supported versions (Universal/Intel)" which is under the "Additional Releases" section.
 
 Add the path of the postgres bin directory to your PATH variable.
+- `echo /Applications/Postgres.app/Contents/Versions/latest/bin | sudo tee /etc/paths.d/postgresapp`
 
 Open the Postgres application and start the server using newest version of Postgres (14.5).
 
@@ -33,7 +34,7 @@ These are the steps I took to install PostgreSQL on WSL (a Linux subsystem for W
 - Start Postgres server: `sudo service postgresql start`
 - Connect to postgres database as superuser: `sudo -u postgres psql`
 - Enter following database commands to create your user:
-  - `create user <USER> with encrypted password '<PGPASSWORD>';`
+  - `create user <USER> with encrypted password '<PGPASSWORD>'`
     - replace `<USER>` with output of `echo $USER`
     - replace `<PGPASSWORD>` with a password of your choice
   - `alter user <USER> createdb;`
