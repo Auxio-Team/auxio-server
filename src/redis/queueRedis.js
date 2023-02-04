@@ -109,13 +109,13 @@ const redisRemoveSong = async (sessionId, songId) => {
     ]).then((resp) => resp == 1)
     .catch((err) => console.log(`Error when trying to remove song from queue\n${err}`))
 
-    // shift the priorities of the other songs
-    const minScore = Math.trunc(prio / 100000) * 100000
-    const maxScore = prio
-    redisShiftSongs(sessionId, minScore, maxScore)
-
-    // notify subscribers that a song was removed
     if (resp) {
+        // shift the priorities of the other songs
+        const minScore = Math.trunc(prio / 100000) * 100000
+        const maxScore = prio
+        redisShiftSongs(sessionId, minScore, maxScore)
+
+        // notify subscribers that a song was removed
         await redisClient.sendCommand([
             'PUBLISH',
             `sessions:${sessionId}`,
@@ -134,16 +134,20 @@ const redisRemoveSong = async (sessionId, songId) => {
  */
 const redisDequeueSongFromSession = async (sessionId) => {
     // dequeue the next up song
-    const member = await redisClient.ZPOPMAX(
+    var member = await redisClient.ZPOPMAX(
         `sessions:${sessionId}:queue`
     ).then((resp) => resp)
     .catch((err) => console.log('Error when dequeuing\n' + err))
     console.log(member)
 
-    // shift the priorities of the other songs
-    const minScore = member.score - 99999
-    const maxScore = member.score
-    redisShiftSongs(sessionId, minScore, maxScore)
+    if (member === null) {
+        member = ""
+    } else {
+        // shift the priorities of the other songs
+        const minScore = member.score - 99999
+        const maxScore = member.score
+        redisShiftSongs(sessionId, minScore, maxScore)
+    }
 
     // update current song
     await redisClient.sendCommand([

@@ -17,9 +17,9 @@ const {
 	getSessionInfoController,
 	joinSessionController,
 	leaveSessionController,
-	endSessionController
+	endSessionController,
+	validateSessionRequestController
 } = require('../controllers/sessionController')
-
 
 // import database functions
 const {
@@ -38,6 +38,30 @@ const {
 
 module.exports = function (app) {
 	/*
+	 * Check session exists from given sessionId
+	 * and check user is in current session.
+	 */
+	app.param('sessionId', async (req, res, next, id) => {
+		try {
+			const validSessionReq = await validateSessionRequestController(
+				redisVerifySessionIdExists,
+				redisVerifyParticipantExists,
+				id,
+				req.account.accountId
+			)
+			if (validSessionReq.status === FAILURE) {
+				res.status(400).send({ error: validSessionReq.error })
+			} else {
+				next()
+			}
+		}
+		catch (err) {
+			console.log(err)
+			res.status(500).send("Internal Server Error")
+		}
+	})
+
+	/*
 	 * Create new session.
 	 */
 	app.post('/session', async (req, res) => {
@@ -52,8 +76,8 @@ module.exports = function (app) {
 				req.body.capacity
 			)
 
-			if (newSession == null) {
-				res.status(400).send()
+			if (newSession.status === FAILURE) {
+				res.status(403).send({ error: newSession.error })
 			}
 			else {
 				res.status(201).send({ id: newSession.id }) 
@@ -68,18 +92,17 @@ module.exports = function (app) {
 
 	/*
 	 * Get session information.
-	 * returns host and preferredPlatform in the body.
 	 */
-	app.get('/sessions/:id', async (req, res) => {
+	app.get('/sessions/:sessionId', async (req, res) => {
 		try {
 			const sessionInfo = await getSessionInfoController(
 				redisGetSessionInfo,
 				dbGetAccount,
-				req.params.id
+				req.params.sessionId
 			)
 
 			if (sessionInfo == null) {
-				res.status(400).send()
+				res.status(400).send({'message': 'Unable to get session information'}) 
 			}
 			else {
 				res.status(200).send(sessionInfo) 
@@ -94,23 +117,24 @@ module.exports = function (app) {
 
 	/*
 	 * Join a session.
+	 * TODO: check if the user joining the session is already a host/in another session
 	 */
-	app.post('/sessions/:id/join', async (req, res) => {
+	app.post('/sessions/:newSessionId/join', async (req, res) => {
 		try {
 			const joinSession = await joinSessionController(
 				redisVerifySessionIdExists,
 				redisJoinSession,
 				dbUpdateStatusAndSessionCode,
-				req.params.id,
+				req.params.newSessionId,
 				req.account.accountId
 			)
 
 			if (joinSession.status === FAILURE) {
-				res.status(400).send({ error: joinSession.error })
+				res.status(403).send({ error: joinSession.error })
 			}
 			else {
-				res.status(200).send() 
-				console.log(`Successfully joined session ${req.params.id} as user ${req.account.accountId}`);
+				res.status(204).send() 
+				console.log(`Successfully joined session ${req.params.newSessionId} as user ${req.account.accountId}`);
 			}
 		}
 		catch (err) {
@@ -121,24 +145,24 @@ module.exports = function (app) {
 
 	/*
 	 * Leave a session.
+	 * TODO: host should not be able to leave a session - they must end it
 	 */
-	app.post('/sessions/:id/leave', async (req, res) => {
+	app.post('/sessions/:sessionId/leave', async (req, res) => {
+		console.log("in leave")
 		try {
 			const leaveSession = await leaveSessionController(
-				redisVerifySessionIdExists,
-				redisVerifyParticipantExists,
 				redisLeaveSession,
 				dbUpdateStatusAndSessionCode,
-				req.params.id,
+				req.params.sessionId,
 				req.account.accountId
 			)
 
 			if (leaveSession.status === FAILURE) {
-				res.status(400).send({ error: leaveSession.error })
+				res.status(403).send({ error: leaveSession.error })
 			}
 			else {
-				res.status(200).send() 
-				console.log(`Successfully left session ${req.params.id} as user ${req.account.accountId}`);
+				res.status(204).send() 
+				console.log(`Successfully left session ${req.params.sessionId} as user ${req.account.accountId}`);
 			}
 		}
 		catch (err) {
@@ -149,30 +173,29 @@ module.exports = function (app) {
 
 	/*
 	 * End a session.
-	 * (this route should only be callable from a host)
+	 * The user must be the host of the given session.
 	 */
-	app.post('/sessions/:id/end', async (req, res) => {
+	app.post('/sessions/:sessionId/end', async (req, res) => {
 		try {
 			// TODO: verify fields in req.body.session
 			const endSession = await endSessionController(
-				redisVerifySessionIdExists,
 				redisVerifyHostExists,
 				redisEndSession,
 				dbCreateSession,
 				dbAddSessionParticipant,
 				dbUpdateStatusAndSessionCode,
-				req.params.id,
+				req.params.sessionId,
 				req.account.accountId,
 				req.body.session,
 				req.body.users
 			)
 
 			if (endSession.status === FAILURE) {
-				res.status(400).send({ error: endSession.error })
+				res.status(403).send({ error: endSession.error })
 			}
 			else {
-				res.status(200).send() 
-				console.log(`Successfully ended session ${req.params.id} as host ${req.account.accountId}`);
+				res.status(204).send() 
+				console.log(`Successfully ended session ${req.params.sessionId} as host ${req.account.accountId}`);
 			}
 		}
 		catch (err) {

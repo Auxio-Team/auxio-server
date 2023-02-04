@@ -45,7 +45,7 @@ const redisJoinSession = async (sessionId, participant) => {
     let numParticipants = await redisClient.SCARD(`sessions:${sessionId}:participants`);
 
     if (numParticipants >= capacity) {
-        console.log('hit max capacity\n');
+        console.log('hit max capacity');
         return MAX_CAPACITY;
     }
 
@@ -143,7 +143,7 @@ const redisGetSessionInfo = async (sessionId) => {
  */
 const redisLeaveSession = async (sessionId, accountId) => {
     return await redisClient.SREM(`sessions:${sessionId}:participants`, accountId)
-        .then((resp) => resp)
+        .then((resp) => resp == 1)
         .catch((err) => 'Error removing participant from session\n'+err);
 }
 

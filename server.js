@@ -51,6 +51,7 @@ const upload = multer({storage: multer.diskStorage({
 /*
  * Test creating a new postgres database and connecting to it.
  * Create .env file with new Token Secrets
+ * TODO: dev env only
  */
 app.get('/', async (req, res) => {
 	try {
@@ -70,9 +71,8 @@ app.get('/', async (req, res) => {
  * 3. return that user
  */
 app.use((req, res, next) => {
-	// guest user bypass authorization
-	if (req.path.split('/')[1] == 'guest' ||
-			(req.path.split('/')[1] == 'account' && req.path.split('/').length == 2 && req.method == 'POST')) {
+	// create account bypass authorization
+	if (req.path.split('/')[1] == 'account' && req.path.split('/').length == 2 && req.method == 'POST') {
 		return next();
 	}
 
@@ -90,7 +90,7 @@ app.use((req, res, next) => {
 	jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, account) => {
 		if (err) {
 			console.log("Forbidden")
-			return res.status(403).send()
+			return res.status(401).send()
 		}
 		req.account = account
 		next()

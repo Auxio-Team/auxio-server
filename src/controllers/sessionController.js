@@ -9,9 +9,10 @@ const {
 const {
     INVALID_ID,
     INVALID_NAME,
+    INVALID_HOST,
+    INVALID_CAPACITY,
     MAX_CAPACITY,
     SESSION_HISTORY,
-    SESSION_PARTICIPANT,
     FAILURE,
     CODE_LENGTH,
     sessionSuccess,
@@ -21,17 +22,46 @@ const {
 const { 
     dbAddSessionParticipant 
 } = require('../database/historyDatabase');
+const { dbGetAccount } = require('../database/accountDatabase');
+
+/*
+ * Verify that the session exists and
+ * verify that the user is in the given session.
+ * return -> success if session exists, failure otherwise.
+ */
+const validateSessionRequestController = async (redisVerifySessionIdExistsCb, redisVerifyParticipantExistsCb, sessionId, accountId) => {
+    // verify session id exists
+    if (!await redisVerifySessionIdExistsCb(sessionId)) {
+        console.log('Error: Session ID does not exist')
+        return sessionError(INVALID_ID);
+    }
+    // verify user is in session
+    if (!await redisVerifyParticipantExistsCb(sessionId, accountId)) {
+        console.log(`Error: User not in session ${sessionId}`)
+        return sessionError(INVALID_NAME)
+    }
+    
+    return sessionSuccess()
+}
 
 /*
  * Create a new session and save it in Redis.
  */
-const createSessionController = 
-        async ( redisCreateSessionCb, redisVerifyProspectHostCb, redisVerifySessionIdExistsCb, 
-            dbUpdateStatusAndSessionCode, accountId, id, capacity ) => {
+const createSessionController = async ( redisCreateSessionCb, redisVerifyProspectHostCb, redisVerifySessionIdExistsCb, dbUpdateStatusAndSessionCode, accountId, id, capacity ) => {
 	// verify user as valid host
     if (!await redisVerifyProspectHostCb(accountId)) {
-        console.log('Error creating session: User cannot be a host');
-        return null;
+        console.log('Error creating session: User is already a host');
+        return sessionError(INVALID_HOST);
+    }
+    if ((await dbGetAccount(accountId))['current_status'] == 'In Session') {
+        console.log('Error creating session: User is already in a session')
+        return sessionError(INVALID_HOST);
+    }
+    
+    // verify capacity is an int >= 1
+    if (!Number.isInteger(capacity) || capacity < 1) {
+        console.log('Error creating session: capacity is invalid')
+        return sessionError(INVALID_CAPACITY);
     }
 
     var sessionId = '';
@@ -39,7 +69,7 @@ const createSessionController =
         // user entered custom session id
         if (id.length !== CODE_LENGTH || await redisVerifySessionIdExistsCb(id)) {
             console.log('Error creating session: Bad custom session code')
-            return null;
+            return sessionError(INVALID_ID);
         }
         sessionId = id;
     }
@@ -59,7 +89,7 @@ const createSessionController =
 	}
 	else {
         console.log('Error creating session: Redis could not create session');
-		return null;
+		return sessionError(FAILURE);
 	}
 }
 
@@ -91,8 +121,7 @@ const getSessionInfoController = async (redisGetSessionInfoCb, dbGetAccount, ses
 /*
  * Join a session.
  */
-const joinSessionController = async (redisVerifySessionIdExistsCb, redisJoinSessionCb, 
-        dbUpdateStatusAndSessionCode, sessionId, accountId) => {
+const joinSessionController = async (redisVerifySessionIdExistsCb, redisJoinSessionCb, dbUpdateStatusAndSessionCode, sessionId, accountId) => {
     if (!await redisVerifySessionIdExistsCb(sessionId)) {
         console.log('Error joining session: Session ID not valid')
         return sessionError(INVALID_ID);
@@ -121,28 +150,22 @@ const joinSessionController = async (redisVerifySessionIdExistsCb, redisJoinSess
 /*
  * Leave a session.
  */
-const leaveSessionController = async (redisVerifySessionIdExistsCb, redisVerifyParticipantExistsCb, 
-        redisLeaveSessionCb, dbUpdateStatusAndSessionCode, sessionId, accountId) => {
-    if (!await redisVerifySessionIdExistsCb(sessionId)) {
-        console.log('Error leaving session: Session ID not valid')
-        return sessionError(INVALID_ID);
-    } else if (!await redisVerifyParticipantExistsCb(sessionId, accountId)) {
-        console.log(`Error leaving session: User not in session ${sessionId}`)
-        return sessionError(INVALID_NAME)
-    }
-
+const leaveSessionController = async (redisLeaveSessionCb, dbUpdateStatusAndSessionCode, sessionId, accountId) => {
     const response = await redisLeaveSessionCb(sessionId, accountId)
         .then((res) => {
             if (res) {
-                return sessionSuccess();
+                console.log("in res true")
+                return sessionSuccess()
             }
-            return sessionError(FAILURE);
+            console.log("in res false")
+            return sessionError(FAILURE)
         });
     
     // update status and session code in database on success, if updates fail return null
-    if (dbUpdateStatusAndSessionCode && response.status == sessionSuccess().status && !await updateStatusAndSessionCodeController(dbUpdateStatusAndSessionCode, accountId, "Online", null)) {
+    if (response.status == sessionSuccess().status && 
+            !await updateStatusAndSessionCodeController(dbUpdateStatusAndSessionCode, accountId, "Online", null)) {
         console.log('Error updating account status and session code');
-        return null
+        return sessionError(FAILURE)
     }
 
     return response
@@ -151,15 +174,10 @@ const leaveSessionController = async (redisVerifySessionIdExistsCb, redisVerifyP
 /*
  * End a session.
  */
-const endSessionController =
-    async (redisVerifySessionIdExistsCb, redisVerifyHostExistsCb, redisEndSessionCb, dbCreateSessionCb, dbAddSessionParticipantCb, dbUpdateStatusAndSessionCode, sessionId, accountId, session, users) => {
-
-    if (!await redisVerifySessionIdExistsCb(sessionId)) {
-        console.log('Error ending session: Session ID not valid')
-        return sessionError(INVALID_ID);
-    } else if (!await redisVerifyHostExistsCb(sessionId, accountId)) {
+const endSessionController = async (redisVerifyHostExistsCb, redisEndSessionCb, dbCreateSessionCb, dbAddSessionParticipantCb, dbUpdateStatusAndSessionCode, sessionId, accountId, session, users) => {
+    if (!await redisVerifyHostExistsCb(sessionId, accountId)) {
         console.log('Error ending session: Invalid host')
-        return sessionError(INVALID_NAME)
+        return sessionError(INVALID_HOST)
     }
 
     const res = await dbCreateSessionCb(session, accountId);
@@ -201,5 +219,6 @@ module.exports = {
     getSessionInfoController,
     joinSessionController,
     leaveSessionController,
-    endSessionController
+    endSessionController,
+    validateSessionRequestController
 }
