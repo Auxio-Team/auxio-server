@@ -1,5 +1,4 @@
 const {
-	validateCreateAccount,
 	encryptPassword
 } = require('../services/accountService')
 const { getFriendshipStatusController } = require('./friendController')

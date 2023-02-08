@@ -1,10 +1,9 @@
 const process = require('process')
 const { Client, Pool } = require('pg')
 
-// connect to "postgres" database.
-const PGUSER = process.env.USER
-const PGHOST = 'localhost'
-const PGPASSWORD = process.env.PGPASSWORD
+const PGUSER = 'postgres'
+const PGHOST = 'postgres'
+const PGPASSWORD = 'pass'
 const PGPORT = 5432
 
 const createClient = (pgdatabase) => {

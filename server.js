@@ -33,6 +33,9 @@ const getSecrets = async () => {
 		+ "\nCODE_TOKEN_SECRET=" + secrets.code_token_secret 
 		+ "\nPASSWORD_TOKEN_SECRET=" + secrets.password_token_secret
 	fs.appendFileSync('.env', envContent)
+	console.log("Successfully got aws secrets")
+
+	require('dotenv').config()
 }
 
 if (!fs.existsSync('./.env')) {
@@ -42,6 +45,8 @@ if (!fs.existsSync('./.env')) {
 		+ "\nTWILIO_AUTH_TOKEN=" + twilioAuthToken
 	fs.writeFileSync('.env', envContent)
 	getSecrets()
+} else {
+	console.log("Already have aws secrets")
 }
 
 require('dotenv').config()

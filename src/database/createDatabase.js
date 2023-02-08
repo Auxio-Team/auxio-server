@@ -28,7 +28,7 @@ const createAuxioDatabase = async () => {
 
 	// create "auxiodb" database.
 	try {
-		await client.query('CREATE DATABASE auxiodb WITH OWNER=' + process.env.USER)
+		await client.query('CREATE DATABASE auxiodb WITH OWNER=postgres')
 		console.log("Succesfully created database \"auxiodb\"")
 	}
 	catch (err) {
