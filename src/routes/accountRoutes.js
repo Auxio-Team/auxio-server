@@ -21,12 +21,9 @@ const {
 	dbGetAccount,
 	dbGetAccountByUsername,
 	dbUpdateStatusAndSessionCode,
-	dbUpdateProfilePicture
-} = require('../database/accountDatabase')
-
-const {
+	dbUpdateProfilePicture,
 	dbDeleteRefreshToken
-} = require('../database/authDatabase')
+} = require('../database/accountDatabase')
 
 const {
 	dbGetFriendshipStatus

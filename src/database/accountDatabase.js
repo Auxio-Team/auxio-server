@@ -311,6 +311,32 @@ const dbUpdateProfilePicture = async (accountId, value) => {
 	return response	
 }
 
+/*
+ * TODO: could also use this function if we implement delete account
+ * Delete the refresh token for the account with account_id=accountId.
+ */
+const dbDeleteRefreshToken = async (accountId) => {
+	const query = {
+		text: "DELETE FROM refresh_token "
+				+ "WHERE account_id=$1",
+		values: [accountId],
+	}
+
+	const client = createClient("auxiodb")
+	await client.connect()
+	const response = await client.query(query)
+	.then(res => {
+		return res
+	})
+	.catch(err => {
+		console.error(err.stack)
+		return null
+	})
+	await client.end()
+	
+	// returns the number of rows that were deleted
+	return response["rowCount"]
+}
 
 module.exports = {
 	dbCreateAccount,
@@ -323,5 +349,6 @@ module.exports = {
 	dbGetAccountId,
 	dbUpdateUsername,
 	dbUpdateStatusAndSessionCode,
-	dbUpdateProfilePicture
+	dbUpdateProfilePicture,
+	dbDeleteRefreshToken
 }

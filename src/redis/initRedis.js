@@ -1,7 +1,11 @@
-const { createClient } = require('redis');
+const redis = require("redis");
 
-const redisClient = createClient({
-    url: 'redis://localhost:36379'
+let redisClient = redis.createClient({
+    legacyMode: false,
+    socket: {
+        port: 36379,
+        host: "redis-server"
+    }
 });
 
 redisClient.on('error', (err) => console.log('Redis Client Error', err));

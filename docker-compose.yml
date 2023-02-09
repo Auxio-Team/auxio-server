@@ -1,0 +1,60 @@
+version: '1.0'
+
+name: auxio
+
+services:
+  postgres:
+    container_name: postgres
+    image: postgres
+    environment:
+      - POSTGRES_PASSWORD=pass
+    ports:
+      - "5432:5432"
+    networks:
+      - auxio-network
+
+  redis-server:
+    container_name: redis-server
+    build:
+      context: ./redis-server
+      tags: 
+        - "auxio-redis-server-img"
+    ports:
+      - "36379:36379"
+    networks:
+      - auxio-network
+  
+  server:
+    container_name: server
+    build:
+      context: .
+      tags:
+        - "auxio-server-img"
+    ports:
+      - "3000:3000"
+    volumes:
+      - /$HOME/.aws/credentials:/root/.aws/credentials:ro
+    networks:
+      - auxio-network
+    depends_on:
+      - redis-server
+      - postgres
+
+  auth-server:
+    container_name: auth-server
+    build:
+      context: ../auxio-auth-server
+      tags:
+        - "auxio-auth-server-img"
+    ports:
+      - "4000:4000"
+    volumes:
+      - /$HOME/.aws/credentials:/root/.aws/credentials:ro
+    networks:
+      - auxio-network
+    depends_on:
+      - postgres
+    
+
+networks:
+  auxio-network: {}

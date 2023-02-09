@@ -1,0 +1,4 @@
+node_modules
+pictures/*
+redis-server
+.env
